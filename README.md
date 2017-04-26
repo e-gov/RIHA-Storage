@@ -1,2 +1,6 @@
 # RIHA-Storage
-RIHA andmehoidla | RIHA internal storage service 
+Andmehoidja - RIHA sisemine püsimäluteenus | RIHA internal storage service 
+
+Vt [arhitektuurikirjeldus](https://arhitektuur.riha.ee/Andmehoidja)
+
+
