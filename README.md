@@ -24,5 +24,6 @@ Reposse `RIHA-Storage` on koondatud kood repost `kirjeldusmoodul-rest-api` ja as
 
 1.3 Eelmistele punktidele vastavad muudatused komponendi koodis ja andmebaasi struktuuris.
 
+Täpsemalt vt Issues.
 
 
