@@ -1,0 +1,329 @@
+package ee.eesti.riha.rest.integration.main_resource;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
+import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+
+import ee.eesti.riha.rest.MyTestRunner;
+import ee.eesti.riha.rest.TestHelper;
+import ee.eesti.riha.rest.error.ErrorCodes;
+import ee.eesti.riha.rest.error.RihaRestError;
+import ee.eesti.riha.rest.integration.IntegrationTestHelper;
+import ee.eesti.riha.rest.integration.TestFinals;
+import ee.eesti.riha.rest.logic.Finals;
+import ee.eesti.riha.rest.service.ApiCGIService;
+import ee.eesti.riha.rest.service.ApiClassicService;
+
+//@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(MyTestRunner.class)
+@ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
+public class TestApiCGIServiceImpl_POST_opDelete<T> {
+
+  // general info here
+  @Autowired
+  WebClient webClient;
+  private static ApiClassicService serviceHelpingCreateDeleteTestData;
+  private static List<Integer> idUnderTestList = new ArrayList<Integer>();
+
+  // service under test info here
+  private static ApiCGIService serviceUnderTest;
+  // table under test info here
+  private static String tableUnderTest = TestFinals.MAIN_RESOURCE;
+  private static String jsonToUseForCreate = TestFinals.JSON_CONTENT_FOR_MAIN_RESOURCE_CORRECT_SAMPLE_AS_JSON_STRING;
+  private static String jsonToUseForCreateTest = TestFinals.JSON_CONTENT_FOR_MAIN_RESOURCE_CORRECT_SAMPLE_WITH_TEST_FIELD;
+
+  // other specifics
+  private static String pathToUse = TestFinals.CGI_PATH_PROPERTY_VALUE_FOR_MAIN_RESOURCE;
+
+  @Before
+  public void beforeTest() {
+    webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
+    serviceHelpingCreateDeleteTestData = JAXRSClientFactory.fromClient(webClient, ApiClassicService.class, true);
+    serviceUnderTest = JAXRSClientFactory.fromClient(webClient, ApiCGIService.class);
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreate));
+  }
+
+  @After
+  public void afterTest() {
+    // clean up always
+    for (Integer idForTestEntry : idUnderTestList) {
+      IntegrationTestHelper.removeTestDataFromDB(serviceHelpingCreateDeleteTestData, tableUnderTest, idForTestEntry);
+    }
+    idUnderTestList.clear();
+  }
+
+  @Test
+  public void testDelete1Item_whenValidCall_thenSuccess() throws Exception {
+
+    Integer expectDeleted = 1;
+    String path = pathToUse + idUnderTestList.get(0);
+    String json = "{\r\n" + "	\"op\":\"delete\", \r\n" + "\"token\":\"testToken\",	\"path\": \"" + path + "\" \r\n"
+        + "}\r\n" + "";
+    Response response = serviceUnderTest.postCGI(json);
+    assertNotNull(response.getEntity());
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+  @Test
+  public void testDelete_whenWrongTable_thenError() throws Exception {
+
+    String path = "/db/" + TestFinals.NON_EXISTENT_TABLE + "/" + idUnderTestList.get(0);
+    String json = "{\r\n" + "	\"op\":\"delete\", \r\n" + "\"token\":\"testToken\",	\"path\": \"" + path + "\" \r\n"
+        + "}\r\n" + "";
+    Response response = serviceUnderTest.postCGI(json);
+    RihaRestError error = TestHelper.getObjectFromClient((InputStream) response.getEntity(), RihaRestError.class);
+    assertNotNull(error);
+    assertEquals(ErrorCodes.INPUT_UNKNOWN_OBJECT_TYPE_REQUESTED, error.getErrcode());
+    assertEquals(ErrorCodes.INPUT_UNKNOWN_OBJECT_TYPE_REQUESTED_MSG, error.getErrmsg());
+    assertTrue(error.getErrtrace().equals(TestFinals.NON_EXISTENT_TABLE));
+
+  }
+
+  @Test
+  public void testDelete_whenNonExistentId_thenReturn0() throws Exception {
+
+    Integer expectDeleted = 0;
+    String path = pathToUse + TestFinals.NON_EXISTENT_ID_ANY_TABLE;
+    String json = "{\r\n" + "	\"op\":\"delete\", \r\n" + "\"token\":\"testToken\",	\"path\": \"" + path + "\" \r\n"
+        + "}\r\n" + "";
+    Response response = serviceUnderTest.postCGI(json);
+    assertNotNull(response.getEntity());
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+  @Test
+  public void testDelete_whenParameterPathIsNotValid_thenError() throws Exception {
+
+    String path = pathToUse + "/test/test///";
+    String json = "{\r\n" + "	\"op\":\"delete\", \r\n" + "\"token\":\"testToken\",	\"path\": \"" + path + "\" \r\n"
+        + "}\r\n" + "";
+    Response response = serviceUnderTest.postCGI(json);
+
+    RihaRestError error = TestHelper.getObjectFromClient((InputStream) response.getEntity(), RihaRestError.class);
+    assertNotNull(error);
+    assertEquals(ErrorCodes.INPUT_JSON_PATH_VALUE_NOTVALID, error.getErrcode());
+    assertEquals(ErrorCodes.INPUT_JSON_PATH_VALUE_NOTVALID_MSG, error.getErrmsg());
+    assertTrue(error.getErrtrace().equals(path));
+
+  }
+
+  @Test
+  public void testDeleteListWithPropertyWhoseNameMatchesWithPrimaryKeyField_shouldSucceed() throws Exception {
+
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreate));
+    Integer expectDeleted = 2;
+    // field must be existing field in matching table, or just id (will be
+    // translated to right pk)
+    String idField = "main_resource_id";
+    String idValues = "[" + idUnderTestList.get(0) + "," + idUnderTestList.get(1) + "]";
+    String json = "{\"op\":\"delete\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\", \"" + idField
+        + "\": " + idValues + "}";
+    Response response = serviceUnderTest.postCGI(json);
+
+    assertNotNull(response.getEntity());
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+  @Test
+  public void testDeleteListByPropertyId_shouldSucceed() throws Exception {
+
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreate));
+    Integer expectDeleted = 2;
+    // field must be existing field in matching table, or just id (will be
+    // translated to right pk)
+    String idField = "id";
+    String idValues = "[" + idUnderTestList.get(0) + "," + idUnderTestList.get(1) + "]";
+    String json = "{\"op\":\"delete\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\", \"" + idField
+        + "\": " + idValues + "}";
+    Response response = serviceUnderTest.postCGI(json);
+
+    assertNotNull(response.getEntity());
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+  @Test
+  public void testDeleteListByUnknownColumn_thenError() throws Exception {
+    System.out.println("\n\n FAILING TEST:");
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreate));
+    String idField = "TESTtestTEST";
+    String idValues = "[" + idUnderTestList.get(0) + "," + idUnderTestList.get(1) + "]";
+    String json = "{\"op\":\"delete\",\"path\":\"" + pathToUse + "\"," + "\"token\":\"testToken\",\"" + idField + "\":"
+        + idValues + "}";
+    Response response = serviceUnderTest.postCGI(json);
+    System.out.println(json);
+    RihaRestError error = TestHelper.getObjectFromClient((InputStream) response.getEntity(), RihaRestError.class);
+    assertNotNull(error);
+    System.out.println("\n\nERROR " + error);
+    assertEquals(ErrorCodes.INPUT_CAN_NOT_FIND_COLUMN, error.getErrcode());
+    assertTrue(error.getErrmsg().contains(ErrorCodes.INPUT_CAN_NOT_FIND_COLUMN_MSG));
+    System.out.println(json);
+    System.out.println(error.getErrtrace());
+    assertTrue(error.getErrtrace().equals(json));
+
+  }
+
+  @Test
+  public void testDelete_whenIdNotProvidedInPathNorInsidePropertyId_thenError() throws Exception {
+    // can not delete if don't have the id
+
+    String json = "{\"op\":\"delete\"," + "\"token\":\"testToken\",\"path\":\"" + pathToUse + "\"" + "}";
+    Response response = serviceUnderTest.postCGI(json);
+
+    RihaRestError error = TestHelper.getObjectFromClient((InputStream) response.getEntity(), RihaRestError.class);
+    assertNotNull(error);
+    assertEquals(ErrorCodes.INPUT_JSON_GENERAL_SOMETHING_MISSING, error.getErrcode());
+    assertTrue(error.getErrmsg().contains(ErrorCodes.INPUT_JSON_GENERAL_SOMETHING_MISSING_MSG));
+    System.out.println(json);
+    System.out.println(error.getErrtrace());
+    assertTrue(error.getErrtrace().equals(json));
+
+  }
+
+  @Test
+  public void testDeleteListByOwner() throws Exception {
+
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreate));
+    String ownerOrganization = "7000TEST0562TEST";
+
+    Integer expectDeleted = 2;
+    String idField = "owner";
+    String idValues = "[" + ownerOrganization + "]";
+    String json = "{\"op\":\"delete\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\", \"" + idField
+        + "\": " + idValues + "}";
+    Response response = serviceUnderTest.postCGI(json);
+
+    assertNotNull(response.getEntity());
+
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+  @Test
+  public void testDeleteListByVersion() throws Exception {
+
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreate));
+    String version = "3.14159265";
+
+    Integer expectDeleted = 2;
+    String idField = "version";
+    String idValues = "[\"" + version + "\"]";
+    String json = "{\"op\":\"delete\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\", \"" + idField
+        + "\": " + idValues + "}";
+    Response response = serviceUnderTest.postCGI(json);
+
+    assertNotNull(response.getEntity());
+
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+  @Test
+  public void testDeleteListByNumberShortName() throws Exception {
+
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreate));
+    String short_name = "Eesti TESTkirikuregisterTEST";
+
+    Integer expectDeleted = 2;
+    String idField = "short_name";
+    String idValues = "[\"" + short_name + "\"]";
+    String json = "{\"op\":\"delete\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\", \"" + idField
+        + "\": " + idValues + "}";
+    Response response = serviceUnderTest.postCGI(json);
+
+    assertNotNull(response.getEntity());
+
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+  @Test
+  public void testDeleteListByFieldOnlyInJsonContent() throws Exception {
+
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreateTest));
+
+    String idField = "test_abc";
+    String idValues = "[\"test_123\"]";
+
+    Integer expectDeleted = 1;
+    String json = "{\"op\":\"delete\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\", \"" + idField
+        + "\": " + idValues + "}";
+    Response response = serviceUnderTest.postCGI(json);
+
+    assertNotNull(response.getEntity());
+
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+  @Test
+  public void testDeleteListByNumericFieldOnlyInJsonContent() throws Exception {
+
+    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
+        jsonToUseForCreateTest));
+
+    String idField = "test_num";
+    String idValues = "[123]";
+
+    Integer expectDeleted = 1;
+    String json = "{\"op\":\"delete\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\", \"" + idField
+        + "\": " + idValues + "}";
+    Response response = serviceUnderTest.postCGI(json);
+
+    assertNotNull(response.getEntity());
+
+    Map<String, Integer> result = TestHelper.getResultMap(response);
+
+    assertNotNull(result);
+    assertEquals(expectDeleted, result.get(Finals.OK));
+
+  }
+
+}

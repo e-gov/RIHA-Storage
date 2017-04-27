@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+
+
+	<context:property-placeholder location="classpath*: **/riharest.jdbc.properties"/>
+
+	<!-- <jee:jndi-lookup id="dataSource" jndi-name="jdbc/riharest/datasource" 
+		/> -->
+
+	<jee:jndi-lookup id="dataSource" jndi-name="jdbc/riharest/datasource"
+		default-ref="propDataSource">
+	</jee:jndi-lookup>
+
+
+	<bean id="propDataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.postgresql.Driver" />
+		<property name="url" value="${riharest.jdbc.url}" />
+		<property name="username" value="${riharest.jdbc.user}" />
+		<property name="password" value="${riharest.jdbc.password}" />
+	</bean>
+
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- <property name="packagesToScan" value="ee.eesti.riha.rest.model" /> -->
+		<property name="annotatedClasses">
+			<list>
+				<value>ee.eesti.riha.rest.model.Main_resource</value>
+				<value>ee.eesti.riha.rest.model.Document</value>
+				<value>ee.eesti.riha.rest.model.Data_object</value>
+				<value>ee.eesti.riha.rest.model.Comment</value>
+
+				<value>ee.eesti.riha.rest.model.readonly.Kind</value>
+				<value>ee.eesti.riha.rest.model.readonly.Isik</value>
+				<value>ee.eesti.riha.rest.model.readonly.Asutus</value>
+				<value>ee.eesti.riha.rest.model.readonly.Role_right</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- <prop key="hibernate.format_sql" >true</prop> -->
+				<!-- <prop key="hibernate.use_sql_comments">true</prop> -->
+				<!-- to overcome occasional http://stackoverflow.com/questions/10075081/hibernate-slow-to-acquire-postgres-connection -->
+				<prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="persistenceExceptionTranslationPostProcessor"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+	<bean id="serviceBean"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+</beans>

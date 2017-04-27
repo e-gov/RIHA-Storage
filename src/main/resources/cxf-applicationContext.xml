@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://cxf.apache.org/configuration/beans http://cxf.apache.org/schemas/configuration/cxf-beans.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<import resource="main-applicationContext.xml" />
+
+	<jaxrs:server>
+
+		<jaxrs:providers>
+			<ref bean="jacksonJsonProviderId" />
+			<!-- <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" /> -->
+			<bean class="ee.eesti.riha.rest.filter.CORSFilter" />
+			<bean class="ee.eesti.riha.rest.mapper.MyExceptionMapper" />
+			<bean class="ee.eesti.riha.rest.mapper.GeneralExceptionMapper" />
+		</jaxrs:providers>
+
+		<jaxrs:serviceBeans>
+			<ref bean="serviceBeansId" />
+		</jaxrs:serviceBeans>
+
+	</jaxrs:server>
+
+	<bean id="jacksonJsonProviderId" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+
+	<util:list id="serviceBeansId">
+		<bean class="ee.eesti.riha.rest.service.impl.ApiClassicServiceImpl" />
+		<bean class="ee.eesti.riha.rest.service.impl.ApiCGIServiceImpl" />
+		<bean class="ee.eesti.riha.rest.service.impl.FileServiceImpl" />
+		<bean class="ee.eesti.riha.rest.service.impl.ApiAuthServiceImpl" />
+		<bean class="ee.eesti.riha.rest.service.impl.ApiTableServiceImpl" />
+		<bean class="ee.eesti.riha.rest.service.impl.ApiImportServiceImpl" />
+	</util:list>
+
+</beans>

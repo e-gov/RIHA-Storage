@@ -1,0 +1,30 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+         http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+
+	<import resource="test-applicationContext.xml" />
+
+	<!-- Override DAO with FAKE in test -->
+	<!-- <bean id="apiGenericDAOImpl" class="ee.eesti.riha.rest.dao.ApiGenericDAOImplFake" 
+		/> -->
+
+	<bean id="endpoint" class="java.lang.String">
+		<constructor-arg value="local://trivialTESTendpoint" />
+	</bean>
+
+	<bean class="org.apache.cxf.jaxrs.client.WebClient"
+		factory-method="create">
+		<constructor-arg ref="endpoint" />
+		<constructor-arg ref="jacksonJsonProviderId" />
+	</bean>
+
+	<!-- destroy-method="destroy" doesnt work -->
+	<bean class="ee.eesti.riha.rest.ServerFactory" destroy-method="destroy">
+		<property name="provider" ref="jacksonJsonProviderId" />
+		<property name="resourceClasses" ref="serviceBeansId" />
+		<property name="endpoint" ref="endpoint" />
+	</bean>
+
+</beans>
