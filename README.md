@@ -2,26 +2,25 @@
 Andmehoidja - RIHA sisemine püsimäluteenus | RIHA internal storage service 
 
 Vt:
-- [arhitektuurikirjeldus](https://arhitektuur.riha.ee/Andmehoidja) (arhitektuuriteatmikus)
-- [arendusjuhend](docs/Arendusjuhend) (siinses repos)
+- [Andmehoidja](https://arhitektuur.riha.ee/Andmehoidja), ülevaatlik kirjeldus arhitektuuriteatmikus
+- [RIHA-Storage API ](docs/RIHA-Storage-API.md), Andmehoidja poolt pakutava API spetsifikatsioon
+- [arendusjuhend](docs/Arendusjuhend), teave paigaldamise kohta.
 
-## Tööde plaan
+## Senine arendustöö
 
-Aluseks võtame eelmises arendusjärgus loodud "Kirjeldusmooduli" serveripoolse komponendi (Kirjeldusmooduli REST API). Kood tarniti reposse `kirjeldusmoodul-rest-api` (mitteavalik repo). Dokumentatsioon tarniti zip-tult ja on üles pandud mitteavalikus RIA keskkonnas.
+RIHA-Storage aluseks on eelmises arendusjärgus loodud "Kirjeldusmooduli" serveripoolse komponendi (Kirjeldusmooduli REST API). Kood tarniti reposse `kirjeldusmoodul-rest-api` (mitteavalik repo). Dokumentatsioon tarniti zip-tult ja on üles pandud mitteavalikus RIA keskkonnas. Reposse `RIHA-Storage` on koondatud kood repost `kirjeldusmoodul-rest-api` ja asjassepuutuv, varem eraldiseisev dokumentatsioon. Andmesalvestuse üldine arhitektuuriline kirjeldus on kantud arhitektuuriteatmikku, lehele [Andmehoidja](https://e-gov.github.io/RIHA-Index/Andmehoidja).
 
-Reposse `RIHA-Storage` on koondatud kood repost `kirjeldusmoodul-rest-api` ja asjassepuutuv, varem eraldiseisev dokumentatsioon. 
+## Järgmised tööd 
 
-Andmesalvestuse üldine arhitektuuriline kirjeldus on kantud arhitektuuriteatmikku, lehele [Andmehoidja](https://e-gov.github.io/RIHA-Index/Andmehoidja).
+1 RIHA-Storage ühitamine komponentidega `RIHA-Producer`, `RIHA-Approver`, `RIHA-Browser`, `RIHA-Publisher`
 
-__RIHA-Storage ühitamine komponentidega RIHA-Producer, RIHA-Approver, RIHA-Browser, RIHA-Publisher__
+_Praegu salvestavad nimetatud neli komponenti andmeid JSON-failidesse. Failid tuleb asendada andmebaasi kasutamisega RIHA-Storage kaudu._
 
-Praegu salvestavad nimetatud neli komponenti andmeid JSON-failidesse. Failid tuleb asendada andmebaasi kasutamisega RIHA-Storage kaudu.
+1.1 Vastavalt tuleb RIHA-Storage API-t täiendada.
 
-Vastavalt tuleb RIHA-Storage API-t täiendada.
+1.2 Ühtlasi tuleb API-st eemaldada mittevajalikud osad.
 
-Ühtlasi tuleb API-st eemaldada mittevajalikud osad.
-
-Üks mittevajalik osa on pääsuhaldus. Pääsuhaldus lahendatakse komponentides RIHA-Producer, RIHA-Approver, RIHA-Browser ja RIHA-Publisher. Pöördumisi nimetatud komponentidest peab RIHA-Storage usaldama. 
+_Üks mittevajalik osa on pääsuhaldus. Pääsuhaldus lahendatakse komponentides `RIHA-Producer`, `RIHA-Approver`, `RIHA-Browser` ja `RIHA-Publisher`. Pöördumisi nimetatud komponentidest peab `RIHA-Storage` usaldama._ 
 
 
 
