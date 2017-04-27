@@ -10,21 +10,17 @@ Kõige olulisemad dokumendid:
 
 ## Senine arendustöö
 
-RIHA-Storage aluseks on eelmises arendusjärgus loodud "Kirjeldusmooduli" serveripoolne komponent. Seda kompnenti nimetati ka "Kirjeldusmooduli REST API" või lihsalt "RIHA REST API".
+RIHA-Storage aluseks on eelmises arendusjärgus loodud "Kirjeldusmooduli" serveripoolne komponent. Seda komponenti nimetati ka "Kirjeldusmooduli REST API" või lihtsalt "RIHA REST API".
 
 Reposse `RIHA-Storage` on koondatud kood repost `kirjeldusmoodul-rest-api` ja asjassepuutuv, varem eraldiseisev dokumentatsioon. Dokumentatsiooni on toimetatud, kood on arendaja poolt üleantud kujul.
 
 ## Järgmised tööd 
 
-1 RIHA-Storage ühitamine komponentidega `RIHA-Producer`, `RIHA-Approver`, `RIHA-Browser`, `RIHA-Publisher`
+1 RIHA-Storage ühitamine komponentidega `RIHA-Producer`, `RIHA-Approver`, `RIHA-Browser`, `RIHA-Publisher`. _Praegu salvestavad nimetatud neli komponenti andmeid JSON-failidesse. Failid tuleb asendada andmebaasi kasutamisega RIHA-Storage kaudu._
 
-_Praegu salvestavad nimetatud neli komponenti andmeid JSON-failidesse. Failid tuleb asendada andmebaasi kasutamisega RIHA-Storage kaudu._
+1.1 RIHA-Storage API ülevaatamine ja täiendamine.
 
-1.1 Vastavalt tuleb RIHA-Storage API-t täiendada.
-
-1.2 Ühtlasi tuleb API-st eemaldada mittevajalikud osad.
-
-_Üks mittevajalik osa on pääsuhaldus. Pääsuhaldus lahendatakse komponentides `RIHA-Producer`, `RIHA-Approver`, `RIHA-Browser` ja `RIHA-Publisher`. Pöördumisi nimetatud komponentidest peab `RIHA-Storage` usaldama._ 
+1.2 Mittevajalike osade eemaldamine API-st. _Üks mittevajalik osa on pääsuhaldus. Pääsuhaldus lahendatakse komponentides `RIHA-Producer`, `RIHA-Approver`, `RIHA-Browser` ja `RIHA-Publisher`. Pöördumisi nimetatud komponentidest peab `RIHA-Storage` usaldama._ 
 
 
 
