@@ -199,8 +199,20 @@ või ühetaolisel viisil selliselt:
 või selliselt:
 
 ```json
-{"op":"post", "path": "/db/mytable",
-  "data": [{ "value": 58.3788, "name": "lat"},{ "value": 24.56, "name": "lng"}]}
+{
+   "op":"post",
+   "path":"/db/mytable",
+   "data":[
+      {
+         "value":58.3788,
+         "name":"lat"
+      },
+      {
+         "value":24.56,
+         "name":"lng"
+      }
+   ]
+}
 ```
 
 Kui lisatava välja väärtus on omakorda JSON array või JSON objekt, esitatakse ta JSON kujul, mitte stringina:
@@ -219,7 +231,14 @@ Võib kasutada nii HTTP PUT kui HTTP POST päringuid (viimasel juhul peab olema 
 Näiteks `http://localhost/api/db/mytable/123` `path`-le klassikalisel viisil saadetud HTTP PUT `{ "value": 58.3788, "name": "lat"}` või ühetaolisel viisil selliselt: `http://localhost/api URLile saadetud HTTP POST`
 
 ```json
-{"op":"put", "path": "/db/mytable/123", "data":{ "value": 58.3788, "name": "lat"}}
+{
+   "op":"put",
+   "path":"/db/mytable/123",
+   "data":{
+      "value":58.3788,
+      "name":"lat"
+   }
+}
 ```
 
 Mitme kirje korraga muutmine toimub selliselt:
@@ -227,9 +246,23 @@ Mitme kirje korraga muutmine toimub selliselt:
 `http://localhost/api URLile saadetud HTTP POST`
 
 ```json
-{"op":"put", "path": "/db/mytable", "key":"id",
- "data":[{"id":123, "value": 58.3788, "name": "lat"},
- {"id":456, "value": 58.3788, "name": "lat"}]
+{
+   "op":"put",
+   "path":"/db/mytable",
+   "key":"id",
+   "data":[
+      {
+         "id":123,
+         "value":58.3788,
+         "name":"lat"
+      },
+      {
+         "id":456,
+         "value":58.3788,
+         "name":"lat"
+      }
+   ]
+}
 ```
 
 Viimasel juhul esitab `"key":"id"` väljanime (näites `id`), mille järgi kirjeid muutmise jaoks identifitseeritakse. See väljanimi peab olema toodud järgnevates data kirjetes. NB! Key väärtus ei pea olema unikaalne identifikaator, seega võib üks kirje sisendis muuta mitut kirjet baasis. Oluline: andmetes esitatud väljad muudetakse, esitamata välju ei muudeta.
@@ -281,26 +314,65 @@ http://192.168.50.106:8080/rest/api?op=count&path=db/main_resource&filter=name,=
 
 või POST päring `http://192.168.50.106:8080/rest/api`
 
-```
-{"op":"count","path":"db/main_resource","filter":[["service_code","=","aar.valdkonnad"]}
+```json
+{
+   "op":"count",
+   "path":"db/main_resource",
+   "filter":[
+      "service_code",
+      "=",
+      "aar.valdkonnad"
+   ]
+}
 ```
 
 __GETNAMES__. Päring asutuste ja isikute ja main_resource tabelis asuvate andmeobjektide nimede saamiseks vastavalt etteantud registri- või isikukoodile või andmeobjekti URI-le. Vastus on kujul
 
 ```
-{ "organizations": {<registrikood>: <nimi>, <registrikood2>: <nimi2>},"persons": {<isikukood>: <nimi>}}
+{ "organizations":
+  { <registrikood>: <nimi>,
+    <registrikood2>: <nimi2>
+  },
+  "persons": {<isikukood>: <nimi>}
+}
 ```
 
 Näiteks: `POST päring http://192.168.50.106:8080/rest/api`
 
 ```
-{"op":"getnames", "organizations":["21345", "1234123"], "persons":["372115555", "3745555555"], "token":"testToken"}
+{
+   "op":"getnames",
+   "organizations":[
+      "21345",
+      "1234123"
+   ],
+   "persons":[
+      "372115555",
+      "3745555555"
+   ],
+   "token":"testToken"
+}
 ```
 
 Sama päring URI-dega:
 
-```
-{"op":"getnames", "organizations":["70009646", "80296167"], "persons":["37211070309", "37404192743"],"uris":["urn:fdc:riha.eesti.ee:2016:classifier:172297", "urn:fdc:riha.eesti.ee:2016:classifier:172298"], "token":"testToken"}
+```json
+{
+   "op":"getnames",
+   "organizations":[
+      "70009646",
+      "80296167"
+   ],
+   "persons":[
+      "37211070309",
+      "37404192743"
+   ],
+   "uris":[
+      "urn:fdc:riha.eesti.ee:2016:classifier:172297",
+      "urn:fdc:riha.eesti.ee:2016:classifier:172298"
+   ],
+   "token":"testToken"
+}
 ```
 
 __RESOURCE__. Päring objekti täisinfo importimiseks (POST meetodi korral) või eksportimiseks (GET meetodi korral). Tehniliselt võttes teostatakse päring kõigi `main_resource`'ga seotud kirjete saamiseks. Antud päring lisab vastusesse kõik `data_object_id` ja `document_id`, mille `main_resource_id` võrdub päringus antud `id`-ga. `data_object_id` lisatakse vastusesse välja, mille nimi võetakse `data_object`'i `field_name` väljast. Samamoodi toimitakse ka `document`'iga.
@@ -313,7 +385,7 @@ POST meetodi näide:
 
 `URL: http://192.168.50.106:8080/rest/api/resource?token=testToken`
 
-```
+```json
 {
   "uri": "urn:fdc:test.test.ee:2016:TEST_MR_123:XYZ",
   "xyz": "TEST_::123",
@@ -368,7 +440,7 @@ GET meetodi näide:
 
 `URL: http://192.168.50.106:8080/rest/api/resource/518215?token=testToken`
 
-```
+```json
 {
   "uri": "urn:fdc:riha.eesti.ee:2016:classifier:518215",
   "name": "Anesteesia liigid",
@@ -387,10 +459,10 @@ GET meetodi näide:
   "main_resource_id": 518215,
   "reference_number": "KL000210",
   "template_version": "1.0.0",
-  "update_frequency": " toimub vastavalt taotluste esitamisele ja järgnevale loendite töörühma otsusele või vastavalt seadusandlikule muudatusele",
+  "update_frequency": " toimub vastavalt taotluste ... muudatusele",
   "approval_required": false,
   "classifier_status": "kehtestatud",
-  "short_description": "Võimalikud anesteesia liigid on: üldanesteesiaid, regionaalanesteesiaid, anestesioloogiline julgestus. ",
+  "short_description": "Võimalikud anesteesia liigid on: .... ",
   "access_restriction": 0,
   "kind": "classifier",
   "documents": [
@@ -400,7 +472,7 @@ GET meetodi näide:
       "type": "klassifikaator",
       "state": "C",
       "old_id": 533,
-      "content": "S29vZDtM/GhpbmltZXR1cztOaW1ldHVzO1Bpa2tfbmltZXR1cztWYW5lbV9rb29kO0hpZXJhcmhpYV9hc3RlO0tlaHRpdnVzZV9hbGd1c2Vfa3B2O0tlaHRpdnVzZV9s9XB1XM7YW5lc3Rlc2lvbG9vZ2lsaW5lIGp1bGdlc3R1czs7MDszMS4wNS4yMDA3Ozs7OzE7DQo=",
+      "content": "S29vZDtM/Ghp3Ozs7OzE7DQo=",
       "creator": "45901190303",
       "kind_id": 410,
       "filename": "Anesteesia liigid.csv",
@@ -425,7 +497,13 @@ __NEWVERSION__. Päring andmeobjektist uue versiooni loomiseks. Parameetrina ant
 Näiteks POST päring `http://192.168.50.106:8080/rest/api`:
 
 ```
-{"op":"newversion","path":"db/main_resource", "new_version":"v2", "uri":"urn:fdc:riha.eesti.ee:2016:TEST_infosystem:273826","token":"testToken"}
+{
+   "op":"newversion",
+   "path":"db/main_resource",
+   "new_version":"v2",
+   "uri":"urn:fdc:riha.eesti.ee:2016:TEST_infosystem:273826",
+   "token":"testToken"
+}
 ```
 
 ## Veateated
