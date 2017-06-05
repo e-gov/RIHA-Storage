@@ -5,13 +5,14 @@ Versioon 3.0, 05.06.2017
 Märkus. Käesolev 
 versioon on põhjalikult ümber töötatud dokumendist v 2.0, 29.04.2017, mille autorid olid Girf OÜ, Degeetia OÜ, Mindstone OÜ.
 
-##Sisukord
+## Sisukord
 
 - Ülevaade
-- Seotud dokumendid
-- Andmebaasi arendamise eesmärgid
-- Andmeviisi struktuuri etapiviisiline arendamine
-- Uue andmebaasi struktuuri põhimõtted
+  - Seotud dokumendid
+- Eesmärgid ja põhimõtted
+  - Andmebaasi arendamise eesmärgid
+  - Andmeviisi struktuuri etapiviisiline arendamine
+  - Uue andmebaasi struktuuri põhimõtted
 - Uue andmebaasi struktuuri füüsilise andmemudeli põhiosad
   - Infosüsteemi kirjeldamine
   - Infosüsteemi funktsioonide kirjeldamine [EI TEOSTATA]
@@ -19,9 +20,9 @@ versioon on põhjalikult ümber töötatud dokumendist v 2.0, 29.04.2017, mille 
   - Andmebaaside, tabelite ja väljade kirjeldamine
   - Teenuste kirjeldamine
   - Valdkondade, sõnastike ja XML varade kirjeldamine
-  - Versioneerimine
-    - Versioneerimise stsenaariumid
-    - Versioneerimise tehnoloogia
+- Versioneerimine
+  - Versioneerimise stsenaariumid
+  - Versioneerimise tehnoloogia
 
 
 ## Ülevaade
@@ -32,7 +33,7 @@ Dokument  kirjeldab uue RIHA andmebaasi kontseptuaalset mudelit, sh
 - kuidas toimub versioneerimine,
 - kuidas toimub andmete ülekandmine vana ja uue süsteemi vahel.
 
-## Seotud dokumendid
+### Seotud dokumendid
 
 - Uue RIHA andmebaasi füüsiline andmemudel on esitatud eraldi dokumendis ja tema lisades.
 - Andmebaasi struktuur Enterprise Architecti failina: `riha_andmemudel.eap`
@@ -45,7 +46,9 @@ Dokument  kirjeldab uue RIHA andmebaasi kontseptuaalset mudelit, sh
 - Andmete esitamine masinloetaval kujul on esitatud eraldi dokumentides, millest käesoleva dokumendi kontekstis tasub tutvuda põhidokumendiga:
   - `RIHA andmete masinloetavate vormingute põhimõtted.docx`.
 
-## Andmebaasi arendamise eesmärgid
+## Eesmärgid ja põhimõtted
+
+### Andmebaasi arendamise eesmärgid
 
 - Muuta andmebaasi struktuur senisest universaalsemaks ja paindlikumaks, mis võimaldab
 - RIHAs kergemini kasutusele võtta ja hallata uusi ressursitüüpe lisaks senistele (infosüsteem, teenused, klassifikaatorid, valdkonnasõnastikud ja XML varad)
@@ -54,7 +57,7 @@ Dokument  kirjeldab uue RIHA andmebaasi kontseptuaalset mudelit, sh
 - Võimaldada ressursside versioneerimist.
 - Lihtsustada andmebaasi struktuuri.
 
-## Andmebaasi struktuuri etapiviisiline arendamine
+### Andmebaasi struktuuri etapiviisiline arendamine
 
 Uut andmebaasistruktuuri ei looda nullist, vaid lähtutakse järgmistest põhimõtetest:
 
@@ -70,7 +73,7 @@ Etapiviisiline täpsustamine toimub järgnevalt:
 - Esimeses etapis uuendatakse põhjalikult infosüsteemi, andmebaaside/tabelite/väljade ning teenuste esitamise struktuuri.
 - Klassifikaatorite, valdkonnasõnastike ja XML varade struktuur uuendatakse esimeses etapis väga lihtsate põhimõtete alusel, põhjalikum uuendamine toimub peale nende ressursitüüpide ärianalüüsi.
 
-## Uue andmebaasi struktuuri põhimõtted
+### Uue andmebaasi struktuuri põhimõtted
 
 Uue RIHA andmebaasimootorina kasutatakse uusimat Ubuntu LTS-s toetatud PostgreSQL versiooni. Alates versioonist 9.4 on PostgreSQL-l väga hea tugi vaba struktuuriga JSON andmete efektiivseks hoidmiseks ja töötlemiseks JSONB tüüpi väljal.
 
@@ -99,7 +102,7 @@ Esitame siin füüsilise andmemudeli põhiosad, jättes täpsustamata igas tabel
 
 `json_content` välja struktuur tuuakse välja eraldi dokumendis „RIHA andmebaasi füüsiline mudel".
 
-## Infosüsteemi kirjeldamine
+### Infosüsteemi kirjeldamine
 
 Infosüsteem esitatakse `main_resource` tabelis. Väljal `kind` on kirjas `infosystem`. Kirjelduse põhiosad esitakse `json_content` väljal, mis sisaldab mh ka kõiki ülaltoodud SQL-lauses antud klassikalisi välju.
 
@@ -107,7 +110,7 @@ Infosüsteemi püsiv, versioonist sõltumatu identifikaator on `uri`, kuhu sises
 
 Infosüsteemi, tema andmebaaside ja tabelite versioneerimise põhimõtted on detailselt kirjas selle dokumendi hilisemas peatükis „Versioneerimine".
 
-## Infosüsteemi funktsioonide kirjeldamine [EI TEOSTATA]
+### Infosüsteemi funktsioonide kirjeldamine [EI TEOSTATA]
 
 Uue võimalusena on võimalik infosüsteemi kirjelduse koosseisus kirjeldada infosüsteemi funktsioonide/eesmärkide loetelu. Funktsioonid/eesmärgid tuleb kirjeldada andmete säilitustähtaegade täpsusega - erineva säilitustähtajaga säilitatavate andmete kohta tuleb kirjeldada erinev funktsioon/eesmärk.
 
@@ -115,13 +118,13 @@ Funktsioonid/eesmärgid esitatakse data_object tabelis hierarhiliselt, kasutades
 
 Kirjelduse põhiosad esitakse `json_content` väljal.
 
-## Infosüsteemi loogilise andmekoosseisu kirjeldamine
+### Infosüsteemi loogilise andmekoosseisu kirjeldamine
 
 Infosüsteemi andmekoosseis esitatakse `data_object` tabelis hierarhiliselt, kasutades `parent_id` välja. Tasemete arv pole piiratud. Olemi tüüp on kirjas tekstiväljal `kind` ning see on alati väärtusega `entity`. Iga selline olem on `main_resource_id` kaudu alati ühe infosüsteemi konkreetse versiooniga seotud.
 
 Kirjelduse põhiosad esitakse `json_content` väljal.
 
-## Andmebaaside, tabelite ja väljade kirjeldamine
+### Andmebaaside, tabelite ja väljade kirjeldamine
 
 Infosüsteemi andmebaasid, tabelid ja väljad esitatakse `data_object` tabelis hierarhiliselt, kasutades `parent_id` välja. Esimene tase on alati andmebaas. Olemi (andmebaas, tabel, ...) tüübi määrab tekstiväli `kind`. Iga selline olem on `main_resource_id` kaudu alati ühe infosüsteemi konkreetse versiooniga seotud.
 
@@ -129,7 +132,7 @@ Olemi püsiv, versioonist sõltumatu identifikaator on `uri`, kuhu sisestatakse 
 
 Kirjelduse põhiosad esitakse `json_content` väljal, mis sisaldab mh ka kõiki ülaltoodud SQL-lauses antud klassikalisi välju.
 
-## Teenuste kirjeldamine
+### Teenuste kirjeldamine
 
 Teenused esitatakse `main_resource` tabelis, ning nad on üldjuhul konkreetse infosüsteemiga `parent_id` kaudu seotud. Teenustel võivad olla versioonid, sõltumatult infosüsteemist kui terviku versioonidest.
 
@@ -139,7 +142,7 @@ Teenuse sisendid ja väljundid kirjeldatakse lisaks WSDL-s toodud struktuurile k
 
 Sisendite ja väljundite järjekord esitatud ei ole, konkreetne struktuur on üldjuhul loetav WSDL failist.
 
-## Valdkondade, sõnastike ja XML varade kirjeldamine
+### Valdkondade, sõnastike ja XML varade kirjeldamine
 
 Nende kolme põhiressursi edasine konkreetne kasutus- ja haldamisviis vajab detailset ärianalüüsi. Põhiküsimused seejuures on:
 
