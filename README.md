@@ -6,7 +6,8 @@ Kõige olulisemad dokumendid:
 
 - [Andmehoidja](https://arhitektuur.riha.ee/Andmehoidja), ülevaatlik kirjeldus arhitektuuriteatmikus (repos RIHA-Index)
 - [RIHA-Storage API ](docs/RIHA-Storage-API.md), Andmehoidja poolt pakutava API spetsifikatsioon (siinses repos)
-- [arendusjuhend](docs/Arendusjuhend), teave paigaldamise kohta (siinses repos).
+- [arendusjuhend](docs/Arendusjuhend), teave paigaldamise kohta (siinses repos)
+- [RIHA andmebaasi kontseptuaalne mudel](docs/RIHA-Storage-Conceptual.md).
 
 ## Senine arendustöö
 
