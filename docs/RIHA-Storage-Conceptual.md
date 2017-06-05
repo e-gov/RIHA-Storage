@@ -1,12 +1,28 @@
 # RIHA andmebaasi kontseptuaalne mudel
 
+Versioon 3.0, 05.06.2017
+
 Märkus. Käesolev 
 versioon on põhjalikult ümber töötatud dokumendist v 2.0, 29.04.2017, mille autorid olid Girf OÜ, Degeetia OÜ, Mindstone OÜ.
 
-Versioon 3.0, 05.06.2017
+##Sisukord
 
+- Ülevaade
+- Seotud dokumendid
+- Andmebaasi arendamise eesmärgid
+- Andmeviisi struktuuri etapiviisiline arendamine
+- Uue andmebaasi struktuuri põhimõtted
+- Uue andmebaasi struktuuri füüsilise andmemudeli põhiosad
+  - Infosüsteemi kirjeldamine
+  - Infosüsteemi funktsioonide kirjeldamine [EI TEOSTATA]
+  - Infosüsteemi loogilise andmekoosseisu kirjeldamine
+  - Andmebaaside, tabelite ja väljade kirjeldamine
+  - Teenuste kirjeldamine
+  - Valdkondade, sõnastike ja XML varade kirjeldamine
+  - Versioneerimine
+    - Versioneerimise stsenaariumid
+    - Versioneerimise tehnoloogia
 
-Sisukord
 
 ## Ülevaade
 
@@ -27,7 +43,7 @@ Dokument  kirjeldab uue RIHA andmebaasi kontseptuaalset mudelit, sh
   - `riha_tables.sql` esitab kogu RIHA andmebaasi struktuuri SQL CREATE lausetena
   - `riha_andmedetailid.xlsx` sisaldab lisaks SQL väljadele JSON struktuuris esitatavad väljad: seejuures `main_resources` tabeli asemel on esitatud eraldi `infosystem`, `service`, `classifier`, `area` kui eri tüüpi põhiobjektid erinevate JSON-väljadega.
 - Andmete esitamine masinloetaval kujul on esitatud eraldi dokumentides, millest käesoleva dokumendi kontekstis tasub tutvuda põhidokumendiga:
-  - `RIHA andmete masinloetavate vormingute põhimõtted.docx`
+  - `RIHA andmete masinloetavate vormingute põhimõtted.docx`.
 
 ## Andmebaasi arendamise eesmärgid
 
@@ -59,9 +75,9 @@ Etapiviisiline täpsustamine toimub järgnevalt:
 Uue RIHA andmebaasimootorina kasutatakse uusimat Ubuntu LTS-s toetatud PostgreSQL versiooni. Alates versioonist 9.4 on PostgreSQL-l väga hea tugi vaba struktuuriga JSON andmete efektiivseks hoidmiseks ja töötlemiseks JSONB tüüpi väljal.
 
 Struktuuri muutused lähtuvad järgmisest:
-- Senised erinevad tabelid infosüsteemi, teenuse, klassifikaatori, valdkonna, valdkonna sõnastiku ja XML vara jaoks asendatakse ühise universaalse tabeliga main_resource.
-- Kõik uute tabelite väljad esitatakse PostgreSQL JSONB tüüpi nimi-väärtus paaridest koosneva objektina, kus väärtused võivad olla nii lihtväärtused kui omakorda sisemise struktuuriga objektid või massiivid. Selline mahukas JSONB objekt on klassikalise SQL tabeli mõttes väljal json_content.
-- Igal uuel tabelil on lisaks json_content väljale veel mitmeid klassikalisi SQL välju, mille põhieesmärk on võimaldada kiiremat otsingut, ehk niiöelda cache-tud väärtused.
+- Senised erinevad tabelid infosüsteemi, teenuse, klassifikaatori, valdkonna, valdkonna sõnastiku ja XML vara jaoks asendatakse ühise universaalse tabeliga `main_resource`.
+- Kõik uute tabelite väljad esitatakse PostgreSQL JSONB tüüpi nimi-väärtus paaridest koosneva objektina, kus väärtused võivad olla nii lihtväärtused kui omakorda sisemise struktuuriga objektid või massiivid. Selline mahukas JSONB objekt on klassikalise SQL tabeli mõttes väljal `json_content`.
+- Igal uuel tabelil on lisaks `json_content` väljale veel mitmeid klassikalisi SQL välju, mille põhieesmärk on võimaldada kiiremat otsingut, ehk niiöelda cache-tud väärtused.
 - Väliselt kirjeldatavad ressursid (infosüsteemid, teenused, tabelid jne) identifitseeritakse stabiilse, versioonist sõltumatu tekstilise URI väljaga, mida mh kasutatakse selle ressursi kirjeldamisel väliste kirjeldusfailide abil. Primaarvõti `id` identifitseerib ressursi konkreetset versiooni.
 - Ressursi spetsiifilised abitabelid, mis on ette nähtud loendite jms lihtsate struktuuride kodeerimiseks (näiteks, eri keeltes olevad nimed jms) kaotatakse ja asendatakse kas JSON massiivi või JSON nimi-väärtus objektiga otse põhitabeli vastaval JSONB-väljal.
 - Kommentaaride ja dokumentide universaalsed abitabelid jäetakse alles ja restruktureeritakse uute põhimõtete järgi.
@@ -81,7 +97,7 @@ Peamised täiendavat informatsiooni sisaldavad tabelid, mis võivad viidata mist
 
 Esitame siin füüsilise andmemudeli põhiosad, jättes täpsustamata igas tabelis oleva `json_content` välja sisemise struktuuri, kus hoitakse tabeli ridade põhiinfot.
 
-`json_content` välja struktuur tuuakse välja eraldi dokumendis „RIHA+ füüsiline mudel".
+`json_content` välja struktuur tuuakse välja eraldi dokumendis „RIHA andmebaasi füüsiline mudel".
 
 ## Infosüsteemi kirjeldamine
 
@@ -91,7 +107,7 @@ Infosüsteemi püsiv, versioonist sõltumatu identifikaator on `uri`, kuhu sises
 
 Infosüsteemi, tema andmebaaside ja tabelite versioneerimise põhimõtted on detailselt kirjas selle dokumendi hilisemas peatükis „Versioneerimine".
 
-## Infosüsteemi funktsioonide kirjeldamine [EI TULE TEOSTAMISELE ESIMESES JÄRJEKORRAS]
+## Infosüsteemi funktsioonide kirjeldamine [EI TEOSTATA]
 
 Uue võimalusena on võimalik infosüsteemi kirjelduse koosseisus kirjeldada infosüsteemi funktsioonide/eesmärkide loetelu. Funktsioonid/eesmärgid tuleb kirjeldada andmete säilitustähtaegade täpsusega - erineva säilitustähtajaga säilitatavate andmete kohta tuleb kirjeldada erinev funktsioon/eesmärk.
 
