@@ -1,13 +1,17 @@
 # Andmehoidja (RIHA-Storage)
 
-__Andmehoidja__,  tehnilise nimetusega __RIHA-Storage__, on serveriteenus (e RIHA backend komponent), mis korraldab andmete püsihoidmist. Andmehoidla teenindab oma API kaudu RIHA teisi serveriteenuseid, olles vahendajaks PostgreSQL andmebaasi ja HTTPS päringute vahel.
+__Andmehoidja__,  tehnilise nimetusega __RIHA-Storage__, on serveriteenus (e RIHA _backend_ komponent), mis korraldab andmete püsihoidmist. Andmehoidla teenindab oma API kaudu RIHA teisi serveriteenuseid, olles vahendajaks PostgreSQL andmebaasi ja HTTPS päringute vahel.
 
-Kõige olulisemad dokumendid:
+**Dokumentatsioon.** RIHA-Storage dokumentatsiooni hoitakse koos koodiga, siin repos. Dokumentatsiooni osad on:
 
-- [Andmehoidja](https://arhitektuur.riha.ee/Andmehoidja), ülevaatlik kirjeldus arhitektuuriteatmikus (repos RIHA-Index)
-- [RIHA-Storage API ](docs/RIHA-Storage-API.md), Andmehoidja poolt pakutava API spetsifikatsioon (siinses repos)
-- [arendusjuhend](docs/Arendusjuhend), teave paigaldamise kohta (siinses repos)
-- [RIHA andmebaasi kontseptuaalne mudel](docs/RIHA-Storage-Conceptual.md).
+1. [RIHA-Storage API spetsifikatsioon](docs/RIHA-Storage-API.md)
+2. [RIHA andmebaasi kontseptuaalmudel](docs/RIHA-Storage-Conceptual.md)
+  a. Andmemudel skeemina (Enterprise Architect)
+3. Kommenteeritud SQL-skriptid  
+4. [Arendusjuhend](docs/Arendusjuhend) - dokument kirjeldab komponendi paigaldamisse ja arendamisse puutuvat
+5. koodis olevad kommentaarid.
+
+Andmehoidja lühike kirjeldus on ka RIHA arhitektuuriteatmikus: [Andmehoidja](https://arhitektuur.riha.ee/Andmehoidja) (repos RIHA-Index).
 
 ## Senine arendustöö
 

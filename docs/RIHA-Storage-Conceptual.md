@@ -1,4 +1,21 @@
-# RIHA andmebaasi kontseptuaalne mudel
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+TL;DR
+
+STAATUS:  Põhiosas ajakohane, mõned osad vajavad ümbertöötlust (vt allpool) - 06.06.2017 (PP)
+
+VAJALIK ÜMBERTÖÖTLUS:
+- Versioneerimine. Otsust (06.06.2017): kasutamine minimaalselt lihtsat versioneerimist, mis lähtub kahest vajadusest: 1) infosüsteemi omanikul endal, aga ka teistel kasutajatel on vahel vaja vaadata, milline oli kirjelduse varasem seis. See vajadus ei ole sage. Reeglina huvitab kõige uuem seis; 2) turvanõue on, et muudatuste ajalugu tuleb säilitada. S.t vajadusel peab olema välja selgitatav kes mida muutis. Uus versioon tekib igal muudetud kirjelduse salvestamisel. Tehniliselt lisatakse uus rida `main_resource` tabelis. Versiooninumbreid ei kasuta, versiooni identifitseerib salvestuse _timestamp_.
+
+VAJALIK HILISEM ÜMBERTÖÖTLUS:
+- Andmeobjektide tabelisse (`data_object`) puutuv. Ärivajadustest lähtudes formuleerida tehniline ettepanek (arhitekt)
+- Teenuste kirjeldamine
+- Valdkondade, sõnastike ja XML-varade kirjeldamine
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+# RIHA andmebaasi kontseptuaalmudel
 
 Versioon 3.0, 05.06.2017
 
@@ -7,25 +24,17 @@ versioon on põhjalikult ümber töötatud dokumendist v 2.0, 29.04.2017, mille 
 
 ## Sisukord
 
-- Ülevaade
-  - Seotud dokumendid
-- Eesmärgid ja põhimõtted
-  - Andmebaasi arendamise eesmärgid
-  - Andmeviisi struktuuri etapiviisiline arendamine
-  - Uue andmebaasi struktuuri põhimõtted
-- Uue andmebaasi struktuuri füüsilise andmemudeli põhiosad
+1. Ülevaade
+2. Eesmärgid ja põhimõtted
+3. Andmetabelid
   - Infosüsteemi kirjeldamine
-  - Infosüsteemi funktsioonide kirjeldamine [EI TEOSTATA]
-  - Infosüsteemi loogilise andmekoosseisu kirjeldamine
-  - Andmebaaside, tabelite ja väljade kirjeldamine
-  - Teenuste kirjeldamine
-  - Valdkondade, sõnastike ja XML varade kirjeldamine
-- Versioneerimine
-  - Versioneerimise stsenaariumid
-  - Versioneerimise tehnoloogia
+  - Andmebaaside, tabelite ja väljade kirjeldamine [VAJALIK HILISEM ÜMBERTÖÖTLUS]
+  - Teenuste kirjeldamine [VAJALIK HILISEM ÜMBERTÖÖTLUS]
+  - Valdkondade, sõnastike ja XML-varade kirjeldamine [VAJALIK HILISEM ÜMBERTÖÖTLUS]
+4. Versioneerimine [VAJALIK ÜMBERTÖÖTLUS]
 
 
-## Ülevaade
+## 1 Ülevaade
 
 Dokument  kirjeldab uue RIHA andmebaasi kontseptuaalset mudelit, sh
 
@@ -33,51 +42,21 @@ Dokument  kirjeldab uue RIHA andmebaasi kontseptuaalset mudelit, sh
 - kuidas toimub versioneerimine,
 - kuidas toimub andmete ülekandmine vana ja uue süsteemi vahel.
 
-### Seotud dokumendid
+Vajadusel vt ka eelnenud arenduses valminud dokumenti `riha_andmedetailid.xlsx`. See sisaldab lisaks SQL väljadele JSON struktuuris esitatavad väljad: seejuures `main_resources` tabeli asemel on esitatud eraldi `infosystem`, `service`, `classifier`, `area` kui eri tüüpi põhiobjektid erinevate JSON-väljadega.
 
-- Uue RIHA andmebaasi füüsiline andmemudel on esitatud eraldi dokumendis ja tema lisades.
-- Andmebaasi struktuur Enterprise Architecti failina: `riha_andmemudel.eap`
+## 2 Eesmärgid ja põhimõtted
 
-- RIHA andmebaasi füüsiline mudel, esitatud dokumentides:
-  - `RIHA andmebaasi füüsiline mudel.docx`
-  - `riha_main_tables.sql` esitab alltoodud nelja põhitabeli SQL-väljad CREATE TABLE lausetena: sama on esitatud käesolevas dokumendis allpool, kontseptuaalse mudel lugemise hõlbustamiseks.
-  - `riha_tables.sql` esitab kogu RIHA andmebaasi struktuuri SQL CREATE lausetena
-  - `riha_andmedetailid.xlsx` sisaldab lisaks SQL väljadele JSON struktuuris esitatavad väljad: seejuures `main_resources` tabeli asemel on esitatud eraldi `infosystem`, `service`, `classifier`, `area` kui eri tüüpi põhiobjektid erinevate JSON-väljadega.
-- Andmete esitamine masinloetaval kujul on esitatud eraldi dokumentides, millest käesoleva dokumendi kontekstis tasub tutvuda põhidokumendiga:
-  - `RIHA andmete masinloetavate vormingute põhimõtted.docx`.
-
-## Eesmärgid ja põhimõtted
-
-### Andmebaasi arendamise eesmärgid
-
-- Muuta andmebaasi struktuur senisest universaalsemaks ja paindlikumaks, mis võimaldab
+Andmebaasi arendamise eesmärgiks on:
+- muuta andmebaasi struktuur senisest universaalsemaks ja paindlikumaks, mis võimaldab
 - RIHAs kergemini kasutusele võtta ja hallata uusi ressursitüüpe lisaks senistele (infosüsteem, teenused, klassifikaatorid, valdkonnasõnastikud ja XML varad)
-- Kergemini lisada uusi välju ja kirjeldusatribuute
-- Võimaldada infosüsteemide ja muude ressursside automatiseeritud kirjeldamist väliste kirjeldusfailidega, mida RIHA automaatselt sisse loeb.
-- Võimaldada ressursside versioneerimist.
-- Lihtsustada andmebaasi struktuuri.
-
-### Andmebaasi struktuuri etapiviisiline arendamine
-
-Uut andmebaasistruktuuri ei looda nullist, vaid lähtutakse järgmistest põhimõtetest:
-
-- Vana RIHA andmebaasist peab saama regulaarselt andmeid uude kanda ilma andmekaota.
-- Senist andmebaasi struktuuri muudetakse minimaalselt, ehk vastavalt uute komponentide/kasutajaliideste vajadustele.
-- Andmebaasi uuendatakse järk-järgult, vastavalt komponentide ja ressursitüüpide ärianalüüsile, mis täpsustab reaalseid vajadusi ja nende lahendamise parimaid teid.
-- Uue RIHA tervikliku valmimiseni jäävad tööle nii vana kui uus RIHA, kusjuures uues RIHAs on realiseeritud osa mooduleid, ning seni uuendamata moodulid töötavad vanas RIHAs, moodustades kasutaja jaoks samas ühe tervikliku kasutajaliidese. Vanal ja uuel RIHAl on erinevad andmebaasid.
-- Kõik vana RIHA andmetabelid kantakse esialgu üle uue RIHA andmebaasi, kus neile lisatakse uute põhimõtete järgi loodud uued tabelid. Vanade tabelite mittevajalikuks osutumise järel nad uue RIHA andmebaasist kustutatakse.
-- Uue RIHA moodulid kasutavad ainult uut andmebaasi ning vana RIHA moodulid kasutavad ainult vana andmebaasi.
-
-Etapiviisiline täpsustamine toimub järgnevalt:
-
-- Esimeses etapis uuendatakse põhjalikult infosüsteemi, andmebaaside/tabelite/väljade ning teenuste esitamise struktuuri.
-- Klassifikaatorite, valdkonnasõnastike ja XML varade struktuur uuendatakse esimeses etapis väga lihtsate põhimõtete alusel, põhjalikum uuendamine toimub peale nende ressursitüüpide ärianalüüsi.
-
-### Uue andmebaasi struktuuri põhimõtted
+- kergemini lisada uusi välju ja kirjeldusatribuute
+- võimaldada infosüsteemide ja muude ressursside automatiseeritud kirjeldamist väliste kirjeldusfailidega, mida RIHA automaatselt sisse loeb.
+- võimaldada ressursside versioneerimist [MINIMAALSELT LIHTSAL KUJUL].
+- lihtsustada andmebaasi struktuuri.
 
 Uue RIHA andmebaasimootorina kasutatakse uusimat Ubuntu LTS-s toetatud PostgreSQL versiooni. Alates versioonist 9.4 on PostgreSQL-l väga hea tugi vaba struktuuriga JSON andmete efektiivseks hoidmiseks ja töötlemiseks JSONB tüüpi väljal.
 
-Struktuuri muutused lähtuvad järgmisest:
+Struktuuri muutused, võrreldes vana RIHA andmebaasiga, lähtuvad järgmisest:
 - Senised erinevad tabelid infosüsteemi, teenuse, klassifikaatori, valdkonna, valdkonna sõnastiku ja XML vara jaoks asendatakse ühise universaalse tabeliga `main_resource`.
 - Kõik uute tabelite väljad esitatakse PostgreSQL JSONB tüüpi nimi-väärtus paaridest koosneva objektina, kus väärtused võivad olla nii lihtväärtused kui omakorda sisemise struktuuriga objektid või massiivid. Selline mahukas JSONB objekt on klassikalise SQL tabeli mõttes väljal `json_content`.
 - Igal uuel tabelil on lisaks `json_content` väljale veel mitmeid klassikalisi SQL välju, mille põhieesmärk on võimaldada kiiremat otsingut, ehk niiöelda cache-tud väärtused.
@@ -85,9 +64,11 @@ Struktuuri muutused lähtuvad järgmisest:
 - Ressursi spetsiifilised abitabelid, mis on ette nähtud loendite jms lihtsate struktuuride kodeerimiseks (näiteks, eri keeltes olevad nimed jms) kaotatakse ja asendatakse kas JSON massiivi või JSON nimi-väärtus objektiga otse põhitabeli vastaval JSONB-väljal.
 - Kommentaaride ja dokumentide universaalsed abitabelid jäetakse alles ja restruktureeritakse uute põhimõtete järgi.
 
-Uus andmebaasi struktuur toetub kahele peamisele tabelile: ülemise taseme tabel `main_resource` ja tema komponentide tabel `data_object` ning neile lisainfot andvatele tabelitele `document` ja `comment`.
+## 3 Andmetabelid
 
-Mõlemad tabelid võivad moodustada hierarhia oma `parent_id` välja kaudu. Seejuures näeme ette, et:
+Esitame siin füüsilise andmemudeli põhiosad, jättes täpsustamata igas tabelis oleva `json_content` välja sisemise struktuuri, kus hoitakse tabeli ridade põhiinfot. Uus andmebaasi struktuur toetub kahele peamisele tabelile: ülemise taseme tabel `main_resource` ja tema komponentide tabel `data_object` ning neile lisainfot andvatele tabelitele `document` ja `comment`.
+
+Mõlemad tabelid võivad moodustada hierarhia oma `parent_id` välja kaudu. Seejuures:
 - `main_resource` tabeli rida sisaldab suurel hulgal informatsiooni, on versioneeritav ja ei moodusta üldjuhul sügavaid hierarhiaid. Tabel ei sisalda väga suurtes kogustes ridu.
 - `data_object` tabeli rida on seotud konkreetse `main_resource` tabeli reaga, sisaldab vähem informatsiooni, ei ole omaette versioneeritav ja võib moodustada sügavaid hierarhiaid. Tegemist on kogu andmebaasi kõige mahukama tabeliga.
 
@@ -95,12 +76,6 @@ Peamised täiendavat informatsiooni sisaldavad tabelid, mis võivad viidata mist
 
 - `document`, mis sisaldab üldjuhul ametliku dokumendi (määruse vms) tervet sisu või tema viita kas URLi või failisüsteemi viidana, samuti tema metainformatsiooni: nimi, kehtivusperiood jms.
 - `comment` sisaldab mõne süsteemi kasutaja tekstilist kommentaari või küsimust konkreetse süsteemi või tema osa kohta, koos metainfoga: millal lisati jms.
-
-## Uue andmebaasi struktuuri füüsilise andmemudeli põhiosad
-
-Esitame siin füüsilise andmemudeli põhiosad, jättes täpsustamata igas tabelis oleva `json_content` välja sisemise struktuuri, kus hoitakse tabeli ridade põhiinfot.
-
-`json_content` välja struktuur tuuakse välja eraldi dokumendis „RIHA andmebaasi füüsiline mudel".
 
 ### Infosüsteemi kirjeldamine
 
@@ -110,29 +85,21 @@ Infosüsteemi püsiv, versioonist sõltumatu identifikaator on `uri`, kuhu sises
 
 Infosüsteemi, tema andmebaaside ja tabelite versioneerimise põhimõtted on detailselt kirjas selle dokumendi hilisemas peatükis „Versioneerimine".
 
-### Infosüsteemi funktsioonide kirjeldamine [EI TEOSTATA]
-
-Uue võimalusena on võimalik infosüsteemi kirjelduse koosseisus kirjeldada infosüsteemi funktsioonide/eesmärkide loetelu. Funktsioonid/eesmärgid tuleb kirjeldada andmete säilitustähtaegade täpsusega - erineva säilitustähtajaga säilitatavate andmete kohta tuleb kirjeldada erinev funktsioon/eesmärk.
-
-Funktsioonid/eesmärgid esitatakse data_object tabelis hierarhiliselt, kasutades `parent_id` välja. Tasemete arv pole piiratud. Olemi tüüp on kirjas tekstiväljal `kind` ning see on alati väärtusega `function`. Iga selline olem on `main_resource_id` kaudu alati ühe infosüsteemi konkreetse versiooniga seotud.
-
 Kirjelduse põhiosad esitakse `json_content` väljal.
 
-### Infosüsteemi loogilise andmekoosseisu kirjeldamine
+### Infosüsteemi loogilise andmekoosseisu kirjeldamine [VAJAB ÜMBERTÖÖTLUST]
 
 Infosüsteemi andmekoosseis esitatakse `data_object` tabelis hierarhiliselt, kasutades `parent_id` välja. Tasemete arv pole piiratud. Olemi tüüp on kirjas tekstiväljal `kind` ning see on alati väärtusega `entity`. Iga selline olem on `main_resource_id` kaudu alati ühe infosüsteemi konkreetse versiooniga seotud.
 
 Kirjelduse põhiosad esitakse `json_content` väljal.
 
-### Andmebaaside, tabelite ja väljade kirjeldamine
-
 Infosüsteemi andmebaasid, tabelid ja väljad esitatakse `data_object` tabelis hierarhiliselt, kasutades `parent_id` välja. Esimene tase on alati andmebaas. Olemi (andmebaas, tabel, ...) tüübi määrab tekstiväli `kind`. Iga selline olem on `main_resource_id` kaudu alati ühe infosüsteemi konkreetse versiooniga seotud.
 
 Olemi püsiv, versioonist sõltumatu identifikaator on `uri`, kuhu sisestatakse üldjuhul `riha:infosystem:lühinimi:andmebaas:tabel:väli` s.t koolonitega eraldatud hierarhia infosüsteemi, andmebaasi, tabeli jne väljast kuni antud olemi nimeni. Olemi hierarhia võib olla ka sügavam, näiteks, kui kasutatakse mitte-SQL-andmebaase või sisemise struktuuriga JSON välju.
 
-Kirjelduse põhiosad esitakse `json_content` väljal, mis sisaldab mh ka kõiki ülaltoodud SQL-lauses antud klassikalisi välju.
+Kirjelduse põhiosad esitakse `json_content` väljal, mis sisaldab mh ka kõiki  SQL-lauses antud klassikalisi välju.
 
-### Teenuste kirjeldamine
+## Teenuste kirjeldamine [VAJA ÜMBERTÖÖTLUST]
 
 Teenused esitatakse `main_resource` tabelis, ning nad on üldjuhul konkreetse infosüsteemiga `parent_id` kaudu seotud. Teenustel võivad olla versioonid, sõltumatult infosüsteemist kui terviku versioonidest.
 
@@ -142,7 +109,7 @@ Teenuse sisendid ja väljundid kirjeldatakse lisaks WSDL-s toodud struktuurile k
 
 Sisendite ja väljundite järjekord esitatud ei ole, konkreetne struktuur on üldjuhul loetav WSDL failist.
 
-### Valdkondade, sõnastike ja XML varade kirjeldamine
+## Valdkondade, sõnastike ja XML varade kirjeldamine [VAJAB ÜMBERTÖÖTLUST]
 
 Nende kolme põhiressursi edasine konkreetne kasutus- ja haldamisviis vajab detailset ärianalüüsi. Põhiküsimused seejuures on:
 
@@ -165,7 +132,7 @@ Ajutine, lihtsustatud kirjeldus uue RIHA andmebaasis:
 - Põhiobjekti kirjelduses olevad senised väljasisud jäävad muutmata.
 - Põhiobjekti abitabelid ja nende sisu jäävad muus osas muutmata, kui nad aga sisaldavad välisvõtit senisele põhiobjektile viitamiseks, siis lisatakse neile täiendavalt väli `main_resource_uri`, mis täidetakse vastava senise põhiobjekti uue uri välja sisuga kujul a la `RIHA:classifier:classifierid`, kus `classifierid` on senise põhiobjekti `id` senises RIHAs. See võimaldab kasutada senist objekti versioneeritud kujul.
 
-## Versioneerimine
+## 4 Versioneerimine [VAJAB ÜMBERTÖÖTLUST]
 
 Kirjeldame järgnevas infosüsteemi versioneerimist, kuid samad põhimõtted kehtivad ka teiste ressursside (teenused, ..., XML varad) kohta.
 
