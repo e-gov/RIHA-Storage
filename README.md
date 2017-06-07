@@ -6,7 +6,9 @@ __Andmehoidja__,  tehnilise nimetusega __RIHA-Storage__, on serveriteenus (e RIH
 
 1. [RIHA-Storage API spetsifikatsioon](docs/RIHA-Storage-API.md)
 2. [RIHA andmebaasi kontseptuaalmudel](docs/RIHA-Storage-Conceptual.md)
-  a. Andmemudel skeemina (Enterprise Architect)
+  a. Andmemudel (Enterprise Architect failina)
+    - `RIHA-Andmebaas (VANA)` - RIHA vana andmebaasi mudel (palju tabeleid)
+    - `RIHA-Storage` PostgreSQL andmebaasi mudel
 3. Kommenteeritud SQL-skriptid  
 4. [Arendusjuhend](docs/Arendusjuhend) - dokument kirjeldab komponendi paigaldamisse ja arendamisse puutuvat
 5. koodis olevad kommentaarid.
