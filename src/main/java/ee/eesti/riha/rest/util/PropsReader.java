@@ -14,7 +14,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 public final class PropsReader {
   // this where external riharest.project.properties should be
   // so that properties could be changed without recompiling
-  // if you change it you must change it in src/main/resources/hibernate-applicationContext.xml as well
+  // if you change it you must change it in src/main/resources/persistence-context.xml as well
   private static final String EXTERNAL_CONF_LOCATION = "/opt/tomcat/conf/";
   
   private static final String FILE_NAME = "riharest.project.properties";

@@ -34,9 +34,6 @@
 		
 		<!-- See Profile <id>${project.groupId}-${project.artifactId}}</id> below! -->
 		
-		<riharest.test.jdbc.url>${riharest.jdbc.url}</riharest.test.jdbc.url>
-		<riharest.test.jdbc.user>${riharest.jdbc.user}</riharest.test.jdbc.user>
-		<riharest.test.jdbc.password>${riharest.jdbc.password}</riharest.test.jdbc.password>
 		<riharest.test.pathRoot>target/test-files/</riharest.test.pathRoot>
 		<riharest.test.pathRootWindows>${riharest.pathRootWindows}</riharest.test.pathRootWindows>
 		<riharest.test.authService>${riharest.authService}</riharest.test.authService>
@@ -81,9 +78,6 @@
 				
 				<!-- FIXME No reason to hold these values here! -->
 				
-				<riharest.jdbc.url>jdbc:postgresql://localhost:5432/riha</riharest.jdbc.url>
-				<riharest.jdbc.user>riha</riharest.jdbc.user>
-				<riharest.jdbc.password>riha</riharest.jdbc.password>
 				<!-- app base url -->
 				<riharest.base.url>http://localhost:8080/rest</riharest.base.url>
 				
