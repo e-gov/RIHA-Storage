@@ -81,7 +81,7 @@ public class ImportLogic {
     FilterComponent fc2 = new FilterComponent("end_date", "null_or_>", dateJson);
 
     List<ObjectNode> many = changeLogic.doGetMany(Main_resource.class, 1, 0, Arrays.asList(fc, fc2), "-creation_date",
-        null, user);
+        null);
 
     if (many.isEmpty()) {
       // no corresponding Main_resource in database
@@ -148,8 +148,8 @@ public class ImportLogic {
       List<String> arrayFieldsWithObjects, JsonObject importJson, AuthInfo user) throws RihaRestException,
       ReflectiveOperationException, IOException {
 
-    List<ObjectNode> dataObjects = changeLogic.doGetByMainResourceId(Data_object.class, main_resource_id, user);
-    List<ObjectNode> documents = changeLogic.doGetByMainResourceId(Document.class, main_resource_id, user);
+    List<ObjectNode> dataObjects = changeLogic.doGetByMainResourceId(Data_object.class, main_resource_id);
+    List<ObjectNode> documents = changeLogic.doGetByMainResourceId(Document.class, main_resource_id);
     List<ObjectNode> services = serviceLogic.getServicesByParentId(main_resource_id, user);
 
     // updateOrDeleteConnectedObjects(dataObjects, uriToJsonObject, Data_object.class, user);
@@ -169,8 +169,7 @@ public class ImportLogic {
       importJson.remove(arrayField);
     }
     // update Main_resource
-    changeLogic.doUpdate(importJson.toString(), Main_resource.class, main_resource_id, null,
-        user);
+    changeLogic.doUpdate(importJson.toString(), Main_resource.class, main_resource_id, null);
   }
 
   /**
@@ -190,9 +189,9 @@ public class ImportLogic {
     changeLogic.replaceKindWithKindId(jsonObjectCopy);
 
     // create imported Main_resource
-    List<Integer> createdKeys = changeLogic.doCreate(jsonObjectCopy.toString(), Main_resource.class, user);
+    List<Integer> createdKeys = changeLogic.doCreate(jsonObjectCopy.toString(), Main_resource.class);
     int main_resourceId = createdKeys.get(0);
-    return (ObjectNode) changeLogic.doGet(Main_resource.class, main_resourceId, null, user);
+    return (ObjectNode) changeLogic.doGet(Main_resource.class, main_resourceId, null);
 
   }
 
@@ -224,7 +223,7 @@ public class ImportLogic {
           jsonToCreate.remove(documentField);
         }
         // create connected data
-        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz, user);
+        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz);
         int dataObjectId = createdKeys.get(0);
 
         // create Docuemnts connected to data
@@ -233,7 +232,7 @@ public class ImportLogic {
           JsonObject jsonDoc = entryDoc.getValue();
           jsonDoc.addProperty("data_object_id", dataObjectId);
           changeLogic.replaceKindWithKindId(jsonDoc);
-          changeLogic.doCreate(jsonDoc.toString(), Document.class, user);
+          changeLogic.doCreate(jsonDoc.toString(), Document.class);
         }
       } else if (clazz == Main_resource.class) {
         LOG.info("Creating special Main_resource services");
@@ -250,7 +249,7 @@ public class ImportLogic {
           jsonToCreate.remove(documentField);
         }
         // create connected data
-        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz, user);
+        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz);
         int serviceId = createdKeys.get(0);
 
         // create Docuemnts connected to data
@@ -259,11 +258,11 @@ public class ImportLogic {
           JsonObject jsonDoc = entryDoc.getValue();
           jsonDoc.addProperty("main_resource_id", serviceId);
           changeLogic.replaceKindWithKindId(jsonDoc);
-          changeLogic.doCreate(jsonDoc.toString(), Document.class, user);
+          changeLogic.doCreate(jsonDoc.toString(), Document.class);
         }
       } else {
         // create connected data
-        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz, user);
+        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz);
       }
 
     }
@@ -294,7 +293,7 @@ public class ImportLogic {
       changeLogic.replaceKindWithKindId(jsonToCreate);
 
       // create connected data
-      List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz, user);
+      List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz);
 
     }
 
@@ -321,11 +320,11 @@ public class ImportLogic {
       int objId = connectedObj.get(pkField).asInt();
       if (uriToJsonObject.containsKey(objUri)) {
         LOG.info("Update exists");
-        changeLogic.doUpdate(uriToJsonObject.get(objUri).toString(), clazz, objId, null, user);
+        changeLogic.doUpdate(uriToJsonObject.get(objUri).toString(), clazz, objId, null);
         // update item
       } else {
         LOG.info("Delete does not exist " + objUri);
-        changeLogic.doDelete(clazz.getSimpleName(), objId, user);
+        changeLogic.doDelete(clazz.getSimpleName(), objId);
         // delete item
       }
       // remove uri so only those that must be created remain
@@ -371,8 +370,7 @@ public class ImportLogic {
 
         // check if connectedObj has nested Documents
         FilterComponent fc = new FilterComponent("data_object_id", "=", "" + dataId);
-        List<ObjectNode> documents = changeLogic.doGetMany(Document.class, null, null, Arrays.asList(fc), null, null,
-            user);
+        List<ObjectNode> documents = changeLogic.doGetMany(Document.class, null, null, Arrays.asList(fc), null, null);
         if (documents.size() > 0) {
           // update or delete
           LOG.info("SHOULD UPDATE OR DELETE NESTED DOCUEMNT ");
@@ -387,11 +385,11 @@ public class ImportLogic {
           uriToJsonObject.get(dataUri).remove(arrayField);
         }
 
-        changeLogic.doUpdate(uriToJsonObject.get(dataUri).toString(), clazz, dataId, null, user);
+        changeLogic.doUpdate(uriToJsonObject.get(dataUri).toString(), clazz, dataId, null);
         // update item
       } else {
         LOG.info("Delete Data_object does not exist  " + dataUri);
-        changeLogic.doDelete(clazz.getSimpleName(), dataId, user);
+        changeLogic.doDelete(clazz.getSimpleName(), dataId);
         // delete item
       }
       // remove uri so only those that must be created remain
@@ -437,8 +435,7 @@ public class ImportLogic {
 
         // check if connectedObj has nested Documents
         FilterComponent fc = new FilterComponent("main_resource_id", "=", "" + serviceId);
-        List<ObjectNode> documents = changeLogic.doGetMany(Document.class, null, null, Arrays.asList(fc), null, null,
-            user);
+        List<ObjectNode> documents = changeLogic.doGetMany(Document.class, null, null, Arrays.asList(fc), null, null);
         if (documents.size() > 0) {
           // update or delete
           LOG.info("SHOULD UPDATE OR DELETE NESTED DOCUEMNT ");
@@ -453,11 +450,11 @@ public class ImportLogic {
           uriToJsonObject.get(serviceUri).remove(arrayField);
         }
 
-        changeLogic.doUpdate(uriToJsonObject.get(serviceUri).toString(), clazz, serviceId, null, user);
+        changeLogic.doUpdate(uriToJsonObject.get(serviceUri).toString(), clazz, serviceId, null);
         // update item
       } else {
         LOG.info("Delete service does not exist  " + serviceUri);
-        changeLogic.doDelete(clazz.getSimpleName(), serviceId, user);
+        changeLogic.doDelete(clazz.getSimpleName(), serviceId);
         // delete item
       }
       // remove uri so only those that must be created remain
@@ -573,7 +570,7 @@ public class ImportLogic {
     List<FilterComponent> versionNameAlreadyUsed = Arrays.asList(
         new FilterComponent("uri", "=", uri), new FilterComponent("version", "=", version));
     List<ObjectNode> itemsWithSameVersion = changeLogic.doGetMany(Main_resource.class, null, null,
-        versionNameAlreadyUsed, null, null, user);
+        versionNameAlreadyUsed, null, null);
     Validator.versionMustBeDifferent(itemsWithSameVersion, uri, version, jsonObject);
   }
 }

@@ -49,7 +49,7 @@ public class FileServiceImpl implements FileService {
     try {
       AuthInfo user = TokenValidator.isTokenOk(token, tokenStore);
       String fields = "[\"document_id\", \"filename\"]";
-      ObjectNode jsonObject = (ObjectNode) changeLogic.doGet(Document.class, documentId, fields, user);
+      ObjectNode jsonObject = (ObjectNode) changeLogic.doGet(Document.class, documentId, fields);
 
       return getFileLogic(documentId, jsonObject, token);
 

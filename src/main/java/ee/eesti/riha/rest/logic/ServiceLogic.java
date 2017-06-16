@@ -98,8 +98,7 @@ public class ServiceLogic<T, K> {
         }
       }
 
-      List<T> all = changeLogic.doGetMany(classRepresentingTable, limit, offset, filterComponents, sort, fields,
-          authInfo);
+      List<T> all = changeLogic.doGetMany(classRepresentingTable, limit, offset, filterComponents, sort, fields);
       return Response.ok(all).build();
 
     } catch (RihaRestException e) {
@@ -130,7 +129,7 @@ public class ServiceLogic<T, K> {
       Validator.unknownTableRequested(tableName);
 
       Class<T> classRepresentingTable = Finals.getClassRepresentingTable(tableName);
-      T item = changeLogic.doGet(classRepresentingTable, id, fields, authInfo);
+      T item = changeLogic.doGet(classRepresentingTable, id, fields);
 
       Validator.noSuchIdInGivenTable(item, id);
 
@@ -158,15 +157,15 @@ public class ServiceLogic<T, K> {
   public Response getResourceById(Integer id, AuthInfo authInfo) {
 
     try {
-      T item = changeLogic.doGet((Class<T>) Main_resource.class, id, null, authInfo);
+      T item = changeLogic.doGet((Class<T>) Main_resource.class, id, null);
 
       Validator.noSuchIdInGivenTable(item, id);
 
-      List<T> documents = changeLogic.doGetByMainResourceId((Class<T>) Document.class, id, authInfo);
+      List<T> documents = changeLogic.doGetByMainResourceId((Class<T>) Document.class, id);
       FileHelper.readDocumentFileToContent(documents, Document.class);
       Map<String, List<T>> fieldNameMap = extractItemsByFieldName(documents, Document.class);
 
-      List<T> dataObjects = changeLogic.doGetByMainResourceId((Class<T>) Data_object.class, id, authInfo);
+      List<T> dataObjects = changeLogic.doGetByMainResourceId((Class<T>) Data_object.class, id);
       // get documents connnected to data_object
       addDocumentsToData_object(dataObjects, authInfo);
 
@@ -210,7 +209,7 @@ public class ServiceLogic<T, K> {
     // get services only
     FilterComponent fcService = new FilterComponent("kind", "=", "service");
     List<T> servcies = changeLogic.doGetMany((Class<T>) Main_resource.class, 1, 0, Arrays.asList(fc, fcService),
-        null, null, authInfo);
+        null, null);
     return servcies;
   }
 
@@ -222,7 +221,7 @@ public class ServiceLogic<T, K> {
       ObjectNode objNode = (ObjectNode) service;
       FilterComponent docHasMrId = new FilterComponent("main_resource_id", "=", objNode.get("main_resource_id").asText());
       List<T> connectedDocs = changeLogic.doGetMany((Class<T>) Document.class,
-          null, null, Arrays.asList(docHasMrId), null, null, authInfo);
+          null, null, Arrays.asList(docHasMrId), null, null);
       FileHelper.readDocumentFileToContent(connectedDocs, Document.class);
       Map<String, List<T>> fieldNameMapDataObject = extractItemsByFieldName(connectedDocs, Document.class);
 
@@ -238,7 +237,7 @@ public class ServiceLogic<T, K> {
       ObjectNode objNode = (ObjectNode) dataObject;
       FilterComponent docHasDataId = new FilterComponent("data_object_id", "=", objNode.get("data_object_id").asText());
       List<T> connectedDocs = changeLogic.doGetMany((Class<T>) Document.class,
-          null, null, Arrays.asList(docHasDataId), null, null, authInfo);
+          null, null, Arrays.asList(docHasDataId), null, null);
       FileHelper.readDocumentFileToContent(connectedDocs, Document.class);
       Map<String, List<T>> fieldNameMapDataObject = extractItemsByFieldName(connectedDocs, Document.class);
 
@@ -316,7 +315,7 @@ public class ServiceLogic<T, K> {
       Validator.jsonCantBeEmpty(json);
 
       Class<T> classRepresentingTable = Finals.getClassRepresentingTable(tableName);
-      List<K> createdKeys = changeLogic.doCreate(json, classRepresentingTable, user);
+      List<K> createdKeys = changeLogic.doCreate(json, classRepresentingTable);
 
       return Response.ok(createdKeys).build();
 
@@ -356,7 +355,7 @@ public class ServiceLogic<T, K> {
 
       Map<String, Integer> updatedResult = null;
       Class<T> classRepresentingTable = Finals.getClassRepresentingTable(tableName);
-      updatedResult = changeLogic.doUpdate(json, classRepresentingTable, id, Finals.NAME, user);
+      updatedResult = changeLogic.doUpdate(json, classRepresentingTable, id, Finals.NAME);
 
       LOG.info("" + updatedResult);
       return Response.ok(updatedResult).build();
@@ -390,7 +389,7 @@ public class ServiceLogic<T, K> {
       Validator.unknownTableRequested(tableName);
       Validator.tableCantBeModified(tableName);
 
-      Map<String, Integer> deletedResult = changeLogic.doDelete(tableName, id, authInfo);
+      Map<String, Integer> deletedResult = changeLogic.doDelete(tableName, id);
       return Response.ok(deletedResult).build();
 
     } catch (RihaRestException e) {
@@ -478,10 +477,10 @@ public class ServiceLogic<T, K> {
 
       QueryHolder queryHolder = new QueryHolder(operation, path, token, limit, offset, filterComponents, sort, fields);
       if (StringHelper.areEqual(operation, Finals.GET)) {
-        Object result = changeLogic.doGet(queryHolder, user);
+        Object result = changeLogic.doGet(queryHolder);
         return Response.ok(result).build();
       } else if (StringHelper.areEqual(operation, Finals.COUNT)) {
-        Object result = changeLogic.doCount(queryHolder, user);
+        Object result = changeLogic.doCount(queryHolder);
         return Response.ok(result).build();
       }
       return Response.ok().build();
@@ -582,7 +581,7 @@ public class ServiceLogic<T, K> {
 
       if (StringHelper.areEqual(queryHolder.getOp(), Finals.GET)) {
 
-        Object result = changeLogic.doGet(queryHolder, user);
+        Object result = changeLogic.doGet(queryHolder);
         return Response.ok(result).build();
 
       } else if (StringHelper.areEqual(queryHolder.getOp(), Finals.POST)) {
@@ -590,7 +589,7 @@ public class ServiceLogic<T, K> {
         String[] reqPars1 = {"data" };
         Validator.cantHaveMissingReqParsInJson(reqPars1, json);
 
-        List<K> createdKeys = changeLogic.doCreate(queryHolder.getData().toString(), classRepresentingTable, user);
+        List<K> createdKeys = changeLogic.doCreate(queryHolder.getData().toString(), classRepresentingTable);
         return Response.ok(createdKeys).build();
 
       } else if (StringHelper.areEqual(queryHolder.getOp(), Finals.PUT)) {
@@ -598,17 +597,17 @@ public class ServiceLogic<T, K> {
         String[] reqPars1 = {"data" };
         Validator.cantHaveMissingReqParsInJson(reqPars1, json);
 
-        Map<String, Integer> updateResult = changeLogic.doUpdate(queryHolder, user);
+        Map<String, Integer> updateResult = changeLogic.doUpdate(queryHolder);
         return Response.ok(updateResult).build();
 
       } else if (StringHelper.areEqual(queryHolder.getOp(), Finals.DELETE)) {
 
-        Map<String, Integer> deletedResult = changeLogic.doDelete(queryHolder, user);
+        Map<String, Integer> deletedResult = changeLogic.doDelete(queryHolder);
         return Response.ok(deletedResult).build();
 
       } else if (StringHelper.areEqual(queryHolder.getOp(), Finals.COUNT)) {
 
-        Map<String, Integer> resultCount = changeLogic.doCount(queryHolder, user);
+        Map<String, Integer> resultCount = changeLogic.doCount(queryHolder);
         return Response.ok(resultCount).build();
 
       } else if (StringHelper.areEqual(queryHolder.getOp(), Finals.NEW_VERSION)) {
@@ -658,7 +657,7 @@ public class ServiceLogic<T, K> {
       // Validator.tableCantBeUpdated(pathHolder.tableName);
     }
 
-    Map<String, Map<String, String>> names = changeLogic.doGetNames(queryHolder, user);
+    Map<String, Map<String, String>> names = changeLogic.doGetNames(queryHolder);
 
     return Response.ok(names).build();
   }

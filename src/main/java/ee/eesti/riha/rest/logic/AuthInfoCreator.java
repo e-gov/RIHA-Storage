@@ -61,7 +61,7 @@ public class AuthInfoCreator {
         + "\"organizations\":[\"" + organizationCode + "\"]}";
 
     QueryHolder queryHolder = QueryHolder.create(JsonHelper.GSON, json);
-    Map<String, Map<String, String>> names = changeLogic.doGetNames(queryHolder, authInfo);
+    Map<String, Map<String, String>> names = changeLogic.doGetNames(queryHolder);
 
     authInfo.setOrg_name(names.get("organizations").get(authInfo3rdParty.getAsutus()));
     authInfo.setUser_name(names.get("persons").get(authInfo3rdParty.getIsikuKood()));
