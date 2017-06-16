@@ -65,18 +65,6 @@ public class AuthInfo {
   }
 
   /**
-   * Convert 3rd party data to be suitable for rest api.
-   *
-   * @param authInfo3rdParty the auth info3rd party
-   */
-  public AuthInfo(AuthInfo3rdParty authInfo3rdParty) {
-    this.user_code = authInfo3rdParty.getIsikuKood();
-    this.org_code = authInfo3rdParty.getAsutus();
-    this.role_code = authInfo3rdParty.getRoll();
-    this.token = authInfo3rdParty.getToken();
-  }
-
-  /**
    * Gets the isiku kood.
    *
    * @return the isiku kood
