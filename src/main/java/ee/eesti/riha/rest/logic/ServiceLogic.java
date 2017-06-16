@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
-import ee.eesti.riha.rest.auth.AuthServiceProvider;
-import ee.eesti.riha.rest.auth.TokenStore;
 import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.error.ErrorCodes;
 import ee.eesti.riha.rest.error.RihaRestError;
@@ -54,12 +50,7 @@ public class ServiceLogic<T, K> {
   ChangeLogic<T, K> changeLogic;
 
   @Autowired
-  TokenStore tokenStore;
-
-  @Autowired
   NewVersionLogic<T, K> newVersionLogic;
-
-  AuthServiceProvider authServiceProvider = AuthServiceProvider.getInstance();
 
   private static final Logger LOG = LoggerFactory.getLogger(ServiceLogic.class);
 
@@ -80,8 +71,7 @@ public class ServiceLogic<T, K> {
    * @param fields the fields
    * @return the many
    */
-  public Response getMany(String tableName, Integer limit, Integer offset, String filter, String sort, String fields,
-      AuthInfo authInfo) {
+  public Response getMany(String tableName, Integer limit, Integer offset, String filter, String sort, String fields) {
 
     try {
 
@@ -122,7 +112,7 @@ public class ServiceLogic<T, K> {
    * @param fields the fields
    * @return the by id
    */
-  public Response getById(String tableName, Integer id, String fields, AuthInfo authInfo) {
+  public Response getById(String tableName, Integer id, String fields) {
 
     try {
 
@@ -154,7 +144,7 @@ public class ServiceLogic<T, K> {
    * @param id the id
    * @return the resource by id
    */
-  public Response getResourceById(Integer id, AuthInfo authInfo) {
+  public Response getResourceById(Integer id) {
 
     try {
       T item = changeLogic.doGet((Class<T>) Main_resource.class, id, null);
@@ -167,14 +157,14 @@ public class ServiceLogic<T, K> {
 
       List<T> dataObjects = changeLogic.doGetByMainResourceId((Class<T>) Data_object.class, id);
       // get documents connnected to data_object
-      addDocumentsToData_object(dataObjects, authInfo);
+      addDocumentsToData_object(dataObjects);
 
       fieldNameMap.putAll(extractItemsByFieldName(dataObjects, Data_object.class));
 
       // get connected services (Main_resource)
-      List<T> services = getServicesByParentId(id, authInfo); 
+      List<T> services = getServicesByParentId(id);
       // add connected documents to services
-      addDocumentsToService(services, authInfo);
+      addDocumentsToService(services);
       fieldNameMap.putAll(extractItemsByFieldName(services, Main_resource.class));
       
       ObjectNode objNode = (ObjectNode) item;
@@ -202,7 +192,7 @@ public class ServiceLogic<T, K> {
   /**
    * Get child main_resources with kind "service". Actually returns List&ltObjectNode&gt
    */
-  protected List<T> getServicesByParentId(Integer id, AuthInfo authInfo)
+  protected List<T> getServicesByParentId(Integer id)
       throws RihaRestException {
     // get child main_resources
     FilterComponent fc = new FilterComponent("main_resource_parent_id", "=", "" + id);
@@ -216,7 +206,7 @@ public class ServiceLogic<T, K> {
   /**
    * Get documents connected to Main_resource with kind "service" and include them in service json/ObjectNode
    */
-  private void addDocumentsToService(List<T> services, AuthInfo authInfo) throws RihaRestException {
+  private void addDocumentsToService(List<T> services) throws RihaRestException {
     for (T service : services) {
       ObjectNode objNode = (ObjectNode) service;
       FilterComponent docHasMrId = new FilterComponent("main_resource_id", "=", objNode.get("main_resource_id").asText());
@@ -232,7 +222,7 @@ public class ServiceLogic<T, K> {
   /**
    * Get documents connected to data_objects and include them in data_object json/ObjectNode
    */
-  private void addDocumentsToData_object(List<T> dataObjects, AuthInfo authInfo) throws RihaRestException {
+  private void addDocumentsToData_object(List<T> dataObjects) throws RihaRestException {
     for (T dataObject : dataObjects) {
       ObjectNode objNode = (ObjectNode) dataObject;
       FilterComponent docHasDataId = new FilterComponent("data_object_id", "=", objNode.get("data_object_id").asText());
@@ -516,20 +506,6 @@ public class ServiceLogic<T, K> {
 
       Validator.valueMustBeAllowed(Finals.POST_CGI_ALLOWED_VALUES, queryHolder.getOp(),
           ErrorCodes.INPUT_JSON_OP_VALUE_UNKNOWN, ErrorCodes.INPUT_JSON_OP_VALUE_UNKNOWN_MSG);
-
-      AuthInfo user = null;
-      if (!Finals.READ_ALLOWED_VALUES.contains(queryHolder.getOp())) {
-        // no need to currently authenticate for GET requests
-        user = TokenValidator.isTokenOk(queryHolder.getToken(), tokenStore);
-
-      } else {
-        // allow to read if token not given
-        if (!StringUtils.isEmpty(queryHolder.getToken())) {
-          user = TokenValidator.isTokenOk(queryHolder.getToken(), tokenStore);
-        } else {
-          user = AuthInfo.DEFAULT;
-        }
-      }
 
       String[] filterItems = prepareFilterItems(queryHolder);
       if (filterItems != null) {

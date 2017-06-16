@@ -61,7 +61,7 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
       @Override
       public Response commandMethod(Object user) {
         return serviceLogic.getMany(tableName, limit, offset, filter,
-            sort, fields, (AuthInfo) user);
+            sort, fields);
       }
     }).doIfHeadersOk();
 
@@ -83,7 +83,7 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
     return (new Command() {
       @Override
       public Response commandMethod(Object user) {
-        return serviceLogic.getById(tableName, id, fields, (AuthInfo) user);
+        return serviceLogic.getById(tableName, id, fields);
       }
     }).doIfHeadersOk();
 
@@ -105,7 +105,7 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
     return (new Command() {
       @Override
       public Response commandMethod(Object user) {
-        return serviceLogic.getResourceById(id, (AuthInfo) user);
+        return serviceLogic.getResourceById(id);
       }
     }).doIfHeadersOk();
 

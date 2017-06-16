@@ -150,7 +150,7 @@ public class ImportLogic {
 
     List<ObjectNode> dataObjects = changeLogic.doGetByMainResourceId(Data_object.class, main_resource_id);
     List<ObjectNode> documents = changeLogic.doGetByMainResourceId(Document.class, main_resource_id);
-    List<ObjectNode> services = serviceLogic.getServicesByParentId(main_resource_id, user);
+    List<ObjectNode> services = serviceLogic.getServicesByParentId(main_resource_id);
 
     // updateOrDeleteConnectedObjects(dataObjects, uriToJsonObject, Data_object.class, user);
     // special method for nested Documents
