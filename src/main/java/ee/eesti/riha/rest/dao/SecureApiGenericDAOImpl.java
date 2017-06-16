@@ -21,7 +21,6 @@ import ee.eesti.riha.rest.logic.Validator;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.logic.util.StringHelper;
 import ee.eesti.riha.rest.model.BaseModel;
-import ee.eesti.riha.rest.security.EntityAccessFilter;
 
 @Component
 public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> {
@@ -31,10 +30,7 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
 
   @Autowired
   private AuthInfoCreator authInfoCreator;
-
-  @Autowired
-  private EntityAccessFilter<T> entityFilter;
-
+  
   private static final Logger LOG = LoggerFactory.getLogger(SecureApiGenericDAOImpl.class);
 
   // LOGIC
@@ -64,7 +60,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
       return null;
     }
 
-    entityFilter.canRead(item, authInfo);
     return item;
   }
 
@@ -100,7 +95,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
 
     System.out.println("CREATE " + JsonHelper.GSON.toJson(object));
     Validator.documentMustHaveReference(object);
-    entityFilter.canCreate(object, authInfo);
 
     return genericDAO.create(object);
   }
@@ -110,7 +104,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
 
     for (T object : objects) {
       Validator.documentMustHaveReference(object);
-      entityFilter.canCreate(object, authInfo);
     }
 
     return genericDAO.create(objects);
@@ -127,7 +120,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
       e.printStackTrace();
       return 0;
     }
-    entityFilter.canUpdate(old, authInfo);
 
     return genericDAO.update(object, id);
   }
@@ -143,9 +135,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
       if (je != null && !je.isJsonNull() && je.isJsonPrimitive()) {
         FilterComponent fc = new FilterComponent(idFieldName, "=", je.getAsString());
         List<T> existing = genericDAO.find((Class<T>) object.getClass(), null, null, Arrays.asList(fc), null);
-        for (T item : existing) {
-          entityFilter.canUpdate(item, authInfo);
-        }
       }
     }
 
@@ -163,8 +152,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
       return 0;
     }
 
-    entityFilter.canDelete(old, authInfo);
-
     return genericDAO.delete(clazz, id);
   }
 
@@ -180,9 +167,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
     for (Object value : values) {
       FilterComponent fc = new FilterComponent(key, "=", value + "");
       List<T> toBeDeleted = genericDAO.find(clazz, null, null, Arrays.asList(fc), null);
-      for (T item : toBeDeleted) {
-        entityFilter.canDelete(item, authInfo);
-      }
     }
 
     return genericDAO.delete(tableName, key, values);
