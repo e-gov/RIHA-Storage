@@ -1,7 +1,5 @@
 package ee.eesti.riha.rest.service.impl;
 
-import java.util.Arrays;
-
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -14,11 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ee.eesti.riha.rest.auth.AuthInfo;
-import ee.eesti.riha.rest.auth.AuthService;
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
-import ee.eesti.riha.rest.auth.AuthServiceProvider;
 import ee.eesti.riha.rest.auth.TokenStore;
-import ee.eesti.riha.rest.auth.TokenStoreImpl;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.ServiceLogic;
@@ -40,8 +34,6 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
 
   @Context
   HttpHeaders httpHeaders;
-
-  AuthServiceProvider authServiceProvider = AuthServiceProvider.getInstance();
 
   @Autowired
   TokenStore tokenStore;
@@ -174,32 +166,6 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
       }
     }).doIfHeadersOk();
 
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.service.ApiClassicService#getAuthService()
-   */
-  @Override
-  public AuthService getAuthService() {
-    return authServiceProvider.get();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.service.ApiClassicService#setAuthService(ee.eesti.riha.rest.auth.AuthServiceImpl)
-   */
-  @Override
-  public void setAuthService(AuthServiceImpl authService) {
-    authServiceProvider.set(authService);
-    if (authService == null) {
-      // use actual
-      TokenStoreImpl.setTest(false);
-    } else {
-      TokenStoreImpl.setTest(true);
-    }
   }
 
   /**

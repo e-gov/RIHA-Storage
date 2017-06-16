@@ -373,8 +373,6 @@ public class TestApiCGIServiceImpl_POST_opPost<T> {
 
     String json = "{\"op\":\"post\", \"path\": \"" + pathToUse + "\", " + "\"token\":\"\",\"data\":{}}";
 
-    // use actual validation
-    serviceHelpingCreateDeleteTestData.setAuthService(null);
     // send query
     Response response = serviceUnderTest.postCGI(json);
 
@@ -383,17 +381,10 @@ public class TestApiCGIServiceImpl_POST_opPost<T> {
     assertNotNull(error);
     assertEquals(ErrorCodes.NO_AUTH_TOKEN_PROVIDED, error.getErrcode());
     assertTrue(error.getErrmsg().contains(ErrorCodes.NO_AUTH_TOKEN_PROVIDED_MSG));
-
-    // use fake validation
-    serviceHelpingCreateDeleteTestData.setAuthService(new AuthServiceImpl());
   }
 
   @Test
   public void testCreate_withTestToken() throws Exception {
-
-    // use actual validation
-    serviceHelpingCreateDeleteTestData.setAuthService(null);
-
     String json = "{\r\n" + "	\"op\":\"post\", \r\n" + "	\"path\": \"" + pathToUse + "\", \r\n"
         + "\"token\":\"testToken\",	\"data\": " + jsonToUseForCreate + "}";
 
@@ -407,9 +398,5 @@ public class TestApiCGIServiceImpl_POST_opPost<T> {
     String id1 = resultKey.replace(".0", "");
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(id1));
     idUnderTestList.add(new Integer(id1));
-
-    // use fake validation
-    serviceHelpingCreateDeleteTestData.setAuthService(new AuthServiceImpl());
-
   }
 }

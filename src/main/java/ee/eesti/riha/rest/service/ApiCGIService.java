@@ -9,8 +9,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import ee.eesti.riha.rest.auth.AuthService;
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
 import ee.eesti.riha.rest.logic.Finals;
 
 // TODO: Auto-generated Javadoc
@@ -57,23 +55,5 @@ public interface ApiCGIService<T> {
   // getters and setters won't work without being a service themselves
   // this is needed to use fake AuthService in integration tests
   // TODO find if better solution exists, maybe ignore those paths?
-
-  /**
-   * Getter needed for integration tests.
-   *
-   * @return the auth service
-   */
-  @Path("/not/to/be/called/by/url/x")
-  @GET
-  AuthService getAuthService();
-
-  /**
-   * Setter needed for integration tests.
-   *
-   * @param authService the new auth service
-   */
-  @Path("/not/to/be/called/by/url2/x")
-  @GET
-  void setAuthService(@QueryParam(value = "authService") AuthServiceImpl authService);
 
 }

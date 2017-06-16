@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ee.eesti.riha.rest.auth.AuthInfo;
-import ee.eesti.riha.rest.auth.AuthServiceProvider;
 import ee.eesti.riha.rest.auth.TokenStore;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.ChangeLogic;
@@ -30,8 +29,6 @@ import ee.eesti.riha.rest.service.FileService;
  * The Class FileServiceImpl.
  */
 public class FileServiceImpl implements FileService {
-
-  AuthServiceProvider authServiceProvider = AuthServiceProvider.getInstance();
 
   private static final Logger LOG = LoggerFactory.getLogger(FileServiceImpl.class);
 
