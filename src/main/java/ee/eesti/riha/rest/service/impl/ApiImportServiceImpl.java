@@ -10,13 +10,11 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonObject;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
 import ee.eesti.riha.rest.auth.TokenStore;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.ImportLogic;
 import ee.eesti.riha.rest.logic.MyExceptionHandler;
-import ee.eesti.riha.rest.logic.TokenValidator;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.service.ApiImportService;
 
@@ -36,9 +34,7 @@ public class ApiImportServiceImpl implements ApiImportService {
     JsonObject jsonObject = JsonHelper.getFromJson(json);
 
     try {
-      AuthInfo authInfo = TokenValidator.isTokenOk(token, tokenStore);
-
-      importLogic.logic(jsonObject, authInfo);
+      importLogic.logic(jsonObject);
     } catch (RihaRestException | ReflectiveOperationException | IOException e) {
       return Response.status(Status.BAD_REQUEST).entity(MyExceptionHandler.unmapped(e, " ImportService ")).build();
     }
