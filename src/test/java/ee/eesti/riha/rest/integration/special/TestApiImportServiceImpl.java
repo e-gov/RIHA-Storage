@@ -6,14 +6,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,14 +36,11 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.NewVersionLogic;
 import ee.eesti.riha.rest.logic.URI;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
-import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Data_object;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
-import ee.eesti.riha.rest.model.readonly.Kind;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import ee.eesti.riha.rest.service.ApiImportService;
-import ee.eesti.riha.rest.service.ApiTableService;
 
 @RunWith(MyTestRunner.class)
 @ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
@@ -368,7 +363,7 @@ public class TestApiImportServiceImpl {
     
     // create new version
     String newVersion = "v6";
-    ObjectNode newVersionObject = (ObjectNode) newVersionLogic.doNewVersion(newVersion, uri, testAuthInfo);
+    ObjectNode newVersionObject = (ObjectNode) newVersionLogic.doNewVersion(newVersion, uri);
 
     // get just archived version
     FilterComponent fc = new FilterComponent("uri", "=", uri);

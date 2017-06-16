@@ -124,7 +124,7 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
     return (new Command() {
       @Override
       public Response commandMethod(Object user) {
-        return serviceLogic.create(json, tableName, user);
+        return serviceLogic.create(json, tableName);
       }
     }).doIfHeadersOk();
 
@@ -143,7 +143,7 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
     return (new Command() {
       @Override
       public Response commandMethod(Object user) {
-        return serviceLogic.update(json, tableName, id, user);
+        return serviceLogic.update(json, tableName, id);
       }
     }).doIfHeadersOk();
 
@@ -162,7 +162,7 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
     return (new Command() {
       @Override
       public Response commandMethod(Object user) {
-        return serviceLogic.delete(tableName, id, (AuthInfo) user);
+        return serviceLogic.delete(tableName, id);
       }
     }).doIfHeadersOk();
 

@@ -300,10 +300,9 @@ public class ServiceLogic<T, K> {
    *
    * @param json the json
    * @param tableName the table name
-   * @param user the user
    * @return the response
    */
-  public Response create(String json, String tableName, Object user) {
+  public Response create(String json, String tableName) {
 
     LOG.info("create API called");
 
@@ -338,10 +337,9 @@ public class ServiceLogic<T, K> {
    * @param json the json
    * @param tableName the table name
    * @param id the id
-   * @param user the user
    * @return the response
    */
-  public Response update(String json, String tableName, Integer id, Object user) {
+  public Response update(String json, String tableName, Integer id) {
 
     LOG.info("update API called");
 
@@ -380,7 +378,7 @@ public class ServiceLogic<T, K> {
    * @param id the id
    * @return the response
    */
-  public Response delete(String tableName, Integer id, AuthInfo authInfo) {
+  public Response delete(String tableName, Integer id) {
 
     LOG.info("delete API called");
 
@@ -437,21 +435,6 @@ public class ServiceLogic<T, K> {
       Validator.valueMustBeAllowed(Finals.GET_CGI_ALLOWED_VALUES, operation,
           ErrorCodes.INPUT_URL_OP_VALUE_UNKNOWN_OR_NOTSUITABLE,
           ErrorCodes.INPUT_URL_OP_VALUE_UNKNOWN_OR_NOTSUITABLE_MSG);
-
-      // if doesn't throw then OK
-      // TokenValidator.isTokenOk(token);
-      // Object user = TokenValidator.isTokenOk(token, authServiceProvider.get());
-
-      // no need to currently authenticate for GET requests
-      // AuthInfo user = TokenValidator.isTokenOk(token, tokenStore);
-
-      // allow to read if token not given
-      AuthInfo user = null;
-      if (!StringUtils.isEmpty(token)) {
-        user = TokenValidator.isTokenOk(token, tokenStore);
-      } else {
-        user = AuthInfo.DEFAULT;
-      }
 
       PathHolder pathHolder = null;
       try {
@@ -534,11 +517,6 @@ public class ServiceLogic<T, K> {
       Validator.valueMustBeAllowed(Finals.POST_CGI_ALLOWED_VALUES, queryHolder.getOp(),
           ErrorCodes.INPUT_JSON_OP_VALUE_UNKNOWN, ErrorCodes.INPUT_JSON_OP_VALUE_UNKNOWN_MSG);
 
-      // if doesn't throw then OK
-      // TokenValidator.isTokenOk(queryHolder.getToken());
-      // Object user = TokenValidator.isTokenOk(
-      // queryHolder.getToken(), authServiceProvider.get());
-
       AuthInfo user = null;
       if (!Finals.READ_ALLOWED_VALUES.contains(queryHolder.getOp())) {
         // no need to currently authenticate for GET requests
@@ -612,8 +590,7 @@ public class ServiceLogic<T, K> {
 
       } else if (StringHelper.areEqual(queryHolder.getOp(), Finals.NEW_VERSION)) {
 
-        // Object result = changeLogic.doNewVersion(queryHolder, user);
-        Object result = newVersionLogic.doNewVersion(queryHolder, user);
+        Object result = newVersionLogic.doNewVersion(queryHolder);
         return Response.ok(result).build();
 
       }
@@ -643,19 +620,6 @@ public class ServiceLogic<T, K> {
   private Response specialCGI(QueryHolder queryHolder) throws RihaRestException {
     Validator.valueMustBeAllowed(Finals.POST_CGI_ALLOWED_VALUES, queryHolder.getOp(),
         ErrorCodes.INPUT_JSON_OP_VALUE_UNKNOWN, ErrorCodes.INPUT_JSON_OP_VALUE_UNKNOWN_MSG);
-    // if doesn't throw then OK
-    // Object user = TokenValidator.isTokenOk(
-    // queryHolder.getToken(), authServiceProvider.get());
-    // AuthInfo user = TokenValidator.isTokenOk(queryHolder.getToken(), tokenStore);
-
-    AuthInfo user = null;
-    if (!Finals.READ_ALLOWED_VALUES.contains(queryHolder.getOp())) {
-      // no need to currently authenticate for GET requests
-      user = TokenValidator.isTokenOk(queryHolder.getToken(), tokenStore);
-
-      // may be needed in future
-      // Validator.tableCantBeUpdated(pathHolder.tableName);
-    }
 
     Map<String, Map<String, String>> names = changeLogic.doGetNames(queryHolder);
 

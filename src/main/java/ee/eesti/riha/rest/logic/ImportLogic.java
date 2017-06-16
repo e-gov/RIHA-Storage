@@ -121,7 +121,7 @@ public class ImportLogic {
     // 1. create new version from Main_resource in database
     String newVersion = importJson.get("version").getAsString();
 
-    newVersionLogic.doNewVersion(newVersion, uri, user);
+    newVersionLogic.doNewVersion(newVersion, uri);
 
     // 2. update new version of Main_resource with values from importJson
     // main_resource_id stays the same, copy will have new id
