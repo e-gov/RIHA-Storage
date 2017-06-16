@@ -107,7 +107,7 @@ public class ChangeLogic<T, K> {
     try {
       addEscapedQuotesToJsonArray(filterComponents);
       // all = genericDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
-      all = secureDAO.find(classRepresentingTable, limit, offset, filterComponents, sort, authInfo);
+      all = secureDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
       replaceContentWithFileUrl(all, authInfo, appConfigURL.getRestApiBaseUrl());
       all = filterByFields(all, fields);
 
@@ -238,7 +238,7 @@ public class ChangeLogic<T, K> {
       throws RihaRestException {
 
     // List<T> entityList = genericDAO.findByMainResourceId(classRepresentingTable, id);
-    List<T> entityList = secureDAO.findByMainResourceId(classRepresentingTable, id, authInfo);
+    List<T> entityList = secureDAO.findByMainResourceId(classRepresentingTable, id);
     entityList = tableEntryReadLogic.getAdjustedObjsBasedOnExpectedJson(entityList, null);
 
     // INFO: file content inclusion
@@ -261,7 +261,7 @@ public class ChangeLogic<T, K> {
       throws RihaRestException {
 
     // T entity = genericDAO.find(classRepresentingTable, id);
-    T entity = secureDAO.find(classRepresentingTable, id, authInfo);
+    T entity = secureDAO.find(classRepresentingTable, id);
     Validator.noSuchIdInGivenTable(entity, id);
 
     replaceContentWithFileUrl(entity, id, authInfo, appConfigURL.getRestApiBaseUrl());
@@ -345,14 +345,14 @@ public class ChangeLogic<T, K> {
       LOG.info("COMPARE " + queryHolder.getLimit() + " == Finals -1");
       if (queryHolder.getLimit() == Finals.COUNT_ALL_LIMIT) {
         // count = genericDAO.findCount(classRepresentingTable);
-        count = secureDAO.findCount(classRepresentingTable, authInfo);
+        count = secureDAO.findCount(classRepresentingTable);
       } else {
         // needed for ?& operator
         addEscapedQuotesToJsonArray((List<FilterComponent>) queryHolder.getFilter());
         // count = genericDAO.findCount(classRepresentingTable, queryHolder.getLimit(), queryHolder.getOffset(),
         // (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort());
         count = secureDAO.findCount(classRepresentingTable, queryHolder.getLimit(), queryHolder.getOffset(),
-            (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort(), authInfo);
+            (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort());
       }
     } else {
       // find by id
@@ -411,7 +411,7 @@ public class ChangeLogic<T, K> {
           FileHelper.writeDocumentContentToFile(item);
           // List<K> createdKey = genericDAO.create(item);
           Validator.infosystemMustHaveFields(item, kindRepository);
-          List<K> createdKey = secureDAO.create(item, (AuthInfo) user);
+          List<K> createdKey = secureDAO.create(item);
           createdKeys.add(createdKey.get(0));
         } catch (Exception e) {
           // if unsuccessful, then store error
@@ -451,7 +451,7 @@ public class ChangeLogic<T, K> {
 
         Validator.infosystemMustHaveFields(item, kindRepository);
         // createdKeys = genericDAO.create(item);
-        createdKeys = secureDAO.create(item, (AuthInfo) user);
+        createdKeys = secureDAO.create(item);
 
       } catch (RihaRestException e) {
         throw e;
@@ -522,7 +522,7 @@ public class ChangeLogic<T, K> {
           idFieldName = Finals.KIND_ID;
         }
         // numOfChanged = genericDAO.update(itemList, idFieldName);
-        numOfChanged = secureDAO.update(itemList, idFieldName, (AuthInfo) user);
+        numOfChanged = secureDAO.update(itemList, idFieldName);
 
         // throws exception if numOfChanged has error code as result
         Validator.fieldMustExistInDatabase(numOfChanged, idFieldName);
@@ -547,7 +547,7 @@ public class ChangeLogic<T, K> {
 
       FileHelper.writeDocumentContentToFile(item);
       // numOfChanged = genericDAO.update(item, id);
-      numOfChanged = secureDAO.update(item, id, (AuthInfo) user);
+      numOfChanged = secureDAO.update(item, id);
 
     } else {
       RihaRestError error = new RihaRestError();
@@ -732,7 +732,7 @@ public class ChangeLogic<T, K> {
       int numOfDeleted = 0;
       try {
         // numOfDeleted = genericDAO.delete(tableName, key, values);
-        numOfDeleted = secureDAO.delete(tableName, key, values, authInfo);
+        numOfDeleted = secureDAO.delete(tableName, key, values);
 
         Validator.fieldMustExistInDatabase(numOfDeleted, key);
       } catch (SQLGrammarException e) {
@@ -777,7 +777,7 @@ public class ChangeLogic<T, K> {
 
     Class<T> clazz = Finals.getClassRepresentingTable(tableName);
     // int numOfDeleted = genericDAO.delete(clazz, id);
-    int numOfDeleted = secureDAO.delete(clazz, id, authInfo);
+    int numOfDeleted = secureDAO.delete(clazz, id);
 
     if ((Class<T>) Finals.getClassRepresentingTable(tableName) == Document.class) {
       LOG.info("IS DOCUMENT");

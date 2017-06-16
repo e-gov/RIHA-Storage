@@ -2,7 +2,6 @@ package ee.eesti.riha.rest.stress;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ public class TestCount {
     
     // fetch
     Integer count = secureDao.findCount(Main_resource.class, LIMIT, null,
-        null, null, authInfo);
+        null, null);
     
     // assume we get LIMIT amount of results
     assertEquals(LIMIT, count);

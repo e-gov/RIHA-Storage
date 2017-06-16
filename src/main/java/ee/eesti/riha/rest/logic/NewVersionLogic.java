@@ -136,7 +136,7 @@ public class NewVersionLogic<T, K> {
         classRepresentingTable, user);
 
     // genericDAO.create(itemTemp);
-    List<Integer> archivedKeys = (List<Integer>) secureDAO.create(itemTemp, (AuthInfo) user);
+    List<Integer> archivedKeys = (List<Integer>) secureDAO.create(itemTemp);
 
     // doCreate(tempJson.toString(), classRepresentingTable, user);
     // temp = doGet(classRepresentingTable, id, null, null);
@@ -255,7 +255,7 @@ public class NewVersionLogic<T, K> {
       T itemTemp = (T) tableEntryCreateLogic.fromJsonContentToObjKeepExisting(docJson.toString(),
           clazz, user);
       // save archived item to database
-      List<Integer> createdKeys = (List<Integer>) secureDAO.create(itemTemp, user);
+      List<Integer> createdKeys = (List<Integer>) secureDAO.create(itemTemp);
       docIdMap.put(id, createdKeys.get(0));
     }
     
@@ -305,7 +305,7 @@ public class NewVersionLogic<T, K> {
       
       Document doc = JsonHelper.GSON.fromJson(updateJson, Document.class);
       doc.setJson_content(updateJson);
-      secureDAO.update((T) doc, archivedDocId, user);
+      secureDAO.update((T) doc, archivedDocId);
       LOG.info("update successful? time to copy files");
       try {
         LOG.info("Copying file in new version current to archived");
@@ -352,7 +352,7 @@ public class NewVersionLogic<T, K> {
       T itemTemp = (T) tableEntryCreateLogic.fromJsonContentToObjKeepExisting(dataJson.toString(),
           clazz, user);
       // save archived item to database
-      List<Integer> createdKeys = (List<Integer>) secureDAO.create(itemTemp, user);
+      List<Integer> createdKeys = (List<Integer>) secureDAO.create(itemTemp);
     }
 
     // get unmodified connected Data_objects

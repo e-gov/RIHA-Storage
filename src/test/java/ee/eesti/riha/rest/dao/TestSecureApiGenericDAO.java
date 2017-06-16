@@ -7,33 +7,22 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
-
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
 import ee.eesti.riha.rest.auth.AuthInfo;
-import ee.eesti.riha.rest.dao.util.FilterComponent;
-import ee.eesti.riha.rest.error.ErrorCodes;
-import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.integration.TestFinals;
-import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
-import ee.eesti.riha.rest.model.readonly.Asutus;
 import ee.eesti.riha.rest.model.readonly.Kind;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -107,7 +96,7 @@ public class TestSecureApiGenericDAO<T, K> {
     // use limit, otherwise too slow to show all elements ~200MB
     main_resources = (List<Main_resource>) secureGenericDAO.find(
         (Class<T>) Main_resource.class, limit, null, null,
-        null, authInfo);
+        null);
 
     assertNotNull(main_resources);
     assertFalse(main_resources.isEmpty());
@@ -124,7 +113,7 @@ public class TestSecureApiGenericDAO<T, K> {
     // use limit, otherwise too slow to show all elements ~200MB
     documents = (List<Document>) secureGenericDAO.find(
         (Class<T>) Document.class, limit, null, null,
-        null, authInfo);
+        null);
 
     assertNotNull(documents);
     assertFalse(documents.isEmpty());
@@ -137,7 +126,7 @@ public class TestSecureApiGenericDAO<T, K> {
     Main_resource mr = createTestMain_resource();
     mr.setOwner("ORG");
     additionalMrTestEntries.add(mr);
-    List<K> keys = secureGenericDAO.create((T) mr, superAuthInfo);
+    List<K> keys = secureGenericDAO.create((T) mr);
     System.out.println(keys);
     assertNotNull(keys);
     assertFalse(keys.isEmpty());
@@ -149,7 +138,7 @@ public class TestSecureApiGenericDAO<T, K> {
     Main_resource mr = createTestMain_resource();
     mr.setOwner("ORG");
     additionalMrTestEntries.add(mr);
-    List<K> keys = secureGenericDAO.create((List<T>)Arrays.asList(mr), superAuthInfo);
+    List<K> keys = secureGenericDAO.create((List<T>)Arrays.asList(mr));
     System.out.println(keys);
     assertNotNull(keys);
     assertFalse(keys.isEmpty());
@@ -161,7 +150,7 @@ public class TestSecureApiGenericDAO<T, K> {
     Main_resource mr = createTestMain_resource();
     mr.setOwner("ORG");
     additionalMrTestEntries.add(mr);
-    List<K> keys = secureGenericDAO.create((List<T>)Arrays.asList(mr), authInfo);
+    List<K> keys = secureGenericDAO.create((List<T>)Arrays.asList(mr));
     System.out.println(keys);
 
   }
@@ -173,7 +162,7 @@ public class TestSecureApiGenericDAO<T, K> {
     
     Main_resource mr = createSimpleTestMain_resource(old);
     
-    int updated = secureGenericDAO.update((T) mr, old.callGetId(), superAuthInfo);
+    int updated = secureGenericDAO.update((T) mr, old.callGetId());
     System.out.println(updated);
     assertTrue(updated > 0);
     assertEquals(1, updated);
@@ -187,7 +176,7 @@ public class TestSecureApiGenericDAO<T, K> {
     
     Main_resource mr = createSimpleTestMain_resource(old);
     
-    int updated = secureGenericDAO.update((List<T>)Arrays.asList(mr), "name", superAuthInfo);
+    int updated = secureGenericDAO.update((List<T>)Arrays.asList(mr), "name");
     System.out.println(updated);
     assertTrue(updated > 0);
     assertEquals(1, updated);
@@ -201,7 +190,7 @@ public class TestSecureApiGenericDAO<T, K> {
     
     Main_resource mr = createSimpleTestMain_resource(old);
     
-    int updated = secureGenericDAO.update((List<T>)Arrays.asList(mr), "name", authInfo);
+    int updated = secureGenericDAO.update((List<T>)Arrays.asList(mr), "name");
     System.out.println(updated);
 
   }
@@ -213,7 +202,7 @@ public class TestSecureApiGenericDAO<T, K> {
     Main_resource old = mrAsPrimeTestEntry;
     System.out.println(JsonHelper.GSON.toJson(old));
     
-    int delete = secureGenericDAO.delete((Class<T>) Main_resource.class, old.callGetId(), superAuthInfo);
+    int delete = secureGenericDAO.delete((Class<T>) Main_resource.class, old.callGetId());
     System.out.println(delete);
     assertTrue(delete > 0);
     assertEquals(1, delete);
@@ -225,7 +214,7 @@ public class TestSecureApiGenericDAO<T, K> {
     Main_resource old = mrAsPrimeTestEntry;
     System.out.println(JsonHelper.GSON.toJson(old));
     
-    int delete = secureGenericDAO.delete(Main_resource.class.getSimpleName(), "name", new String[]{EXAMPLE_NAME}, superAuthInfo);
+    int delete = secureGenericDAO.delete(Main_resource.class.getSimpleName(), "name", new String[]{EXAMPLE_NAME});
     System.out.println(delete);
     assertTrue(delete > 0);
     assertEquals(1, delete);
@@ -237,7 +226,7 @@ public class TestSecureApiGenericDAO<T, K> {
     Main_resource old = mrAsPrimeTestEntry;
     System.out.println(JsonHelper.GSON.toJson(old));
     
-    int delete = secureGenericDAO.delete(Main_resource.class.getSimpleName(), "name", new String[]{EXAMPLE_NAME}, authInfo);
+    int delete = secureGenericDAO.delete(Main_resource.class.getSimpleName(), "name", new String[]{EXAMPLE_NAME});
     System.out.println(delete);
 
   }
