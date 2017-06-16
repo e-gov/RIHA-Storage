@@ -23,9 +23,7 @@ import com.google.gson.reflect.TypeToken;
 
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
 import ee.eesti.riha.rest.dao.KindRepository;
-import ee.eesti.riha.rest.dao.TestApiGenericDAOMain_resource;
 import ee.eesti.riha.rest.error.ErrorCodes;
 import ee.eesti.riha.rest.error.PartialError;
 import ee.eesti.riha.rest.error.RihaRestError;

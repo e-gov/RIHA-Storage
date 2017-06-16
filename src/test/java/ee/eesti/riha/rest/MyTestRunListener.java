@@ -6,7 +6,6 @@ import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;
 
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;

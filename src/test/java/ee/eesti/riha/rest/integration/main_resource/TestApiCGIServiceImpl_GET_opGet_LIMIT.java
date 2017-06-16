@@ -26,7 +26,6 @@ import com.google.gson.JsonObject;
 
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
 import ee.eesti.riha.rest.error.ErrorCodes;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.integration.IntegrationTestHelper;

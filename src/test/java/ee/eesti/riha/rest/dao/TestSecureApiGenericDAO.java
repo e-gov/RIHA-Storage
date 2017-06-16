@@ -17,7 +17,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.gson.JsonObject;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.integration.TestFinals;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
@@ -40,10 +39,6 @@ public class TestSecureApiGenericDAO<T, K> {
    
   @Autowired
   UtilitiesDAO<T> utilitiesDAO;
-  
-  AuthInfo authInfo = new AuthInfo("123", "ORG", "ADMIN", "asd123123");
-  AuthInfo superAuthInfo = new AuthInfo("123", "ORG", "ROLL_RIHA_ADMINISTRAATOR", "asd123123");
-  AuthInfo betterAuthInfo = new AuthInfo("123", "ORG", "ROLL_RIHA_HALDUR", "asd123123");
   
   private static final String INFOSYSTEM = "infosystem";
   static Integer infosystemId = null;

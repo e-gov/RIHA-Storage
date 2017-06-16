@@ -9,7 +9,6 @@ import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
 import ee.eesti.riha.rest.dao.SecureApiGenericDAO;
 import ee.eesti.riha.rest.model.Main_resource;
 
@@ -28,9 +27,6 @@ public class TestCount {
   
   @Autowired
   SecureApiGenericDAO<Main_resource, Integer> secureDao;   // FIXME remove excess templating
-  
-  @Autowired
-  AuthInfo authInfo;
   
   @Test
   @Timed(millis = 500)

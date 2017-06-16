@@ -28,17 +28,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
 
   private static final Logger LOG = LoggerFactory.getLogger(SecureApiGenericDAOImpl.class);
 
-  // LOGIC
-  // get Main_resource if Main_resource or by main_resource_id if other table
-  // get kindId from main_resource
-  // get access restriction from main_resource
-  // get access restrictions from parent main_resources
-  // get max access restriction
-  // get Role_rights: DEFAULT, AUTHENTICATED, authInfo.getRoll()
-  // filter Role_rights by kindId && accessRestriction
-  // calculate Role_right from role_Rights
-  // call canCreate(<Calculated Role_right>, <AuthInfo>, <Main_resource owner>}
-
   @Override
   public List<T> find(Class<T> clazz, Integer limit, Integer offset, List<FilterComponent> filterComponents,
                       String sort) throws RihaRestException {
