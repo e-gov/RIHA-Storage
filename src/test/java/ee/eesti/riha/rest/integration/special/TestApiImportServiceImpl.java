@@ -24,8 +24,6 @@ import com.google.gson.JsonObject;
 
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
-import ee.eesti.riha.rest.auth.AuthInfo;
-import ee.eesti.riha.rest.auth.TokenStore;
 import ee.eesti.riha.rest.dao.ApiGenericDAO;
 import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.error.ErrorCodes;
@@ -60,9 +58,6 @@ public class TestApiImportServiceImpl {
   
   @Autowired
   NewVersionLogic<Main_resource, Integer> newVersionLogic;
-  
-  @Autowired
-  TokenStore tokenStore;
 
   // service under test info here
   private static ApiImportService serviceUnderTest;
@@ -84,15 +79,11 @@ public class TestApiImportServiceImpl {
   private static final String TEST_KINDS = "infosystemTests";
   private static final String TEST_KINDS_DOC = "documentTests";
   private static final String TEST_KINDS_SERVICE = "services";
-  
-  private AuthInfo testAuthInfo;
 
   @Before
   public void beforeTest() {
     if (idUnderTestList.size() == 0) {
 
-      testAuthInfo = tokenStore.tokenExists(Finals.TEST_TOKEN);
-      
       webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
       serviceHelpingCreateDeleteTestData = JAXRSClientFactory.fromClient(webClient, ApiClassicService.class, true);
       serviceUnderTest = JAXRSClientFactory.fromClient(webClient, ApiImportService.class, true);

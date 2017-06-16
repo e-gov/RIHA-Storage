@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonObject;
 
-import ee.eesti.riha.rest.auth.TokenStore;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.ImportLogic;
@@ -23,9 +22,6 @@ public class ApiImportServiceImpl implements ApiImportService {
 
   @Autowired
   ImportLogic importLogic;
-
-  @Autowired
-  TokenStore tokenStore;
 
   @Override
   public Response doImport(String json, String token) {
