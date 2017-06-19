@@ -6,7 +6,6 @@ import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;
 
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
@@ -34,9 +33,6 @@ public class MyTestRunListener extends RunListener {
     if (numOfTestRuns == 0) {
       System.out.println("TESTING STARTING... ");
 
-      // use fake auth token validation service in tests
-      service.setAuthService(new AuthServiceImpl());
-
       System.out.println("TESTING STARTED!");
     }
     super.testRunStarted(description);
@@ -49,11 +45,6 @@ public class MyTestRunListener extends RunListener {
     super.testRunFinished(result);
     if (numOfTestRuns == 0) {
       System.out.println("ALL TESTS ARE FINISHED!");
-
-      // use actual auth token validation service outside tests
-      service.setAuthService(null);
-
-      System.out.println("AUTH SERVICE SET TO NULL");
     }
   }
 

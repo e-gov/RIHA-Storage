@@ -12,13 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
-import ee.eesti.riha.rest.auth.AuthServiceProvider;
-import ee.eesti.riha.rest.auth.TokenStore;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.ChangeLogic;
 import ee.eesti.riha.rest.logic.MyExceptionHandler;
-import ee.eesti.riha.rest.logic.TokenValidator;
 import ee.eesti.riha.rest.logic.Validator;
 import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
@@ -31,15 +27,10 @@ import ee.eesti.riha.rest.service.FileService;
  */
 public class FileServiceImpl implements FileService {
 
-  AuthServiceProvider authServiceProvider = AuthServiceProvider.getInstance();
-
   private static final Logger LOG = LoggerFactory.getLogger(FileServiceImpl.class);
 
   @Autowired
   ChangeLogic changeLogic;
-
-  @Autowired
-  TokenStore tokenStore;
 
   /*
    * (non-Javadoc)
@@ -50,11 +41,10 @@ public class FileServiceImpl implements FileService {
   public Response getFile(Integer documentId, String token) {
 
     try {
-      AuthInfo user = TokenValidator.isTokenOk(token, tokenStore);
       String fields = "[\"document_id\", \"filename\"]";
-      ObjectNode jsonObject = (ObjectNode) changeLogic.doGet(Document.class, documentId, fields, user);
+      ObjectNode jsonObject = (ObjectNode) changeLogic.doGet(Document.class, documentId, fields);
 
-      return getFileLogic(documentId, jsonObject, token);
+      return getFileLogic(documentId, jsonObject);
 
     } catch (RihaRestException e) {
       return Response.status(Status.BAD_REQUEST).entity(MyExceptionHandler.unmapped(e, "FileService error"))
@@ -63,12 +53,7 @@ public class FileServiceImpl implements FileService {
 
   }
 
-  private Response getFileLogic(Integer documentId, ObjectNode document, String token) throws RihaRestException {
-    // if doesn't throw then OK
-    // TokenValidator.isTokenOk(token, authServiceProvider.get());
-    // TokenValidator.isTokenOk(token, tokenStore);
-    // no need to currently authenticate for GET requests
-
+  private Response getFileLogic(Integer documentId, ObjectNode document) throws RihaRestException {
     String filePath = FileHelper.createDocumentFilePathWithRoot(documentId);
     File file = new File(filePath);
 

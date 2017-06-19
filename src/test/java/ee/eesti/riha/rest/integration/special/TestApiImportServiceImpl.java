@@ -6,14 +6,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,8 +24,6 @@ import com.google.gson.JsonObject;
 
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
-import ee.eesti.riha.rest.auth.AuthInfo;
-import ee.eesti.riha.rest.auth.TokenStore;
 import ee.eesti.riha.rest.dao.ApiGenericDAO;
 import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.error.ErrorCodes;
@@ -38,14 +34,11 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.NewVersionLogic;
 import ee.eesti.riha.rest.logic.URI;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
-import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Data_object;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
-import ee.eesti.riha.rest.model.readonly.Kind;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import ee.eesti.riha.rest.service.ApiImportService;
-import ee.eesti.riha.rest.service.ApiTableService;
 
 @RunWith(MyTestRunner.class)
 @ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
@@ -65,9 +58,6 @@ public class TestApiImportServiceImpl {
   
   @Autowired
   NewVersionLogic<Main_resource, Integer> newVersionLogic;
-  
-  @Autowired
-  TokenStore tokenStore;
 
   // service under test info here
   private static ApiImportService serviceUnderTest;
@@ -89,15 +79,11 @@ public class TestApiImportServiceImpl {
   private static final String TEST_KINDS = "infosystemTests";
   private static final String TEST_KINDS_DOC = "documentTests";
   private static final String TEST_KINDS_SERVICE = "services";
-  
-  private AuthInfo testAuthInfo;
 
   @Before
   public void beforeTest() {
     if (idUnderTestList.size() == 0) {
 
-      testAuthInfo = tokenStore.tokenExists(Finals.TEST_TOKEN);
-      
       webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
       serviceHelpingCreateDeleteTestData = JAXRSClientFactory.fromClient(webClient, ApiClassicService.class, true);
       serviceUnderTest = JAXRSClientFactory.fromClient(webClient, ApiImportService.class, true);
@@ -368,7 +354,7 @@ public class TestApiImportServiceImpl {
     
     // create new version
     String newVersion = "v6";
-    ObjectNode newVersionObject = (ObjectNode) newVersionLogic.doNewVersion(newVersion, uri, testAuthInfo);
+    ObjectNode newVersionObject = (ObjectNode) newVersionLogic.doNewVersion(newVersion, uri);
 
     // get just archived version
     FilterComponent fc = new FilterComponent("uri", "=", uri);

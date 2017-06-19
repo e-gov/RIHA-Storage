@@ -21,7 +21,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
 import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.util.DateHelper;
@@ -55,12 +54,11 @@ public class ImportLogic {
    * that exist in database but do not exist in importJson will be deleted.
    * 
    * @param importJson
-   * @param user
    * @throws RihaRestException
    * @throws ReflectiveOperationException
    * @throws IOException
    */
-  public void logic(JsonObject importJson, AuthInfo user) throws RihaRestException, ReflectiveOperationException,
+  public void logic(JsonObject importJson) throws RihaRestException, ReflectiveOperationException,
       IOException {
 
     String[] reqPars = {"uri", "version" };
@@ -81,13 +79,13 @@ public class ImportLogic {
     FilterComponent fc2 = new FilterComponent("end_date", "null_or_>", dateJson);
 
     List<ObjectNode> many = changeLogic.doGetMany(Main_resource.class, 1, 0, Arrays.asList(fc, fc2), "-creation_date",
-        null, user);
+        null);
 
     if (many.isEmpty()) {
       // no corresponding Main_resource in database
       // save imported Main_resource to database
       LOG.info("Import create new");
-      createFromImport(importJson, arrayFieldsWithObjects, uriToJsonObject, user);
+      createFromImport(importJson, arrayFieldsWithObjects, uriToJsonObject);
     } else {
 
       ObjectNode existing = many.get(0);
@@ -96,15 +94,15 @@ public class ImportLogic {
       if (existingVersion.equals(importVersion)) {
         // same version then update
         LOG.info("Import update");
-        updateFromImport(main_resource_id, uriToJsonObject, arrayFieldsWithObjects, importJson, user);
+        updateFromImport(main_resource_id, uriToJsonObject, arrayFieldsWithObjects, importJson);
       } else {
         // check older versions also
         // throw error if exists
-        sameUriWithVersionExists(uri, importVersion, importJson, user);
+        sameUriWithVersionExists(uri, importVersion, importJson);
         // different version then new version
         LOG.info("Import new version");
         newVersionFromImport(importJson, uri, main_resource_id,
-            uriToJsonObject, arrayFieldsWithObjects, user);
+            uriToJsonObject, arrayFieldsWithObjects);
       }
     }
 
@@ -112,20 +110,20 @@ public class ImportLogic {
 
   /**
    * Creates new version of corresponding main_resource (and connected items) in database, then updates created new
-   * version with values from importJson using {@link #updateFromImport(int, Map, List, JsonObject, AuthInfo)}
+   * version with values from importJson using {@link #updateFromImport(int, Map, List, JsonObject)}
    */
   protected void newVersionFromImport(JsonObject importJson, String uri, int main_resource_id,
-      Map<String, JsonObject> uriToJsonObject, List<String> arrayFieldsWithObjects, AuthInfo user)
+                                      Map<String, JsonObject> uriToJsonObject, List<String> arrayFieldsWithObjects)
       throws RihaRestException, ReflectiveOperationException, IOException {
 
     // 1. create new version from Main_resource in database
     String newVersion = importJson.get("version").getAsString();
 
-    newVersionLogic.doNewVersion(newVersion, uri, user);
+    newVersionLogic.doNewVersion(newVersion, uri);
 
     // 2. update new version of Main_resource with values from importJson
     // main_resource_id stays the same, copy will have new id
-    updateFromImport(main_resource_id, uriToJsonObject, arrayFieldsWithObjects, importJson, user);
+    updateFromImport(main_resource_id, uriToJsonObject, arrayFieldsWithObjects, importJson);
 
   }
 
@@ -133,11 +131,11 @@ public class ImportLogic {
    * Creates new Main_resource and extract its nested objects to separate tables.
    */
   protected void createFromImport(JsonObject importJson, List<String> arrayFieldsWithObjects,
-      Map<String, JsonObject> uriToJsonObject, AuthInfo user) throws RihaRestException {
+                                  Map<String, JsonObject> uriToJsonObject) throws RihaRestException {
     // save imported Main_resource to database
-    ObjectNode mainResourceJson = createMain_resourceFromImport(importJson, arrayFieldsWithObjects, user);
+    ObjectNode mainResourceJson = createMain_resourceFromImport(importJson, arrayFieldsWithObjects);
     int main_resource_id = mainResourceJson.get("main_resource_id").asInt();
-    createConnectedObjects(uriToJsonObject, main_resource_id, user);
+    createConnectedObjects(uriToJsonObject, main_resource_id);
   }
 
   /**
@@ -145,32 +143,31 @@ public class ImportLogic {
    * updates. If imported Main_resource does not have connected item that exists in database then deletes.
    */
   protected void updateFromImport(int main_resource_id, Map<String, JsonObject> uriToJsonObject,
-      List<String> arrayFieldsWithObjects, JsonObject importJson, AuthInfo user) throws RihaRestException,
+                                  List<String> arrayFieldsWithObjects, JsonObject importJson) throws RihaRestException,
       ReflectiveOperationException, IOException {
 
-    List<ObjectNode> dataObjects = changeLogic.doGetByMainResourceId(Data_object.class, main_resource_id, user);
-    List<ObjectNode> documents = changeLogic.doGetByMainResourceId(Document.class, main_resource_id, user);
-    List<ObjectNode> services = serviceLogic.getServicesByParentId(main_resource_id, user);
+    List<ObjectNode> dataObjects = changeLogic.doGetByMainResourceId(Data_object.class, main_resource_id);
+    List<ObjectNode> documents = changeLogic.doGetByMainResourceId(Document.class, main_resource_id);
+    List<ObjectNode> services = serviceLogic.getServicesByParentId(main_resource_id);
 
     // updateOrDeleteConnectedObjects(dataObjects, uriToJsonObject, Data_object.class, user);
     // special method for nested Documents
-    updateOrDeleteConnectedDataObjects(dataObjects, uriToJsonObject, user);
+    updateOrDeleteConnectedDataObjects(dataObjects, uriToJsonObject);
 
     // special case for nested service in Main_resource
-    updateOrDeleteConnectedServices(services, uriToJsonObject, user);
+    updateOrDeleteConnectedServices(services, uriToJsonObject);
     
-    updateOrDeleteConnectedObjects(documents, uriToJsonObject, Document.class, user);
+    updateOrDeleteConnectedObjects(documents, uriToJsonObject, Document.class);
 
     // only those remain in uriToJsonObject that must be created
-    createConnectedObjects(uriToJsonObject, main_resource_id, user);
+    createConnectedObjects(uriToJsonObject, main_resource_id);
 
     // remove Documents and Data_objects from imported Main_resource
     for (String arrayField : arrayFieldsWithObjects) {
       importJson.remove(arrayField);
     }
     // update Main_resource
-    changeLogic.doUpdate(importJson.toString(), Main_resource.class, main_resource_id, null,
-        user);
+    changeLogic.doUpdate(importJson.toString(), Main_resource.class, main_resource_id, null);
   }
 
   /**
@@ -178,8 +175,7 @@ public class ImportLogic {
    * extracted to other tables.
    *
    */
-  private ObjectNode createMain_resourceFromImport(JsonObject importJson, List<String> arrayFieldsWithObjects,
-      AuthInfo user) throws RihaRestException {
+  private ObjectNode createMain_resourceFromImport(JsonObject importJson, List<String> arrayFieldsWithObjects) throws RihaRestException {
     JsonObject jsonObjectCopy = JsonHelper.getFromJson(importJson.toString());
     // remove Documents and Data_objects from imported Main_resource
     for (String arrayField : arrayFieldsWithObjects) {
@@ -190,9 +186,9 @@ public class ImportLogic {
     changeLogic.replaceKindWithKindId(jsonObjectCopy);
 
     // create imported Main_resource
-    List<Integer> createdKeys = changeLogic.doCreate(jsonObjectCopy.toString(), Main_resource.class, user);
+    List<Integer> createdKeys = changeLogic.doCreate(jsonObjectCopy.toString(), Main_resource.class);
     int main_resourceId = createdKeys.get(0);
-    return (ObjectNode) changeLogic.doGet(Main_resource.class, main_resourceId, null, user);
+    return (ObjectNode) changeLogic.doGet(Main_resource.class, main_resourceId, null);
 
   }
 
@@ -200,7 +196,7 @@ public class ImportLogic {
    * Create nested new objects that did not exist before. Also creates nested Documents in Data_object
    * 
    */
-  private void createConnectedObjects(Map<String, JsonObject> uriToJsonObject, int main_resource_id, AuthInfo user)
+  private void createConnectedObjects(Map<String, JsonObject> uriToJsonObject, int main_resource_id)
       throws RihaRestException {
 
     // only those remain in uriToJsonObject that must be created
@@ -224,7 +220,7 @@ public class ImportLogic {
           jsonToCreate.remove(documentField);
         }
         // create connected data
-        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz, user);
+        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz);
         int dataObjectId = createdKeys.get(0);
 
         // create Docuemnts connected to data
@@ -233,7 +229,7 @@ public class ImportLogic {
           JsonObject jsonDoc = entryDoc.getValue();
           jsonDoc.addProperty("data_object_id", dataObjectId);
           changeLogic.replaceKindWithKindId(jsonDoc);
-          changeLogic.doCreate(jsonDoc.toString(), Document.class, user);
+          changeLogic.doCreate(jsonDoc.toString(), Document.class);
         }
       } else if (clazz == Main_resource.class) {
         LOG.info("Creating special Main_resource services");
@@ -250,7 +246,7 @@ public class ImportLogic {
           jsonToCreate.remove(documentField);
         }
         // create connected data
-        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz, user);
+        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz);
         int serviceId = createdKeys.get(0);
 
         // create Docuemnts connected to data
@@ -259,11 +255,11 @@ public class ImportLogic {
           JsonObject jsonDoc = entryDoc.getValue();
           jsonDoc.addProperty("main_resource_id", serviceId);
           changeLogic.replaceKindWithKindId(jsonDoc);
-          changeLogic.doCreate(jsonDoc.toString(), Document.class, user);
+          changeLogic.doCreate(jsonDoc.toString(), Document.class);
         }
       } else {
         // create connected data
-        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz, user);
+        List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz);
       }
 
     }
@@ -275,11 +271,9 @@ public class ImportLogic {
    *
    * @param dataUriToJsonObject Data_object nested documents mapped by uri
    * @param data_object_id the data_object_id
-   * @param user the user
    * @throws RihaRestException the riha rest exception
    */
-  private void createConnectedDataObjectDocuments(Map<String, JsonObject> dataUriToJsonObject, int data_object_id,
-      AuthInfo user) throws RihaRestException {
+  private void createConnectedDataObjectDocuments(Map<String, JsonObject> dataUriToJsonObject, int data_object_id) throws RihaRestException {
 
     // only those remain in uriToJsonObject that must be created
     LOG.info("Create DataObject - uriToJsonObject: " + dataUriToJsonObject);
@@ -294,7 +288,7 @@ public class ImportLogic {
       changeLogic.replaceKindWithKindId(jsonToCreate);
 
       // create connected data
-      List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz, user);
+      List<Integer> createdKeys = changeLogic.doCreate(jsonToCreate.toString(), clazz);
 
     }
 
@@ -303,12 +297,11 @@ public class ImportLogic {
   /**
    * Updates connectedObjs if has same uri in uriToJsonObject, else deletes. <b>Uri is removed from uriToJsonObject
    * after check</b>, so afterwards only those uris remain, that must be created.
-   * 
-   * @param connectedObjs Data_objects or Documents json_content
+   *  @param connectedObjs Data_objects or Documents json_content
    * @param uriToJsonObject will be modified!
    */
   private void updateOrDeleteConnectedObjects(List<ObjectNode> connectedObjs, Map<String, JsonObject> uriToJsonObject,
-      Class clazz, AuthInfo user) throws ReflectiveOperationException, RihaRestException, IOException {
+                                              Class clazz) throws ReflectiveOperationException, RihaRestException, IOException {
     for (ObjectNode connectedObj : connectedObjs) {
       String objUri = connectedObj.get("uri").asText();
       String pkField = TableEntryCreateLogic.createPKFieldName(clazz);
@@ -321,11 +314,11 @@ public class ImportLogic {
       int objId = connectedObj.get(pkField).asInt();
       if (uriToJsonObject.containsKey(objUri)) {
         LOG.info("Update exists");
-        changeLogic.doUpdate(uriToJsonObject.get(objUri).toString(), clazz, objId, null, user);
+        changeLogic.doUpdate(uriToJsonObject.get(objUri).toString(), clazz, objId, null);
         // update item
       } else {
         LOG.info("Delete does not exist " + objUri);
-        changeLogic.doDelete(clazz.getSimpleName(), objId, user);
+        changeLogic.doDelete(clazz.getSimpleName(), objId);
         // delete item
       }
       // remove uri so only those that must be created remain
@@ -335,19 +328,17 @@ public class ImportLogic {
   }
 
   /**
-   * Like {@link #updateOrDeleteConnectedObjects(List, Map, Class, AuthInfo)} but special case for Data_object to handle
+   * Like {@link #updateOrDeleteConnectedObjects(List, Map, Class)} but special case for Data_object to handle
    * nested Documents in Data_object.
    *
    * @param connectedObjs Data_objects with nested Documents
    * @param uriToJsonObject Data_object parent Main_resource's nested child Data_objects, Documents mapped by uri
-   * @param user the user
    * @throws ReflectiveOperationException the reflective operation exception
    * @throws RihaRestException the riha rest exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private void updateOrDeleteConnectedDataObjects(List<ObjectNode> connectedObjs,
-      Map<String, JsonObject> uriToJsonObject,
-      AuthInfo user) throws ReflectiveOperationException, RihaRestException, IOException {
+                                                  Map<String, JsonObject> uriToJsonObject) throws ReflectiveOperationException, RihaRestException, IOException {
     LOG.info("UpdateOrDeleteConnectedDataObjects");
     Class clazz = Data_object.class;
     for (ObjectNode connectedObj : connectedObjs) {
@@ -371,27 +362,26 @@ public class ImportLogic {
 
         // check if connectedObj has nested Documents
         FilterComponent fc = new FilterComponent("data_object_id", "=", "" + dataId);
-        List<ObjectNode> documents = changeLogic.doGetMany(Document.class, null, null, Arrays.asList(fc), null, null,
-            user);
+        List<ObjectNode> documents = changeLogic.doGetMany(Document.class, null, null, Arrays.asList(fc), null, null);
         if (documents.size() > 0) {
           // update or delete
           LOG.info("SHOULD UPDATE OR DELETE NESTED DOCUEMNT ");
-          updateOrDeleteConnectedObjects(documents, dataUriToJsonObject, Document.class, user);
+          updateOrDeleteConnectedObjects(documents, dataUriToJsonObject, Document.class);
         }
         LOG.info("SHOULD CREATE NESTED DOCUEMNT");
         // create new if does not exist before
-        createConnectedDataObjectDocuments(dataUriToJsonObject, dataId, user);
+        createConnectedDataObjectDocuments(dataUriToJsonObject, dataId);
 
         for (String arrayField : dataArrayFields) {
           // remove nested Document, they are extracted
           uriToJsonObject.get(dataUri).remove(arrayField);
         }
 
-        changeLogic.doUpdate(uriToJsonObject.get(dataUri).toString(), clazz, dataId, null, user);
+        changeLogic.doUpdate(uriToJsonObject.get(dataUri).toString(), clazz, dataId, null);
         // update item
       } else {
         LOG.info("Delete Data_object does not exist  " + dataUri);
-        changeLogic.doDelete(clazz.getSimpleName(), dataId, user);
+        changeLogic.doDelete(clazz.getSimpleName(), dataId);
         // delete item
       }
       // remove uri so only those that must be created remain
@@ -401,18 +391,17 @@ public class ImportLogic {
   }
   
   /**
-   * Like {@link #updateOrDeleteConnectedObjects(List, Map, Class, AuthInfo)} but special case for Main_resource servcie to handle
+   * Like {@link #updateOrDeleteConnectedObjects(List, Map, Class)} but special case for Main_resource servcie to handle
    * nested Documents in Main_resource.
    *
    * @param connectedObjs Data_objects with nested Documents
    * @param uriToJsonObject Data_object parent Main_resource's nested child Data_objects, Documents mapped by uri
-   * @param user the user
    * @throws ReflectiveOperationException the reflective operation exception
    * @throws RihaRestException the riha rest exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private void updateOrDeleteConnectedServices(List<ObjectNode> connectedObjs,
-      Map<String, JsonObject> uriToJsonObject, AuthInfo user) 
+                                               Map<String, JsonObject> uriToJsonObject)
           throws ReflectiveOperationException, RihaRestException, IOException {
     LOG.info("UpdateOrDeleteConnectedServices");
     Class clazz = Main_resource.class;
@@ -437,27 +426,26 @@ public class ImportLogic {
 
         // check if connectedObj has nested Documents
         FilterComponent fc = new FilterComponent("main_resource_id", "=", "" + serviceId);
-        List<ObjectNode> documents = changeLogic.doGetMany(Document.class, null, null, Arrays.asList(fc), null, null,
-            user);
+        List<ObjectNode> documents = changeLogic.doGetMany(Document.class, null, null, Arrays.asList(fc), null, null);
         if (documents.size() > 0) {
           // update or delete
           LOG.info("SHOULD UPDATE OR DELETE NESTED DOCUEMNT ");
-          updateOrDeleteConnectedObjects(documents, serviceUriToJsonObject, Document.class, user);
+          updateOrDeleteConnectedObjects(documents, serviceUriToJsonObject, Document.class);
         }
         LOG.info("SHOULD CREATE NESTED DOCUEMNT");
         // create new if does not exist before
-        createConnectedDataObjectDocuments(serviceUriToJsonObject, serviceId, user);
+        createConnectedDataObjectDocuments(serviceUriToJsonObject, serviceId);
 
         for (String arrayField : dataArrayFields) {
           // remove nested Document, they are extracted
           uriToJsonObject.get(serviceUri).remove(arrayField);
         }
 
-        changeLogic.doUpdate(uriToJsonObject.get(serviceUri).toString(), clazz, serviceId, null, user);
+        changeLogic.doUpdate(uriToJsonObject.get(serviceUri).toString(), clazz, serviceId, null);
         // update item
       } else {
         LOG.info("Delete service does not exist  " + serviceUri);
-        changeLogic.doDelete(clazz.getSimpleName(), serviceId, user);
+        changeLogic.doDelete(clazz.getSimpleName(), serviceId);
         // delete item
       }
       // remove uri so only those that must be created remain
@@ -567,13 +555,13 @@ public class ImportLogic {
   /**
    * Throws error if Main_resource with same uri and version exists.
    */
-  private void sameUriWithVersionExists(String uri, String version, JsonObject jsonObject, AuthInfo user)
+  private void sameUriWithVersionExists(String uri, String version, JsonObject jsonObject)
       throws RihaRestException {
     // check if given uri with given version already exists?
     List<FilterComponent> versionNameAlreadyUsed = Arrays.asList(
         new FilterComponent("uri", "=", uri), new FilterComponent("version", "=", version));
     List<ObjectNode> itemsWithSameVersion = changeLogic.doGetMany(Main_resource.class, null, null,
-        versionNameAlreadyUsed, null, null, user);
+        versionNameAlreadyUsed, null, null);
     Validator.versionMustBeDifferent(itemsWithSameVersion, uri, version, jsonObject);
   }
 }

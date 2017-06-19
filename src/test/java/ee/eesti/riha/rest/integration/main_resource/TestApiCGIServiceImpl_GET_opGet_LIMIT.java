@@ -26,7 +26,6 @@ import com.google.gson.JsonObject;
 
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
 import ee.eesti.riha.rest.error.ErrorCodes;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.integration.IntegrationTestHelper;
@@ -195,8 +194,6 @@ public class TestApiCGIServiceImpl_GET_opGet_LIMIT<T> {
   @Ignore("Using fake")
   @Test
   public void testGetList_with3rdPartyAuthValidation_expectCantConnect() throws IOException {
-    // turn off fake validation
-    serviceUnderTest.setAuthService(null);
     String path = pathToUse;
     Response response = serviceUnderTest.getCGI(Finals.GET, path, "testToken", null, null, null, null, null);
     // TODO currently expect that 3rd party token validation service not found
@@ -204,8 +201,5 @@ public class TestApiCGIServiceImpl_GET_opGet_LIMIT<T> {
     RihaRestError error = TestHelper.getObjectFromClient((InputStream) response.getEntity(), RihaRestError.class);
     assertEquals(ErrorCodes.CANT_CONNECT_TO_AUTH, error.getErrcode());
     assertEquals(ErrorCodes.CANT_CONNECT_TO_AUTH_MSG, error.getErrmsg());
-
-    // turn on fake validation
-    serviceUnderTest.setAuthService(new AuthServiceImpl());
   }
 }

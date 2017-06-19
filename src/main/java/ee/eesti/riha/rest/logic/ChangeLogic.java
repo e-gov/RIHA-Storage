@@ -25,7 +25,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
 import ee.eesti.riha.rest.conf.AppConfigURL;
 import ee.eesti.riha.rest.dao.GenericDAO;
 import ee.eesti.riha.rest.dao.KindRepository;
@@ -58,9 +57,6 @@ import ee.eesti.riha.rest.model.readonly.Kind;
  */
 @Component
 public class ChangeLogic<T, K> {
-
-  // @Autowired
-  // ApiGenericDAO<T, K> genericDAO;
 
   @Autowired
   SecureApiGenericDAO<T, K> secureDAO;
@@ -101,14 +97,14 @@ public class ChangeLogic<T, K> {
    * @throws RihaRestException the riha rest exception
    */
   public List<T> doGetMany(Class<T> classRepresentingTable, Integer limit, Integer offset,
-      List<FilterComponent> filterComponents, String sort, String fields, AuthInfo authInfo) throws RihaRestException {
+                           List<FilterComponent> filterComponents, String sort, String fields) throws RihaRestException {
 
     List<T> all = new ArrayList<>();
     try {
       addEscapedQuotesToJsonArray(filterComponents);
       // all = genericDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
-      all = secureDAO.find(classRepresentingTable, limit, offset, filterComponents, sort, authInfo);
-      replaceContentWithFileUrl(all, authInfo, appConfigURL.getRestApiBaseUrl());
+      all = secureDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
+      replaceContentWithFileUrl(all, appConfigURL.getRestApiBaseUrl());
       all = filterByFields(all, fields);
 
       // FileHelper.readDocumentFileToContent(all, classRepresentingTable);
@@ -234,11 +230,11 @@ public class ChangeLogic<T, K> {
    * @return the list
    * @throws RihaRestException the riha rest exception
    */
-  public List<T> doGetByMainResourceId(Class<T> classRepresentingTable, Integer id, AuthInfo authInfo)
+  public List<T> doGetByMainResourceId(Class<T> classRepresentingTable, Integer id)
       throws RihaRestException {
 
     // List<T> entityList = genericDAO.findByMainResourceId(classRepresentingTable, id);
-    List<T> entityList = secureDAO.findByMainResourceId(classRepresentingTable, id, authInfo);
+    List<T> entityList = secureDAO.findByMainResourceId(classRepresentingTable, id);
     entityList = tableEntryReadLogic.getAdjustedObjsBasedOnExpectedJson(entityList, null);
 
     // INFO: file content inclusion
@@ -257,14 +253,14 @@ public class ChangeLogic<T, K> {
    * @return the t
    * @throws RihaRestException the riha rest exception
    */
-  public T doGet(Class<T> classRepresentingTable, Integer id, String fields, AuthInfo authInfo)
+  public T doGet(Class<T> classRepresentingTable, Integer id, String fields)
       throws RihaRestException {
 
     // T entity = genericDAO.find(classRepresentingTable, id);
-    T entity = secureDAO.find(classRepresentingTable, id, authInfo);
+    T entity = secureDAO.find(classRepresentingTable, id);
     Validator.noSuchIdInGivenTable(entity, id);
 
-    replaceContentWithFileUrl(entity, id, authInfo, appConfigURL.getRestApiBaseUrl());
+    replaceContentWithFileUrl(entity, id, appConfigURL.getRestApiBaseUrl());
     entity = filterByFields(entity, fields);
 
     // FileHelper.readDocumentFileToContent(entity, classRepresentingTable);
@@ -273,22 +269,22 @@ public class ChangeLogic<T, K> {
 
   }
 
-  private void replaceContentWithFileUrl(T item, Integer id, AuthInfo authInfo, String baseUrl) {
+  private void replaceContentWithFileUrl(T item, Integer id, String baseUrl) {
     if (item.getClass() == Document.class) {
       LOG.info("IS DOCUMENT CLASS");
       Document doc = (Document) item;
       if (doc.getJson_content() != null) {
         // http://localhost:8080/rest/api/file/167369?toke=asd
-        doc.getJson_content().addProperty("content", baseUrl + "/api/file/" + id + "?token=" + authInfo.getToken());
+        doc.getJson_content().addProperty("content", baseUrl + "/api/file/" + id);
       }
     }
   }
 
-  private void replaceContentWithFileUrl(List<T> items, AuthInfo authInfo, String baseUrl) {
+  private void replaceContentWithFileUrl(List<T> items, String baseUrl) {
     for (T item : items) {
       if (item.getClass() == Document.class) {
         Document doc = (Document) item;
-        replaceContentWithFileUrl(item, doc.getDocument_id(), authInfo, baseUrl);
+        replaceContentWithFileUrl(item, doc.getDocument_id(), baseUrl);
       }
     }
   }
@@ -301,7 +297,7 @@ public class ChangeLogic<T, K> {
    * @throws RihaRestException the riha rest exception
    * @throws NumberFormatException the number format exception
    */
-  public Object doGet(QueryHolder queryHolder, AuthInfo authInfo) throws RihaRestException {
+  public Object doGet(QueryHolder queryHolder) throws RihaRestException {
 
     LOG.info("doGet");
     PathHolder pathHolder = new PathHolder(queryHolder.getPath());
@@ -312,12 +308,12 @@ public class ChangeLogic<T, K> {
       // no id means multiple
       // LOG.info(pathHolder.tableName);
       List<T> result = doGetMany(classRepresentingTable, queryHolder.getLimit(), queryHolder.getOffset(),
-          (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort(), queryHolder.getFields(), authInfo);
+          (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort(), queryHolder.getFields());
 
       return result;
     } else {
       // find by id
-      T item = doGet(classRepresentingTable, Integer.valueOf(pathHolder.id), queryHolder.getFields(), authInfo);
+      T item = doGet(classRepresentingTable, Integer.valueOf(pathHolder.id), queryHolder.getFields());
       // LOG.info("RESULT " + item);
 
       Validator.noSuchIdInGivenTable(item, Integer.valueOf(pathHolder.id));
@@ -334,7 +330,7 @@ public class ChangeLogic<T, K> {
    * @throws RihaRestException the riha rest exception
    * @throws NumberFormatException the number format exception
    */
-  public Map<String, Integer> doCount(QueryHolder queryHolder, AuthInfo authInfo) throws RihaRestException {
+  public Map<String, Integer> doCount(QueryHolder queryHolder) throws RihaRestException {
     LOG.info("doCount");
     PathHolder pathHolder = new PathHolder(queryHolder.getPath());
     Map<String, Integer> resultCount = new HashMap<>();
@@ -345,18 +341,18 @@ public class ChangeLogic<T, K> {
       LOG.info("COMPARE " + queryHolder.getLimit() + " == Finals -1");
       if (queryHolder.getLimit() == Finals.COUNT_ALL_LIMIT) {
         // count = genericDAO.findCount(classRepresentingTable);
-        count = secureDAO.findCount(classRepresentingTable, authInfo);
+        count = secureDAO.findCount(classRepresentingTable);
       } else {
         // needed for ?& operator
         addEscapedQuotesToJsonArray((List<FilterComponent>) queryHolder.getFilter());
         // count = genericDAO.findCount(classRepresentingTable, queryHolder.getLimit(), queryHolder.getOffset(),
         // (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort());
         count = secureDAO.findCount(classRepresentingTable, queryHolder.getLimit(), queryHolder.getOffset(),
-            (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort(), authInfo);
+            (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort());
       }
     } else {
       // find by id
-      T item = doGet(classRepresentingTable, Integer.valueOf(pathHolder.id), queryHolder.getFields(), authInfo);
+      T item = doGet(classRepresentingTable, Integer.valueOf(pathHolder.id), queryHolder.getFields());
       if (item == null) {
         count = 0;
       } else {
@@ -374,11 +370,10 @@ public class ChangeLogic<T, K> {
    *
    * @param json the json
    * @param classRepresentingTable the class representing table
-   * @param user the user
    * @return list of created primary keys
    * @throws RihaRestException the riha rest exception
    */
-  public List<K> doCreate(String json, Class<T> classRepresentingTable, Object user) throws RihaRestException {
+  public List<K> doCreate(String json, Class<T> classRepresentingTable) throws RihaRestException {
 
     List<K> createdKeys = new ArrayList<>();
 
@@ -390,7 +385,7 @@ public class ChangeLogic<T, K> {
       LOG.info("CREATE MULTIPLE JSON ARRAY");
       // expect every json to be parsed as success or error
       List<JsonParseData> jsonMappedToParseResult = tableEntryCreateLogic.parseEveryJsonInArrayToObjOfDestinationClass(
-          json, classRepresentingTable, user);
+          json, classRepresentingTable);
       List<JsonParseData> jsonToParsedOKObjList = new ArrayList<>();
       List<JsonParseData> jsonToErrorList = new ArrayList<>();
       // separate error and success data
@@ -411,7 +406,7 @@ public class ChangeLogic<T, K> {
           FileHelper.writeDocumentContentToFile(item);
           // List<K> createdKey = genericDAO.create(item);
           Validator.infosystemMustHaveFields(item, kindRepository);
-          List<K> createdKey = secureDAO.create(item, (AuthInfo) user);
+          List<K> createdKey = secureDAO.create(item);
           createdKeys.add(createdKey.get(0));
         } catch (Exception e) {
           // if unsuccessful, then store error
@@ -441,7 +436,7 @@ public class ChangeLogic<T, K> {
 
     } else {
 
-      T item = (T) tableEntryCreateLogic.jsonToObjOfType(json, classRepresentingTable, user);
+      T item = (T) tableEntryCreateLogic.jsonToObjOfType(json, classRepresentingTable);
       if (item instanceof RihaRestError) {
         throw new RihaRestException(item);
       }
@@ -451,7 +446,7 @@ public class ChangeLogic<T, K> {
 
         Validator.infosystemMustHaveFields(item, kindRepository);
         // createdKeys = genericDAO.create(item);
-        createdKeys = secureDAO.create(item, (AuthInfo) user);
+        createdKeys = secureDAO.create(item);
 
       } catch (RihaRestException e) {
         throw e;
@@ -475,14 +470,12 @@ public class ChangeLogic<T, K> {
    * @param classRepresentingTable the class representing table
    * @param id primary key used only if is not array
    * @param idFieldName name of field by which the updates will be made, only used is is array
-   * @param user the user
    * @return number of changed rows
    * @throws ReflectiveOperationException the reflective operation exception
    * @throws RihaRestException the riha rest exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public Map<String, Integer> doUpdate(String json, Class<T> classRepresentingTable, Integer id, String idFieldName,
-      Object user) throws ReflectiveOperationException, RihaRestException, IOException {
+  public Map<String, Integer> doUpdate(String json, Class<T> classRepresentingTable, Integer id, String idFieldName) throws ReflectiveOperationException, RihaRestException, IOException {
 
     int numOfChanged = 0;
     LOG.info("JSON " + json);
@@ -496,7 +489,7 @@ public class ChangeLogic<T, K> {
       JsonArray jsonArray = (JsonArray) new JsonParser().parse(json);
       for (int i = 0; i < jsonArray.size(); i++) {
         JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
-        addModifierAndDate(jsonObject, dtJsonFormat, user);
+        addModificationDate(jsonObject, dtJsonFormat);
 
         if (classRepresentingTable != Comment.class) {
           // replace kind with kind_id
@@ -522,7 +515,7 @@ public class ChangeLogic<T, K> {
           idFieldName = Finals.KIND_ID;
         }
         // numOfChanged = genericDAO.update(itemList, idFieldName);
-        numOfChanged = secureDAO.update(itemList, idFieldName, (AuthInfo) user);
+        numOfChanged = secureDAO.update(itemList, idFieldName);
 
         // throws exception if numOfChanged has error code as result
         Validator.fieldMustExistInDatabase(numOfChanged, idFieldName);
@@ -533,7 +526,7 @@ public class ChangeLogic<T, K> {
     } else if (id != null) {
 
       JsonObject jsonObject = JsonHelper.getFromJson(json);
-      addModifierAndDate(jsonObject, dtJsonFormat, user);
+      addModificationDate(jsonObject, dtJsonFormat);
 
       if (classRepresentingTable != Comment.class) {
         replaceKindWithKindId(jsonObject);
@@ -547,7 +540,7 @@ public class ChangeLogic<T, K> {
 
       FileHelper.writeDocumentContentToFile(item);
       // numOfChanged = genericDAO.update(item, id);
-      numOfChanged = secureDAO.update(item, id, (AuthInfo) user);
+      numOfChanged = secureDAO.update(item, id);
 
     } else {
       RihaRestError error = new RihaRestError();
@@ -565,19 +558,14 @@ public class ChangeLogic<T, K> {
   }
 
   /**
-   * Adds the modifier and date.
+   * Adds modification date.
    *
    * @param asJsonObject the as json object
    * @param dateJson the date json
-   * @param user the user
    */
-  // TODO get modifier from user
-  private void addModifierAndDate(JsonObject asJsonObject, String dateJson, Object user) {
-    // asJsonObject.add(Finals.MODIFIER, new JsonPrimitive(Finals.DEFAULT_MODIFIER));
-    String idCode = ((AuthInfo) user).getUser_code();
-    asJsonObject.add(Finals.MODIFIER, new JsonPrimitive(idCode));
+  private void addModificationDate(JsonObject asJsonObject, String dateJson) {
     asJsonObject.add(Finals.MODIFIED_DATE, new JsonPrimitive(dateJson));
-    LOG.info("ADDED MODIFIER TO JSON OBJECT");
+    LOG.info("ADDED MODIFIED DATE TO JSON OBJECT");
   }
 
   /**
@@ -601,13 +589,12 @@ public class ChangeLogic<T, K> {
    * Do update.
    *
    * @param queryHolder the query holder
-   * @param user the user
    * @return the map
    * @throws ReflectiveOperationException the reflective operation exception
    * @throws RihaRestException the riha rest exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public Map<String, Integer> doUpdate(QueryHolder queryHolder, Object user) throws ReflectiveOperationException,
+  public Map<String, Integer> doUpdate(QueryHolder queryHolder) throws ReflectiveOperationException,
       RihaRestException, IOException {
 
     PathHolder pathHolder = new PathHolder(queryHolder.getPath());
@@ -619,7 +606,7 @@ public class ChangeLogic<T, K> {
 
     Integer id = pathHolder.id != null ? Integer.valueOf(pathHolder.id) : null;
     String dataJson = queryHolder.getData().toString();
-    Map<String, Integer> updatedResult = doUpdate(dataJson, classRepresentingTable, id, idFieldName, user);
+    Map<String, Integer> updatedResult = doUpdate(dataJson, classRepresentingTable, id, idFieldName);
     return updatedResult;
 
   }
@@ -632,7 +619,7 @@ public class ChangeLogic<T, K> {
    * @throws RihaRestException the riha rest exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public Map<String, Integer> doDelete(QueryHolder queryHolder, AuthInfo authInfo) throws RihaRestException,
+  public Map<String, Integer> doDelete(QueryHolder queryHolder) throws RihaRestException,
       IOException {
 
     LOG.info("DO DELETE QUERYHOLDER");
@@ -645,11 +632,11 @@ public class ChangeLogic<T, K> {
 
     } else if (pathHolder.id != null && !pathHolder.id.isEmpty()) {
 
-      deletedResult = doDelete(pathHolder.tableName, Integer.valueOf(pathHolder.id), authInfo);
+      deletedResult = doDelete(pathHolder.tableName, Integer.valueOf(pathHolder.id));
 
     } else {
 
-      deletedResult = deleteByField(queryHolder, pathHolder, authInfo);
+      deletedResult = deleteByField(queryHolder, pathHolder);
 
     }
 
@@ -665,7 +652,7 @@ public class ChangeLogic<T, K> {
    * @return the map
    * @throws RihaRestException the riha rest exception
    */
-  private Map<String, Integer> deleteByField(QueryHolder queryHolder, PathHolder pathHolder, AuthInfo authInfo)
+  private Map<String, Integer> deleteByField(QueryHolder queryHolder, PathHolder pathHolder)
       throws RihaRestException {
     Map<String, Integer> deletedResult = null;
     Set<Entry<String, JsonElement>> entrySet = queryHolder.getAsJson().getAsJsonObject().entrySet();
@@ -674,7 +661,7 @@ public class ChangeLogic<T, K> {
       if (!StringHelper.contains(entry.getKey(), Finals.KNOWN_PARAMETERS)) {
         // entry.getKey() is the field name
         try {
-          deletedResult = doDelete(pathHolder.tableName, entry.getKey(), entry.getValue(), authInfo);
+          deletedResult = doDelete(pathHolder.tableName, entry.getKey(), entry.getValue());
         } catch (RihaRestException e) {
           Object err = e.getError();
           if (err instanceof RihaRestError) {
@@ -706,7 +693,7 @@ public class ChangeLogic<T, K> {
    * @return the map
    * @throws RihaRestException the riha rest exception
    */
-  private Map<String, Integer> doDelete(String tableName, String key, JsonElement value, AuthInfo authInfo)
+  private Map<String, Integer> doDelete(String tableName, String key, JsonElement value)
       throws RihaRestException {
 
     LOG.info("DO Delete");
@@ -732,7 +719,7 @@ public class ChangeLogic<T, K> {
       int numOfDeleted = 0;
       try {
         // numOfDeleted = genericDAO.delete(tableName, key, values);
-        numOfDeleted = secureDAO.delete(tableName, key, values, authInfo);
+        numOfDeleted = secureDAO.delete(tableName, key, values);
 
         Validator.fieldMustExistInDatabase(numOfDeleted, key);
       } catch (SQLGrammarException e) {
@@ -772,12 +759,12 @@ public class ChangeLogic<T, K> {
    * @return the map
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public Map<String, Integer> doDelete(String tableName, Integer id, AuthInfo authInfo) throws IOException,
+  public Map<String, Integer> doDelete(String tableName, Integer id) throws IOException,
       RihaRestException {
 
     Class<T> clazz = Finals.getClassRepresentingTable(tableName);
     // int numOfDeleted = genericDAO.delete(clazz, id);
-    int numOfDeleted = secureDAO.delete(clazz, id, authInfo);
+    int numOfDeleted = secureDAO.delete(clazz, id);
 
     if ((Class<T>) Finals.getClassRepresentingTable(tableName) == Document.class) {
       LOG.info("IS DOCUMENT");
@@ -818,9 +805,8 @@ public class ChangeLogic<T, K> {
   /**
    * Parses the json array.
    *
-   * @param <T> the generic type
    * @param value the value
-   * @return the t[]
+   * @return generic type
    */
   private T[] parseJsonArray(JsonElement value) {
 
@@ -843,7 +829,7 @@ public class ChangeLogic<T, K> {
    * @param queryHolder the query holder
    * @return the map
    */
-  public Map<String, Map<String, String>> doGetNames(QueryHolder queryHolder, AuthInfo authInfo) {
+  public Map<String, Map<String, String>> doGetNames(QueryHolder queryHolder) {
     Map<String, Map<String, String>> names = new HashMap<>();
     JsonObject queryObject = queryHolder.getAsJson().getAsJsonObject();
     JsonArray organizations = (JsonArray) queryObject.get("organizations");

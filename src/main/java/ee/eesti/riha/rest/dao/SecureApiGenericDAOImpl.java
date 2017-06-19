@@ -11,17 +11,14 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
 import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.error.RihaRestException;
-import ee.eesti.riha.rest.logic.AuthInfoCreator;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.TableEntryCreateLogic;
 import ee.eesti.riha.rest.logic.Validator;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.logic.util.StringHelper;
 import ee.eesti.riha.rest.model.BaseModel;
-import ee.eesti.riha.rest.security.EntityAccessFilter;
 
 @Component
 public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> {
@@ -29,47 +26,29 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
   @Autowired
   private ApiGenericDAO<T, K> genericDAO;
 
-  @Autowired
-  private AuthInfoCreator authInfoCreator;
-
-  @Autowired
-  private EntityAccessFilter<T> entityFilter;
-
   private static final Logger LOG = LoggerFactory.getLogger(SecureApiGenericDAOImpl.class);
-
-  // LOGIC
-  // get Main_resource if Main_resource or by main_resource_id if other table
-  // get kindId from main_resource
-  // get access restriction from main_resource
-  // get access restrictions from parent main_resources
-  // get max access restriction
-  // get Role_rights: DEFAULT, AUTHENTICATED, authInfo.getRoll()
-  // filter Role_rights by kindId && accessRestriction
-  // calculate Role_right from role_Rights
-  // call canCreate(<Calculated Role_right>, <AuthInfo>, <Main_resource owner>}
 
   @Override
   public List<T> find(Class<T> clazz, Integer limit, Integer offset, List<FilterComponent> filterComponents,
-      String sort, AuthInfo authInfo) throws RihaRestException {
+                      String sort) throws RihaRestException {
     System.out.println("FIND MANY");
 
     return genericDAO.find(clazz, limit, offset, filterComponents, sort);
   }
 
   @Override
-  public T find(Class<T> clazz, Integer id, AuthInfo authInfo) throws RihaRestException {
+  public T find(Class<T> clazz, Integer id) throws RihaRestException {
 
     T item = genericDAO.find(clazz, id);
     if (item == null) {
       return null;
     }
 
-    entityFilter.canRead(item, authInfo);
     return item;
   }
 
   @Override
-  public List<T> findByMainResourceId(Class<T> clazz, Integer id, AuthInfo authInfo) throws RihaRestException {
+  public List<T> findByMainResourceId(Class<T> clazz, Integer id) throws RihaRestException {
 
     // main_resource is already checked on higher level that it may be read (ServicLogic.getResourceById)
 
@@ -79,7 +58,7 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
   @Override
   // TODO Milleks limit, offset ja sort siin?
   public Integer findCount(Class<T> clazz, Integer limit, Integer offset, List<FilterComponent> filterComponents,
-      String sort, AuthInfo authInfo) throws RihaRestException {
+                           String sort) throws RihaRestException {
 
     if (limit != null && limit == 0) {
       // special case for count
@@ -90,34 +69,32 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
   }
 
   @Override
-  public Integer findCount(Class<T> clazz, AuthInfo authInfo) throws RihaRestException {
+  public Integer findCount(Class<T> clazz) throws RihaRestException {
 
     return genericDAO.findCount(clazz);
   }
 
   @Override
-  public List<K> create(T object, AuthInfo authInfo) throws RihaRestException {
+  public List<K> create(T object) throws RihaRestException {
 
     System.out.println("CREATE " + JsonHelper.GSON.toJson(object));
     Validator.documentMustHaveReference(object);
-    entityFilter.canCreate(object, authInfo);
 
     return genericDAO.create(object);
   }
 
   @Override
-  public List<K> create(List<T> objects, AuthInfo authInfo) throws RihaRestException {
+  public List<K> create(List<T> objects) throws RihaRestException {
 
     for (T object : objects) {
       Validator.documentMustHaveReference(object);
-      entityFilter.canCreate(object, authInfo);
     }
 
     return genericDAO.create(objects);
   }
 
   @Override
-  public int update(T object, Integer id, AuthInfo authInfo) throws RihaRestException {
+  public int update(T object, Integer id) throws RihaRestException {
 
     System.out.println("CLASS " + object.getClass());
     T old = genericDAO.find((Class<T>) object.getClass(), id);
@@ -127,13 +104,12 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
       e.printStackTrace();
       return 0;
     }
-    entityFilter.canUpdate(old, authInfo);
 
     return genericDAO.update(object, id);
   }
 
   @Override
-  public int update(List<T> objects, String idFieldName, AuthInfo authInfo) throws NoSuchFieldException,
+  public int update(List<T> objects, String idFieldName) throws NoSuchFieldException,
       SecurityException, IllegalArgumentException, IllegalAccessException, RihaRestException {
 
     for (T object : objects) {
@@ -143,9 +119,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
       if (je != null && !je.isJsonNull() && je.isJsonPrimitive()) {
         FilterComponent fc = new FilterComponent(idFieldName, "=", je.getAsString());
         List<T> existing = genericDAO.find((Class<T>) object.getClass(), null, null, Arrays.asList(fc), null);
-        for (T item : existing) {
-          entityFilter.canUpdate(item, authInfo);
-        }
       }
     }
 
@@ -153,7 +126,7 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
   }
 
   @Override
-  public int delete(Class<T> clazz, Integer id, AuthInfo authInfo) throws RihaRestException {
+  public int delete(Class<T> clazz, Integer id) throws RihaRestException {
 
     T old = genericDAO.find(clazz, id);
     try {
@@ -163,13 +136,11 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
       return 0;
     }
 
-    entityFilter.canDelete(old, authInfo);
-
     return genericDAO.delete(clazz, id);
   }
 
   @Override
-  public int delete(String tableName, String key, Object[] values, AuthInfo authInfo) throws RihaRestException {
+  public int delete(String tableName, String key, Object[] values) throws RihaRestException {
 
     Class<T> clazz = Finals.getClassRepresentingTable(tableName);
 
@@ -180,9 +151,6 @@ public class SecureApiGenericDAOImpl<T, K> implements SecureApiGenericDAO<T, K> 
     for (Object value : values) {
       FilterComponent fc = new FilterComponent(key, "=", value + "");
       List<T> toBeDeleted = genericDAO.find(clazz, null, null, Arrays.asList(fc), null);
-      for (T item : toBeDeleted) {
-        entityFilter.canDelete(item, authInfo);
-      }
     }
 
     return genericDAO.delete(tableName, key, values);

@@ -12,9 +12,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import ee.eesti.riha.rest.auth.AuthService;
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
-
 /**
  * This class contains all allowed rest resource paths that are following classical approach.
  * 
@@ -106,23 +103,5 @@ public interface ApiClassicService {
   // getters and setters won't work without being a service themselves
   // this is needed to use fake AuthService in integration tests
   // TODO find if better solution exists, maybe ignore those paths?
-
-  /**
-   * Getter needed for integration tests.
-   *
-   * @return the auth service
-   */
-  @Path("/not/to/be/called/by/url")
-  @GET
-  AuthService getAuthService();
-
-  /**
-   * Setter needed for integration tests.
-   *
-   * @param authService the new auth service
-   */
-  @Path("/not/to/be/called/by/url2")
-  @GET
-  void setAuthService(@QueryParam(value = "authService") AuthServiceImpl authService);
 
 }
