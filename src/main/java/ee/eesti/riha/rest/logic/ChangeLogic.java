@@ -405,7 +405,6 @@ public class ChangeLogic<T, K> {
           T item = (T) parseDate.getResult();
           FileHelper.writeDocumentContentToFile(item);
           // List<K> createdKey = genericDAO.create(item);
-          Validator.infosystemMustHaveFields(item, kindRepository);
           List<K> createdKey = secureDAO.create(item);
           createdKeys.add(createdKey.get(0));
         } catch (Exception e) {
@@ -444,7 +443,6 @@ public class ChangeLogic<T, K> {
       try {
         FileHelper.writeDocumentContentToFile(item);
 
-        Validator.infosystemMustHaveFields(item, kindRepository);
         // createdKeys = genericDAO.create(item);
         createdKeys = secureDAO.create(item);
 

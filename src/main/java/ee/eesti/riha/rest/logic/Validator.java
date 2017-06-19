@@ -416,23 +416,6 @@ public class Validator extends Exception {
   }
 
   /**
-   * Main_resource of kind "infosystem" has special fields that must not be null.
-   * 
-   * @param item
-   * @throws RihaRestException
-   */
-  public static <T> void infosystemMustHaveFields(T item, KindRepository kindRepository) throws RihaRestException {
-    if (item.getClass() == Main_resource.class) {
-      Main_resource mr = (Main_resource) item;
-      Kind kind = kindRepository.getById(mr.getKind_id());
-      if (kind.getName().equals(Finals.INFOSYSTEM)) {
-        String[] reqPars = {"short_name", "infosystem_status"};
-        cantHaveMissingReqParsInJson(reqPars, mr.getJson_content().toString());
-      }
-    }
-  }
-
-  /**
    * Document must exist.
    *
    * @param file the file

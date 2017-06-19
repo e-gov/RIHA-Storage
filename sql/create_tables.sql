@@ -99,11 +99,11 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.kind TO riha;
 CREATE TABLE riha.main_resource
 (
   main_resource_id integer NOT NULL, -- Ressursi unikaalne ID. Iga uus versioon saab uue ID. Kõige väiksema ID-ga ressurss on hetkel aktuaalne
-  uri character varying(150) NOT NULL, -- Ressursi unikaalne URI. Sellega määratakse millised on samad aga erineva versiooniga ressursid ressursside tabelis
-  name character varying(190) NOT NULL, -- Ressursi nimetus
-  owner character varying(150) NOT NULL, -- Ressursi omanik. Tavapäraselt ettevõtte registrikood. Infosüsteemi mõttes vastutav isik.
+  uri character varying(150), -- Ressursi unikaalne URI. Sellega määratakse millised on samad aga erineva versiooniga ressursid ressursside tabelis
+  name character varying(190), -- Ressursi nimetus
+  owner character varying(150), -- Ressursi omanik. Tavapäraselt ettevõtte registrikood. Infosüsteemi mõttes vastutav isik.
   short_name character varying(50), -- Ressursi lühinimetus
-  version character varying(10) NOT NULL, -- Inimloetav versiooni nimi. See ei ühti infosüsteemi versiooni nimetusega
+  version character varying(10), -- Inimloetav versiooni nimi. See ei ühti infosüsteemi versiooni nimetusega
   json_content jsonb, -- Ressursi kirjelduse täisinfo esitatuna json struktuurina (sisaldab ka eraldi väljadena toodud andmed).
   parent_uri character varying(150), -- Hierarhilise ressursi puhul on siin näidatud vanema URI
   main_resource_parent_id integer, -- Hierarhilise ressursi puhul on siin näidatud vanema ID
@@ -112,18 +112,15 @@ CREATE TABLE riha.main_resource
   state character(1), -- Ressursi olek (C-current, O-old, T-temporary, D-deleted jms.) Vaikimisi 'C'.
   start_date timestamp without time zone, -- Käesoleva versiooni kehtivuse algus
   end_date timestamp without time zone, -- Käesoleva versiooni kehtivuse lõpp
-  creator character varying(150) NOT NULL, -- Kirje loonud isiku isikukood või muu identifikaator
+  creator character varying(150), -- Kirje loonud isiku isikukood või muu identifikaator
   modifier character varying(150), -- Viimati kirjet muutnud isiku isikukood või muu identifikaator
-  creation_date timestamp without time zone NOT NULL, -- Kirje loomise ajahetk.
+  creation_date timestamp without time zone, -- Kirje loomise ajahetk.
   modified_date timestamp without time zone, -- Kirje viimati muutmise ajahetk.
   old_id integer,
   field_name character varying(150),
   kind_id integer, -- Ressursi liik (infosystem, classifier, service, dictionary, xmlresource vms.).
   main_resource_template_id integer,
   CONSTRAINT pk_main_resource PRIMARY KEY (main_resource_id),
-  CONSTRAINT fk_kind FOREIGN KEY (kind_id)
-  REFERENCES riha.kind (kind_id) MATCH SIMPLE
-  ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT fk_main_resource_main_resource_02 FOREIGN KEY (main_resource_template_id)
   REFERENCES riha.main_resource (main_resource_id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE NO ACTION

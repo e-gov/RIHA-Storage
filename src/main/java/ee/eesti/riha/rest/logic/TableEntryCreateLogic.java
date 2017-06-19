@@ -136,41 +136,9 @@ public class TableEntryCreateLogic<T> {
     // expect json_content
     JsonObject jsonContent = JsonHelper.getFromJson(json);
 
-    String[] reqPars = {"kind_id" };
-    List<String> missingRequiredPars = collectMissingProperties(reqPars, jsonContent);
-    if (missingRequiredPars.size() > 0) {
-      // First we try to find kind_d based by kind parameter, if this exists:
-      if (jsonContent.has("kind")) {
-        String name = jsonContent.get("kind").getAsString();
-        Kind kind = kindRepository.getByName(name);
-        if (kind == null) {
-          throw new IllegalArgumentException("No kind exists with name: " + name);
-        }
-        jsonContent.addProperty("kind_id", kind.getKind_id());
-
-        // don't save kind to database (will be removed from table soon)
-        jsonContent.add("kind", JsonNull.INSTANCE);
-      } else {
-        return (T) requiredParsMissing(missingRequiredPars, json);
-      }
-    }
-
     Integer pkId = utilitiesDAO.getNextSeqValForPKForTable(classRepresentingTable);
 
-    if (!jsonContent.has("uri") || jsonContent.get("uri").isJsonNull()) {
-      int kindId = jsonContent.get("kind_id").getAsInt();
-      Kind kind = kindRepository.getById(kindId);
-      if (kind == null) {
-        throw new IllegalArgumentException("No kind exists with kind_id: " + kindId);
-      }
-      String kindName = kind.getName();
-      String generatedUri = URI.constructUri(kindName, pkId);
-      // jsonContent must also contain uri
-      jsonContent.addProperty("uri", generatedUri);
-    }
-
     return fromJsonToObjHelper(jsonContent, pkId, classRepresentingTable);
-
   }
 
   /**
