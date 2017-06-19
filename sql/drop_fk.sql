@@ -1,4 +1,3 @@
-alter table riha.role_right drop constraint fk_role_rights_kind;
 alter table riha.main_resource drop constraint fk_kind;
 alter table riha.main_resource drop constraint fk_main_resource_main_resource_02;
 alter table riha.data_object drop constraint fk_data_object_data_object;

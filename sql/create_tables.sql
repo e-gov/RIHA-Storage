@@ -58,19 +58,6 @@ START 436069
 CACHE 1;
 GRANT SELECT, USAGE ON SEQUENCE riha.main_resource_seq TO riha;
 
--- Sequence: riha.role_right_seq
-
--- DROP SEQUENCE riha.role_right_seq;
-
-CREATE SEQUENCE riha.role_right_seq
-INCREMENT 1
-MINVALUE 1
-MAXVALUE 9223372036854775807
-START 338
-CACHE 1;
-GRANT SELECT, USAGE ON SEQUENCE riha.role_right_seq TO riha;
-
-
 -- Table: riha.kind
 
 -- DROP TABLE riha.kind;
@@ -104,50 +91,6 @@ COMMENT ON COLUMN riha.kind.creation_date IS 'Kirje loomise ajamoment';
 COMMENT ON COLUMN riha.kind.modified_date IS 'Kirje muutmise ajamoment';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.kind TO riha;
-
--- Table:fdsfdsff riha.role_right
-
--- DROP TABLE riha.role_right;
-
-CREATE TABLE riha.role_right
-(
-  role_right_id integer NOT NULL,
-  kind_id integer NOT NULL, -- Objekti liik, millele antud õigus rakendub.
-  role_name character varying(50) NOT NULL, -- Rolli nimi, mille korral antud õigus kehtib.
-  access_restriction integer NOT NULL, -- Juurdepääsupiirang, mille suhtes õigus rakendub. Kui väärtus on võrdne või suurem objekti vastava välja väärtusest, siis rakendub antud õigus sellele objektile.
-  read integer NOT NULL, -- 0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes
-  "create" integer NOT NULL, -- 0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes
-  update integer NOT NULL, -- 0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes
-  delete integer NOT NULL, -- 0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes
-  CONSTRAINT pk_user_rights PRIMARY KEY (role_right_id),
-  CONSTRAINT fk_role_rights_kind FOREIGN KEY (kind_id)
-  REFERENCES riha.kind (kind_id) MATCH SIMPLE
-  ON UPDATE NO ACTION ON DELETE NO ACTION
-)
-WITH (
-OIDS=FALSE
-);
-COMMENT ON COLUMN riha.role_right.kind_id IS 'Objekti liik, millele antud õigus rakendub.';
-COMMENT ON COLUMN riha.role_right.role_name IS 'Rolli nimi, mille korral antud õigus kehtib.';
-COMMENT ON COLUMN riha.role_right.access_restriction IS 'Juurdepääsupiirang, mille suhtes õigus rakendub. Kui väärtus on võrdne või suurem objekti vastava välja väärtusest, siis rakendub antud õigus sellele objektile.';
-COMMENT ON COLUMN riha.role_right.read IS '0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes';
-COMMENT ON COLUMN riha.role_right."create" IS '0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes';
-COMMENT ON COLUMN riha.role_right.update IS '0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes';
-COMMENT ON COLUMN riha.role_right.delete IS '0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.role_right TO riha;
-
--- Index: riha.ixfk_user_rights_kind
-
--- DROP INDEX riha.ixfk_user_rights_kind;
-
-CREATE INDEX ixfk_user_rights_kind
-  ON riha.role_right
-  USING btree
-  (kind_id);
-
-
-
 
 -- Table: riha.main_resource
 

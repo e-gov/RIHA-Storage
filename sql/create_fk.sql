@@ -1,7 +1,3 @@
-alter table riha.role_right add CONSTRAINT fk_role_rights_kind FOREIGN KEY (kind_id)
-REFERENCES riha.kind (kind_id) MATCH SIMPLE
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-
 alter table riha.main_resource add CONSTRAINT fk_kind FOREIGN KEY (kind_id)
 REFERENCES riha.kind (kind_id) MATCH SIMPLE
 ON UPDATE NO ACTION ON DELETE NO ACTION;
