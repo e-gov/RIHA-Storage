@@ -707,7 +707,6 @@ public class TestApiGenericDAOMain_resource<T, K> {
     main_resource.setMain_resource_id(utilitiesDAO.getNextSeqValForPKForTable((Class<T>) Main_resource.class));
     main_resource.setUri("uri");
     main_resource.setName(EXAMPLE_NAME);
-    main_resource.setOwner("owner");
     main_resource.setVersion("1.1");
     main_resource.setKind("infosystem");
     // TODO change, currently infosystem kind_id = 389

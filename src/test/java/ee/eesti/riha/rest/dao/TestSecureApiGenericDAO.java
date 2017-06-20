@@ -119,7 +119,6 @@ public class TestSecureApiGenericDAO<T, K> {
   @Test
   public void testCreate() throws RihaRestException {
     Main_resource mr = createTestMain_resource();
-    mr.setOwner("ORG");
     additionalMrTestEntries.add(mr);
     List<K> keys = secureGenericDAO.create((T) mr);
     System.out.println(keys);
@@ -131,7 +130,6 @@ public class TestSecureApiGenericDAO<T, K> {
   @Test
   public void testCreateList() throws RihaRestException {
     Main_resource mr = createTestMain_resource();
-    mr.setOwner("ORG");
     additionalMrTestEntries.add(mr);
     List<K> keys = secureGenericDAO.create((List<T>)Arrays.asList(mr));
     System.out.println(keys);
@@ -143,7 +141,6 @@ public class TestSecureApiGenericDAO<T, K> {
   @Test(expected=RihaRestException.class)
   public void testCreateListFail() throws RihaRestException {
     Main_resource mr = createTestMain_resource();
-    mr.setOwner("ORG");
     additionalMrTestEntries.add(mr);
     List<K> keys = secureGenericDAO.create((List<T>)Arrays.asList(mr));
     System.out.println(keys);
@@ -228,7 +225,6 @@ public class TestSecureApiGenericDAO<T, K> {
   
   public Main_resource createSimpleTestMain_resource(Main_resource old) {
     Main_resource mr = new Main_resource();
-    mr.setOwner("ORG");
     mr.setName(EXAMPLE_NAME);
     mr.setKind_id(old.getKind_id());
     mr.setVersion(old.getVersion());
@@ -247,7 +243,6 @@ public class TestSecureApiGenericDAO<T, K> {
     main_resource.setMain_resource_id(utilitiesDAO.getNextSeqValForPKForTable((Class<T>) Main_resource.class));
     main_resource.setUri("uri");
     main_resource.setName(EXAMPLE_NAME);
-    main_resource.setOwner("owner");
     main_resource.setVersion("1.1");
     main_resource.setKind("infosystem");
     // TODO change, currently infosystem kind_id = 389
