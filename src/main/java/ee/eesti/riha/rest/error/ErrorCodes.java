@@ -113,7 +113,7 @@ public final class ErrorCodes {
   public static final String CONSTRAINT_VIOLATION_MSG = "Andmeväli ei vasta nõutud tingimustele";
   public static final int SQL_NO_SUCH_OPERATOR_EXISTS = 73;
   public static final String SQL_NO_SUCH_OPERATOR_EXISTS_MSG = "Op peab olema "
-      + "(=, >, <, >=, <=, !=, <>, like, ilike, ?&, null_or_>, isnull, isnotnull), aga on: ";
+      + "(=, >, <, >=, <=, !=, <>, like, ilike, ?&, null_or_>, isnull, isnotnull, jilike), aga on: ";
   public static final int CAN_UPDATE_VERSION_HERE = 74;
   public static final String CAN_UPDATE_VERSION_HERE_MSG = "Versiooni ei ole võimalik selle meetodiga muuta";
 

@@ -149,7 +149,15 @@ public class SqlFilter {
             + " IS NULL )");
 
         params.put(opRight + i, Double.valueOf(fc.getOperandRight()).intValue());
+      } else if (fc.getOperator().equals("jilike")) {
+        String updatedOperandLeft = fc.getOperandLeft().replaceAll("\\.", ",");
+        String jsonFieldName = "{" + updatedOperandLeft + "}";
 
+        String jsonFieldNameParameter = "jField" + i;
+        allFilters.add("(item." + Finals.JSON_CONTENT + " #>> " + ":" + jsonFieldNameParameter + "\\:\\:text[]) ilike :" + (opRight + i));
+
+        params.put(jsonFieldNameParameter, jsonFieldName);
+        params.put(opRight + i, fc.getOperandRight());
       } else if (StringHelper.isNumber(fc.getOperandRight())) {
         jsonField = Finals.JSON_CONTENT + "->>" + "'" + fc.getOperandLeft() + "'";
         allFilters.add("cast(item." + jsonField + " AS int) " + fc.getOperator() + " :" + (opRight + i));
