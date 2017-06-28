@@ -26,9 +26,6 @@
 				<bean
 					class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"
 					name="kinds" />
-				<bean
-					class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"
-					name="role_rights" />
 			</set>
 		</property>
 	</bean>

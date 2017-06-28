@@ -1,25 +1,16 @@
 package ee.eesti.riha.rest.dao;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.math.BigInteger;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.Table;
-import javax.transaction.Transactional;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import ee.eesti.riha.rest.dao.util.*;
+import ee.eesti.riha.rest.error.RihaRestException;
+import ee.eesti.riha.rest.logic.Finals;
+import ee.eesti.riha.rest.logic.MyExceptionHandler;
+import ee.eesti.riha.rest.logic.Validator;
+import ee.eesti.riha.rest.logic.util.*;
+import ee.eesti.riha.rest.model.BaseModel;
+import ee.eesti.riha.rest.model.Document;
+import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -33,27 +24,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
-import ee.eesti.riha.rest.dao.util.DaoHelper;
-import ee.eesti.riha.rest.dao.util.FieldTypeHolder;
-import ee.eesti.riha.rest.dao.util.FilterComponent;
-import ee.eesti.riha.rest.dao.util.OrderByData;
-import ee.eesti.riha.rest.dao.util.SqlFilter;
-import ee.eesti.riha.rest.error.RihaRestException;
-import ee.eesti.riha.rest.logic.Finals;
-import ee.eesti.riha.rest.logic.MyExceptionHandler;
-import ee.eesti.riha.rest.logic.Validator;
-import ee.eesti.riha.rest.logic.util.FileHelper;
-import ee.eesti.riha.rest.logic.util.JsonContentBasedTable;
-import ee.eesti.riha.rest.logic.util.JsonFieldHelper;
-import ee.eesti.riha.rest.logic.util.JsonHelper;
-import ee.eesti.riha.rest.logic.util.StringHelper;
-import ee.eesti.riha.rest.logic.util.Tuple;
-import ee.eesti.riha.rest.model.BaseModel;
-import ee.eesti.riha.rest.model.Document;
-import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
+import javax.persistence.Table;
+import javax.transaction.Transactional;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
+import java.text.ParseException;
+import java.util.*;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -902,11 +884,17 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
   }
 
   /**
-   * Searches if any row has json_content which has the field key.
+   * Searches if any row has json_content which has the field key. Key may be represent deeper level json key by using
+   * dots in the key name. In order to check existence of the key, separate key to tokens and construct correct query
+   * with nested key tokens. Additionally, for security reasons, avoid adding plain text keys to the native query.
+   * Resulting query with key owner.name will look like:
+   * <pre>
+   * ... where (json_content-> :keyToken0\:\:text -> :keyToken1\:\:text) is not null
+   * </pre>, where parameters keyToken0 and keyToken1 will be 'owner' and 'name' respectively.
    *
-   * @param session the session
+   * @param session   the session
    * @param tableName the table name
-   * @param key the key
+   * @param key       the key
    * @return true if exists
    */
   private boolean jsonFieldExists(Session session, String tableName, String key) {
@@ -921,8 +909,28 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     }
     // select count(*) from main_resource
     // where (json_content->'test_abc') is not null;
-    Query q = session.createSQLQuery("select count(*) from " + tableName + " where (json_content->'" + key
-        + "') is not null;");
+
+    // Construct SQL query respecting nested keys
+    String[] keyTokens = StringUtils.split(key, ".");
+    if (keyTokens.length == 0) {
+      return false;
+    }
+
+    // Create indexed key token list and parameters for the query
+    List<String> conditionTokens = new ArrayList<>();
+    Map<String, String> parameters = new HashMap<>();
+    for (int i = 0; i < keyTokens.length; i++) {
+      String keyTokenParameterName = "keyToken" + i;
+      conditionTokens.add(":" + keyTokenParameterName + "\\:\\:text");
+      parameters.put(keyTokenParameterName, keyTokens[i]);
+    }
+
+    // Create native SQL query with key tokens
+    Query q = session.createSQLQuery("select count(*) from " + tableName +
+                                             " where (" + Finals.JSON_CONTENT + "->" +
+                                             StringUtils.join(conditionTokens, "->") +
+                                             ") is not null;");
+    q.setProperties(parameters);
     int rowCount = ((BigInteger) q.uniqueResult()).intValue();
     return rowCount > 0;
   }

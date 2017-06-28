@@ -15,7 +15,6 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
 import ee.eesti.riha.rest.dao.GenericDAO;
 import ee.eesti.riha.rest.dao.KindRepository;
 import ee.eesti.riha.rest.dao.UtilitiesDAO;
@@ -56,12 +55,10 @@ public class TableEntryCreateLogic<T> {
    *
    * @param json array containting elements to be parsed
    * @param classRepresentingTable given object type/table to parse every json element
-   * @param user the user
    * @return list containing objects that hold json element parsed with parse result
    * @throws RihaRestException the riha rest exception
    */
-  public List<JsonParseData> parseEveryJsonInArrayToObjOfDestinationClass(String json, Class<T> classRepresentingTable,
-      Object user) throws RihaRestException {
+  public List<JsonParseData> parseEveryJsonInArrayToObjOfDestinationClass(String json, Class<T> classRepresentingTable) throws RihaRestException {
 
     List<JsonParseData> resultingParseResults = new ArrayList<>();
 
@@ -70,7 +67,7 @@ public class TableEntryCreateLogic<T> {
       List<JsonObject> fromJson = JsonHelper.GSON.fromJson(json, new TypeToken<List<JsonObject>>() {
       }.getType());
       for (JsonObject t : fromJson) {
-        T item = jsonToObjOfType(t.toString(), classRepresentingTable, user);
+        T item = jsonToObjOfType(t.toString(), classRepresentingTable);
 
         resultingParseResults.add(new JsonParseData(t.toString(), item));
 
@@ -92,11 +89,10 @@ public class TableEntryCreateLogic<T> {
    *
    * @param json the json
    * @param classRepresentingTable the class representing table
-   * @param user the user
    * @return the t
    * @throws RihaRestException the riha rest exception
    */
-  public T jsonToObjOfType(String json, Class<T> classRepresentingTable, Object user) throws RihaRestException {
+  public T jsonToObjOfType(String json, Class<T> classRepresentingTable) throws RihaRestException {
 
     T fromJson = null;
 
@@ -107,9 +103,9 @@ public class TableEntryCreateLogic<T> {
         // expect json_content and from json_content table entry will be
         // created
         if (classRepresentingTable == Comment.class) {
-          fromJson = fromJsonContentToObjForComment(json, classRepresentingTable, user);
+          fromJson = fromJsonContentToObjForComment(json, classRepresentingTable);
         } else {
-          fromJson = fromJsonContentToObj(json, classRepresentingTable, user);
+          fromJson = fromJsonContentToObj(json, classRepresentingTable);
         }
       }
 
@@ -133,61 +129,27 @@ public class TableEntryCreateLogic<T> {
    *
    * @param json the json
    * @param classRepresentingTable class representing json content based table
-   * @param user the user
    * @return the t
    */
-  public T fromJsonContentToObj(String json, Class<T> classRepresentingTable, Object user) {
+  public T fromJsonContentToObj(String json, Class<T> classRepresentingTable) {
 
     // expect json_content
     JsonObject jsonContent = JsonHelper.getFromJson(json);
 
-    String[] reqPars = {"kind_id" };
-    List<String> missingRequiredPars = collectMissingProperties(reqPars, jsonContent);
-    if (missingRequiredPars.size() > 0) {
-      // First we try to find kind_d based by kind parameter, if this exists:
-      if (jsonContent.has("kind")) {
-        String name = jsonContent.get("kind").getAsString();
-        Kind kind = kindRepository.getByName(name);
-        if (kind == null) {
-          throw new IllegalArgumentException("No kind exists with name: " + name);
-        }
-        jsonContent.addProperty("kind_id", kind.getKind_id());
-
-        // don't save kind to database (will be removed from table soon)
-        jsonContent.add("kind", JsonNull.INSTANCE);
-      } else {
-        return (T) requiredParsMissing(missingRequiredPars, json);
-      }
-    }
-
     Integer pkId = utilitiesDAO.getNextSeqValForPKForTable(classRepresentingTable);
 
-    if (!jsonContent.has("uri") || jsonContent.get("uri").isJsonNull()) {
-      int kindId = jsonContent.get("kind_id").getAsInt();
-      Kind kind = kindRepository.getById(kindId);
-      if (kind == null) {
-        throw new IllegalArgumentException("No kind exists with kind_id: " + kindId);
-      }
-      String kindName = kind.getName();
-      String generatedUri = URI.constructUri(kindName, pkId);
-      // jsonContent must also contain uri
-      jsonContent.addProperty("uri", generatedUri);
-    }
-
-    return fromJsonToObjHelper(jsonContent, pkId, classRepresentingTable, user);
-
+    return fromJsonToObjHelper(jsonContent, pkId, classRepresentingTable);
   }
 
   /**
-   * Like {@link #fromJsonContentToObj(String, Class, Object)} but is special for Comment to use kind instead of
+   * Like {@link #fromJsonContentToObj(String, Class)} but is special for Comment to use kind instead of
    * kind_id, because Comment does not have kind_id field at this point.
    *
    * @param json the json
    * @param classRepresentingTable the class representing table
-   * @param user the user
    * @return the t
    */
-  public T fromJsonContentToObjForComment(String json, Class<T> classRepresentingTable, Object user) {
+  public T fromJsonContentToObjForComment(String json, Class<T> classRepresentingTable) {
 
     // expect json_content
     JsonObject jsonContent = JsonHelper.getFromJson(json);
@@ -206,7 +168,7 @@ public class TableEntryCreateLogic<T> {
       jsonContent.addProperty("uri", generatedUri);
     }
 
-    return fromJsonToObjHelper(jsonContent, pkId, classRepresentingTable, user);
+    return fromJsonToObjHelper(jsonContent, pkId, classRepresentingTable);
 
   }
 
@@ -214,25 +176,18 @@ public class TableEntryCreateLogic<T> {
    * Helper method for code reuse.
    *
    * @param jsonContent the json content
-   * @param pk_id the pk_id
+   * @param pkId the pk_id
    * @param classRepresentingTable the class representing table
-   * @param user the user
    * @return the t
    */
-  private T fromJsonToObjHelper(JsonObject jsonContent, Integer pkId, Class<T> classRepresentingTable, Object user) {
+  private T fromJsonToObjHelper(JsonObject jsonContent, Integer pkId, Class<T> classRepresentingTable) {
     T constructedJsonObj;
     Gson gson = JsonHelper.GSON;
-
-    jsonContent.addProperty("creator", ((AuthInfo) user).getUser_code());
 
     Date dt = new Date();
     String dtJsonFormat = DateHelper.FORMATTER.format(dt);
     LOG.info(dtJsonFormat);
     jsonContent.addProperty("creation_date", dtJsonFormat);
-
-    if (!jsonContent.has("owner") || jsonContent.get("owner").isJsonNull()) {
-      jsonContent.addProperty("owner", ((AuthInfo) user).getOrg_code());
-    }
 
     // save primary key to json_content as well
     String pkFieldName = createPKFieldName(classRepresentingTable);
@@ -263,15 +218,14 @@ public class TableEntryCreateLogic<T> {
   }
 
   /**
-   * Like {@link #fromJsonContentToObj(String, Class, Object)}, but keeps existing information (e.g creation_date).
+   * Like {@link #fromJsonContentToObj(String, Class)}, but keeps existing information (e.g creation_date).
    * Needed for changeLogic.doNewVersion()
    *
    * @param json the json
    * @param classRepresentingTable the class representing table
-   * @param user the user
    * @return the t
    */
-  public T fromJsonContentToObjKeepExisting(String json, Class<T> classRepresentingTable, Object user)
+  public T fromJsonContentToObjKeepExisting(String json, Class<T> classRepresentingTable)
       throws RihaRestException {
 
     // expect json_content

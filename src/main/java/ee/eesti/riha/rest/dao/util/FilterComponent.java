@@ -46,6 +46,9 @@ public class FilterComponent {
 
     ALLOWED_OPERATORS.put("isnull", "ok");
     ALLOWED_OPERATORS.put("isnotnull", "ok");
+
+    // nested json value operators
+    ALLOWED_OPERATORS.put("jilike", "ok");
   }
 
   /**

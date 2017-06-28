@@ -58,19 +58,6 @@ START 436069
 CACHE 1;
 GRANT SELECT, USAGE ON SEQUENCE riha.main_resource_seq TO riha;
 
--- Sequence: riha.role_right_seq
-
--- DROP SEQUENCE riha.role_right_seq;
-
-CREATE SEQUENCE riha.role_right_seq
-INCREMENT 1
-MINVALUE 1
-MAXVALUE 9223372036854775807
-START 338
-CACHE 1;
-GRANT SELECT, USAGE ON SEQUENCE riha.role_right_seq TO riha;
-
-
 -- Table: riha.kind
 
 -- DROP TABLE riha.kind;
@@ -105,50 +92,6 @@ COMMENT ON COLUMN riha.kind.modified_date IS 'Kirje muutmise ajamoment';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.kind TO riha;
 
--- Table:fdsfdsff riha.role_right
-
--- DROP TABLE riha.role_right;
-
-CREATE TABLE riha.role_right
-(
-  role_right_id integer NOT NULL,
-  kind_id integer NOT NULL, -- Objekti liik, millele antud õigus rakendub.
-  role_name character varying(50) NOT NULL, -- Rolli nimi, mille korral antud õigus kehtib.
-  access_restriction integer NOT NULL, -- Juurdepääsupiirang, mille suhtes õigus rakendub. Kui väärtus on võrdne või suurem objekti vastava välja väärtusest, siis rakendub antud õigus sellele objektile.
-  read integer NOT NULL, -- 0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes
-  "create" integer NOT NULL, -- 0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes
-  update integer NOT NULL, -- 0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes
-  delete integer NOT NULL, -- 0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes
-  CONSTRAINT pk_user_rights PRIMARY KEY (role_right_id),
-  CONSTRAINT fk_role_rights_kind FOREIGN KEY (kind_id)
-  REFERENCES riha.kind (kind_id) MATCH SIMPLE
-  ON UPDATE NO ACTION ON DELETE NO ACTION
-)
-WITH (
-OIDS=FALSE
-);
-COMMENT ON COLUMN riha.role_right.kind_id IS 'Objekti liik, millele antud õigus rakendub.';
-COMMENT ON COLUMN riha.role_right.role_name IS 'Rolli nimi, mille korral antud õigus kehtib.';
-COMMENT ON COLUMN riha.role_right.access_restriction IS 'Juurdepääsupiirang, mille suhtes õigus rakendub. Kui väärtus on võrdne või suurem objekti vastava välja väärtusest, siis rakendub antud õigus sellele objektile.';
-COMMENT ON COLUMN riha.role_right.read IS '0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes';
-COMMENT ON COLUMN riha.role_right."create" IS '0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes';
-COMMENT ON COLUMN riha.role_right.update IS '0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes';
-COMMENT ON COLUMN riha.role_right.delete IS '0-õigus puudub 1-õigus oma objektide suhtes 2-õigus kõikide objektide suhtes';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.role_right TO riha;
-
--- Index: riha.ixfk_user_rights_kind
-
--- DROP INDEX riha.ixfk_user_rights_kind;
-
-CREATE INDEX ixfk_user_rights_kind
-  ON riha.role_right
-  USING btree
-  (kind_id);
-
-
-
-
 -- Table: riha.main_resource
 
 -- DROP TABLE riha.main_resource;
@@ -156,11 +99,11 @@ CREATE INDEX ixfk_user_rights_kind
 CREATE TABLE riha.main_resource
 (
   main_resource_id integer NOT NULL, -- Ressursi unikaalne ID. Iga uus versioon saab uue ID. Kõige väiksema ID-ga ressurss on hetkel aktuaalne
-  uri character varying(150) NOT NULL, -- Ressursi unikaalne URI. Sellega määratakse millised on samad aga erineva versiooniga ressursid ressursside tabelis
-  name character varying(190) NOT NULL, -- Ressursi nimetus
-  owner character varying(150) NOT NULL, -- Ressursi omanik. Tavapäraselt ettevõtte registrikood. Infosüsteemi mõttes vastutav isik.
+  uri character varying(150), -- Ressursi unikaalne URI. Sellega määratakse millised on samad aga erineva versiooniga ressursid ressursside tabelis
+  name character varying(190), -- Ressursi nimetus
+  owner character varying(150), -- Ressursi omanik. Tavapäraselt ettevõtte registrikood. Infosüsteemi mõttes vastutav isik.
   short_name character varying(50), -- Ressursi lühinimetus
-  version character varying(10) NOT NULL, -- Inimloetav versiooni nimi. See ei ühti infosüsteemi versiooni nimetusega
+  version character varying(10), -- Inimloetav versiooni nimi. See ei ühti infosüsteemi versiooni nimetusega
   json_content jsonb, -- Ressursi kirjelduse täisinfo esitatuna json struktuurina (sisaldab ka eraldi väljadena toodud andmed).
   parent_uri character varying(150), -- Hierarhilise ressursi puhul on siin näidatud vanema URI
   main_resource_parent_id integer, -- Hierarhilise ressursi puhul on siin näidatud vanema ID
@@ -169,18 +112,15 @@ CREATE TABLE riha.main_resource
   state character(1), -- Ressursi olek (C-current, O-old, T-temporary, D-deleted jms.) Vaikimisi 'C'.
   start_date timestamp without time zone, -- Käesoleva versiooni kehtivuse algus
   end_date timestamp without time zone, -- Käesoleva versiooni kehtivuse lõpp
-  creator character varying(150) NOT NULL, -- Kirje loonud isiku isikukood või muu identifikaator
+  creator character varying(150), -- Kirje loonud isiku isikukood või muu identifikaator
   modifier character varying(150), -- Viimati kirjet muutnud isiku isikukood või muu identifikaator
-  creation_date timestamp without time zone NOT NULL, -- Kirje loomise ajahetk.
+  creation_date timestamp without time zone, -- Kirje loomise ajahetk.
   modified_date timestamp without time zone, -- Kirje viimati muutmise ajahetk.
   old_id integer,
   field_name character varying(150),
   kind_id integer, -- Ressursi liik (infosystem, classifier, service, dictionary, xmlresource vms.).
   main_resource_template_id integer,
   CONSTRAINT pk_main_resource PRIMARY KEY (main_resource_id),
-  CONSTRAINT fk_kind FOREIGN KEY (kind_id)
-  REFERENCES riha.kind (kind_id) MATCH SIMPLE
-  ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT fk_main_resource_main_resource_02 FOREIGN KEY (main_resource_template_id)
   REFERENCES riha.main_resource (main_resource_id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE NO ACTION

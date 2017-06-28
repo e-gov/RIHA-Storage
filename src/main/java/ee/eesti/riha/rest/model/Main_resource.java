@@ -43,7 +43,6 @@ public class Main_resource implements BaseModel {
   private Integer main_resource_id;
   private String uri;
   private String name;
-  private String owner;
   private String short_name;
   private String version;
 
@@ -159,24 +158,6 @@ public class Main_resource implements BaseModel {
    */
   public void setName(String aName) {
     this.name = aName;
-  }
-
-  /**
-   * Gets the owner.
-   *
-   * @return the owner
-   */
-  public String getOwner() {
-    return owner;
-  }
-
-  /**
-   * Sets the owner.
-   *
-   * @param aOwner the new owner
-   */
-  public void setOwner(String aOwner) {
-    this.owner = aOwner;
   }
 
   /**

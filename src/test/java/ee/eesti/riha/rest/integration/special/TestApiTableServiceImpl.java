@@ -23,7 +23,6 @@ import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.integration.IntegrationTestHelper;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.model.readonly.Kind;
-import ee.eesti.riha.rest.model.readonly.Role_right;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import ee.eesti.riha.rest.service.ApiTableService;
 import ee.eesti.riha.rest.service.FileService;
@@ -51,15 +50,6 @@ public class TestApiTableServiceImpl {
     List<Kind> kinds = TestHelper.getObjectsFromClient(response);
     assertNotNull(kinds);
     assertFalse(kinds.isEmpty());
-  }
-
-  @Test
-  public void testWorksWithRole_right() throws Exception {
-    Response response = serviceUnderTest.getFullTable("Role_right");
-
-    List<Role_right> role_rights = TestHelper.getObjectsFromClient(response);
-    assertNotNull(role_rights);
-    assertFalse(role_rights.isEmpty());
   }
 
   @Test

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonObject;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
 import ee.eesti.riha.rest.dao.GenericDAO;
 import ee.eesti.riha.rest.dao.SecureApiGenericDAO;
 import ee.eesti.riha.rest.dao.util.FilterComponent;
@@ -63,13 +62,12 @@ public class NewVersionLogic<T, K> {
    * Unmodifiability is checked elsewhere (by end_date).
    *
    * @param queryHolder the query holder
-   * @param user AuthInfo user
    * @return new version as ObjectNode
    * @throws RihaRestException the riha rest exception
    * @throws ReflectiveOperationException the reflective operation exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public Object doNewVersion(QueryHolder queryHolder, Object user) throws RihaRestException,
+  public Object doNewVersion(QueryHolder queryHolder) throws RihaRestException,
       ReflectiveOperationException, IOException {
     LOG.info("doNewVersion");
     // 0. extract data from queryHolder
@@ -92,7 +90,6 @@ public class NewVersionLogic<T, K> {
 
     String newVersion = query.get("new_version").getAsString();
     String uri = query.get("uri").getAsString();
-    String userId = ((AuthInfo) user).getUser_code();
 
     // 1. find old by uri, sort by start_date (to get current)
     // sort by creation_date instead !! (start_date may be null)
@@ -100,15 +97,14 @@ public class NewVersionLogic<T, K> {
 
     // actually List<ObjectNode>
     // List<T> many = doGetMany(classRepresentingTable, 1, 0, Arrays.asList(fc), "-creation_date", null, null);
-    List<T> many = changeLogic.doGetMany(classRepresentingTable, 1, 0, Arrays.asList(fc), "-creation_date", null,
-        (AuthInfo) user);
+    List<T> many = changeLogic.doGetMany(classRepresentingTable, 1, 0, Arrays.asList(fc), "-creation_date", null);
     Validator.noSuchUriInGivenTable(many, uri);
 
     // check if given uri with given version already exists?
     List<FilterComponent> versionNameAlreadyUsed = Arrays.asList(
         new FilterComponent("uri", "=", uri), new FilterComponent("version", "=", newVersion));
     List<T> itemsWithSameVersion = changeLogic.doGetMany(classRepresentingTable, null, null,
-        versionNameAlreadyUsed, null, null, (AuthInfo) user);
+        versionNameAlreadyUsed, null, null);
     Validator.versionMustBeDifferent(itemsWithSameVersion, uri, newVersion, query);
 
     T temp = many.get(0);
@@ -125,7 +121,6 @@ public class NewVersionLogic<T, K> {
     String dateJson = DateHelper.FORMATTER.format(new Date());
     tempJson.put("end_date", dateJson);
     tempJson.put("modified_date", dateJson);
-    tempJson.put("modifier", userId);
 
     // remove kind, because kind_id should be used instead of kind in server
     tempJson.remove("kind");
@@ -133,14 +128,12 @@ public class NewVersionLogic<T, K> {
     // 4. save temp (with new id)
     // method throws RihaRestException
     T itemTemp = (T) tableEntryCreateLogic.fromJsonContentToObjKeepExisting(tempJson.toString(),
-        classRepresentingTable, user);
+        classRepresentingTable);
 
     // genericDAO.create(itemTemp);
-    List<Integer> archivedKeys = (List<Integer>) secureDAO.create(itemTemp, (AuthInfo) user);
+    List<Integer> archivedKeys = (List<Integer>) secureDAO.create(itemTemp);
 
-    // doCreate(tempJson.toString(), classRepresentingTable, user);
-    // temp = doGet(classRepresentingTable, id, null, null);
-    temp = changeLogic.doGet(classRepresentingTable, id, null, (AuthInfo) user);
+    temp = changeLogic.doGet(classRepresentingTable, id, null);
     ObjectNode oldJson = (ObjectNode) temp;
 
     // 5. update version of old
@@ -148,8 +141,6 @@ public class NewVersionLogic<T, K> {
 
     oldJson.put("start_date", dateJson);
     // 6. set new created, modified to old
-    oldJson.put("creator", userId);
-    oldJson.put("modifier", userId);
     oldJson.put("creation_date", dateJson);
     oldJson.put("modified_date", dateJson);
     // when creating new version, then end_date will be null
@@ -167,21 +158,21 @@ public class NewVersionLogic<T, K> {
     noLogicDAO.update(item);
     // 9. return old (modfiied with new version)
     // temp = doGet(classRepresentingTable, id, null, null);
-    temp = changeLogic.doGet(classRepresentingTable, id, null, (AuthInfo) user);
+    temp = changeLogic.doGet(classRepresentingTable, id, null);
 
-    doNewVersionDocument((Class<T>) Document.class, id, archivedKeys.get(0), dateJson, (AuthInfo) user);
-    doNewVersionData_object((Class<T>) Data_object.class, id, archivedKeys.get(0), dateJson, (AuthInfo) user);
+    doNewVersionDocument((Class<T>) Document.class, id, archivedKeys.get(0), dateJson);
+    doNewVersionData_object((Class<T>) Data_object.class, id, archivedKeys.get(0), dateJson);
 
     return temp;
   }
 
   /**
-   * Helper method to call {@link #doNewVersion(QueryHolder, Object)}. This method only builds the queryHolder needed,
+   * Helper method to call {@link #doNewVersion(QueryHolder)}. This method only builds the queryHolder needed,
    * to ease access from other classes.
    * 
-   * @see #doNewVersion(QueryHolder, Object)
+   * @see #doNewVersion(QueryHolder)
    */
-  public Object doNewVersion(String newVersion, String uri, AuthInfo user) throws RihaRestException,
+  public Object doNewVersion(String newVersion, String uri) throws RihaRestException,
       ReflectiveOperationException, IOException {
     LOG.info("doNewVersion construct queryHolder");
 
@@ -192,37 +183,37 @@ public class NewVersionLogic<T, K> {
     // op is not needed
     QueryHolder queryHolder = QueryHolder.create(JsonHelper.GSON, queryJson.toString());
 
-    return doNewVersion(queryHolder, user);
+    return doNewVersion(queryHolder);
   }
 
   private void doNewVersionDocument(Class<T> clazz, int currentMain_resourceId, int archivedMain_resourceId,
-      String dateJson, AuthInfo user) throws RihaRestException {
+                                    String dateJson) throws RihaRestException {
 
     LOG.info("doNewVersionDocument currentMainResourceId " + currentMain_resourceId 
         + " archivedMainResourceId " + archivedMain_resourceId);
     
     FilterComponent filterByMR = new FilterComponent("main_resource_id", "=", "" + currentMain_resourceId);
 
-    doNewVersionDocumentHelper(clazz, filterByMR, archivedMain_resourceId, "main_resource_id", dateJson, user);
+    doNewVersionDocumentHelper(clazz, filterByMR, archivedMain_resourceId, "main_resource_id", dateJson);
 
   }
 
   private void doNewVersionDocumentThroughData_object(Class<T> clazz, int currentData_objectId,
-      int archivedData_objectId, String dateJson, AuthInfo user) throws RihaRestException {
+                                                      int archivedData_objectId, String dateJson) throws RihaRestException {
 
     FilterComponent filterByData_object = new FilterComponent("data_object_id", "=", "" + currentData_objectId);
 
-    doNewVersionDocumentHelper(clazz, filterByData_object, archivedData_objectId, "data_object_id", dateJson, user);
+    doNewVersionDocumentHelper(clazz, filterByData_object, archivedData_objectId, "data_object_id", dateJson);
 
   }
 
   private void doNewVersionDocumentHelper(Class<T> clazz, FilterComponent filterById, int archivedId, String idField,
-      String dateJson, AuthInfo user) throws RihaRestException {
+                                          String dateJson) throws RihaRestException {
     // find all connected Documents
 
     // List<ObjectNode> actually
     List<T> connectedDocs = changeLogic.doGetMany((Class<T>) Document.class, null, null, Arrays.asList(filterById),
-        null, null, user);
+        null, null);
 
     // for each Document create copy (with new id), set End_date on copy, set archived main_resource_id
 
@@ -242,10 +233,6 @@ public class NewVersionLogic<T, K> {
       docJson.remove(pkField);
 
       docJson.put(idField, archivedId);
-      // can't add end_date here, because can't update object which has end_date set with SecureApiGenericDAO
-      // docJson.put("end_date", dateJson);
-      docJson.put("modified_date", dateJson);
-      docJson.put("modifier", user.getUser_code());
 
       // remove kind
       docJson.remove("kind");
@@ -253,17 +240,16 @@ public class NewVersionLogic<T, K> {
       LOG.info("Archiving doc " + docJson);
       
       T itemTemp = (T) tableEntryCreateLogic.fromJsonContentToObjKeepExisting(docJson.toString(),
-          clazz, user);
+          clazz);
       // save archived item to database
-      List<Integer> createdKeys = (List<Integer>) secureDAO.create(itemTemp, user);
+      List<Integer> createdKeys = (List<Integer>) secureDAO.create(itemTemp);
       docIdMap.put(id, createdKeys.get(0));
     }
     
     LOG.info("Map of current doc ids to archived doc ids " + docIdMap);
 
     // get unmodified connected Documents
-    connectedDocs = changeLogic.doGetMany((Class<T>) Document.class, null, null, Arrays.asList(filterById), null, null,
-        user);
+    connectedDocs = changeLogic.doGetMany((Class<T>) Document.class, null, null, Arrays.asList(filterById), null, null);
 
     // for each Document (original) set Start_date, set
     for (T connectedDoc : connectedDocs) {
@@ -271,7 +257,6 @@ public class NewVersionLogic<T, K> {
       LOG.info("Original doc, that becomes current: " + docJson);
       docJson.put("start_date", dateJson);
       docJson.put("modified_date", dateJson);
-      docJson.put("modifier", user.getUser_code());
       // remove kind
       docJson.remove("kind");
       // when creating new version, then end_date will be null
@@ -305,7 +290,7 @@ public class NewVersionLogic<T, K> {
       
       Document doc = JsonHelper.GSON.fromJson(updateJson, Document.class);
       doc.setJson_content(updateJson);
-      secureDAO.update((T) doc, archivedDocId, user);
+      secureDAO.update((T) doc, archivedDocId);
       LOG.info("update successful? time to copy files");
       try {
         LOG.info("Copying file in new version current to archived");
@@ -321,13 +306,13 @@ public class NewVersionLogic<T, K> {
   }
 
   private void doNewVersionData_object(Class<T> clazz, int currentMain_resourceId, int archivedMain_resourceId,
-      String dateJson, AuthInfo user) throws RihaRestException {
+                                       String dateJson) throws RihaRestException {
     // find all connected Data_objects
     FilterComponent filterByMR = new FilterComponent("main_resource_id", "=", "" + currentMain_resourceId);
     // List<ObjectNode> actually
     List<T> connectedData_objects = changeLogic.doGetMany((Class<T>) Data_object.class, null, null,
         Arrays.asList(filterByMR),
-        null, null, user);
+        null, null);
 
     // arr[0] is currentId, arr[1] is archivedId
     Map<String, int[]> uriToDataIdMap = new HashMap<>();
@@ -344,27 +329,25 @@ public class NewVersionLogic<T, K> {
       dataJson.put("main_resource_id", archivedMain_resourceId);
       dataJson.put("end_date", dateJson);
       dataJson.put("modified_date", dateJson);
-      dataJson.put("modifier", user.getUser_code());
 
       // remove kind
       dataJson.remove("kind");
 
       T itemTemp = (T) tableEntryCreateLogic.fromJsonContentToObjKeepExisting(dataJson.toString(),
-          clazz, user);
+          clazz);
       // save archived item to database
-      List<Integer> createdKeys = (List<Integer>) secureDAO.create(itemTemp, user);
+      List<Integer> createdKeys = (List<Integer>) secureDAO.create(itemTemp);
     }
 
     // get unmodified connected Data_objects
     connectedData_objects = changeLogic.doGetMany((Class<T>) Data_object.class, null, null,
-        Arrays.asList(filterByMR), null, null, user);
+        Arrays.asList(filterByMR), null, null);
 
     // for each Data_object (original) set Start_date, set modifier
     for (T connectedData : connectedData_objects) {
       ObjectNode dataJson = (ObjectNode) connectedData;
       dataJson.put("start_date", dateJson);
       dataJson.put("modified_date", dateJson);
-      dataJson.put("modifier", user.getUser_code());
       // remove kind
       dataJson.remove("kind");
       // when creating new version, then end_date will be null
@@ -381,7 +364,7 @@ public class NewVersionLogic<T, K> {
     // get archived data_object ids
     FilterComponent filterByMRArchived = new FilterComponent("main_resource_id", "=", "" + archivedMain_resourceId);
     List<T> justArchivedData = changeLogic.doGetMany((Class<T>) Data_object.class, null, null,
-        Arrays.asList(filterByMRArchived), null, null, user);
+        Arrays.asList(filterByMRArchived), null, null);
     // add archived data_object ids to uriToDataIdMap
     for (T connectedData : justArchivedData) {
       ObjectNode dataJson = (ObjectNode) connectedData;
@@ -389,7 +372,7 @@ public class NewVersionLogic<T, K> {
     }
 
     for (int[] ids : uriToDataIdMap.values()) {
-      doNewVersionDocumentThroughData_object((Class<T>) Document.class, ids[0], ids[1], dateJson, user);
+      doNewVersionDocumentThroughData_object((Class<T>) Document.class, ids[0], ids[1], dateJson);
     }
 
   }

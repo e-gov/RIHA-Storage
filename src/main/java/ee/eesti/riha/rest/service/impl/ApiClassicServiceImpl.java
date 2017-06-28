@@ -1,28 +1,15 @@
 package ee.eesti.riha.rest.service.impl;
 
-import java.util.Arrays;
-
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import ee.eesti.riha.rest.auth.AuthInfo;
-import ee.eesti.riha.rest.auth.AuthService;
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
-import ee.eesti.riha.rest.auth.AuthServiceProvider;
-import ee.eesti.riha.rest.auth.TokenStore;
-import ee.eesti.riha.rest.auth.TokenStoreImpl;
-import ee.eesti.riha.rest.error.RihaRestError;
-import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.ServiceLogic;
-import ee.eesti.riha.rest.logic.TokenValidator;
 import ee.eesti.riha.rest.service.ApiClassicService;
 
 // TODO: Auto-generated Javadoc
@@ -40,11 +27,6 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
 
   @Context
   HttpHeaders httpHeaders;
-
-  AuthServiceProvider authServiceProvider = AuthServiceProvider.getInstance();
-
-  @Autowired
-  TokenStore tokenStore;
 
   private static final Logger LOG = LoggerFactory.getLogger(ApiClassicServiceImpl.class);
 
@@ -67,9 +49,9 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
 
     return (new Command() {
       @Override
-      public Response commandMethod(Object user) {
+      public Response commandMethod() {
         return serviceLogic.getMany(tableName, limit, offset, filter,
-            sort, fields, (AuthInfo) user);
+            sort, fields);
       }
     }).doIfHeadersOk();
 
@@ -90,8 +72,8 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
 
     return (new Command() {
       @Override
-      public Response commandMethod(Object user) {
-        return serviceLogic.getById(tableName, id, fields, (AuthInfo) user);
+      public Response commandMethod() {
+        return serviceLogic.getById(tableName, id, fields);
       }
     }).doIfHeadersOk();
 
@@ -112,8 +94,8 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
 
     return (new Command() {
       @Override
-      public Response commandMethod(Object user) {
-        return serviceLogic.getResourceById(id, (AuthInfo) user);
+      public Response commandMethod() {
+        return serviceLogic.getResourceById(id);
       }
     }).doIfHeadersOk();
 
@@ -131,8 +113,8 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
 
     return (new Command() {
       @Override
-      public Response commandMethod(Object user) {
-        return serviceLogic.create(json, tableName, user);
+      public Response commandMethod() {
+        return serviceLogic.create(json, tableName);
       }
     }).doIfHeadersOk();
 
@@ -150,8 +132,8 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
 
     return (new Command() {
       @Override
-      public Response commandMethod(Object user) {
-        return serviceLogic.update(json, tableName, id, user);
+      public Response commandMethod() {
+        return serviceLogic.update(json, tableName, id);
       }
     }).doIfHeadersOk();
 
@@ -169,37 +151,11 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
 
     return (new Command() {
       @Override
-      public Response commandMethod(Object user) {
-        return serviceLogic.delete(tableName, id, (AuthInfo) user);
+      public Response commandMethod() {
+        return serviceLogic.delete(tableName, id);
       }
     }).doIfHeadersOk();
 
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.service.ApiClassicService#getAuthService()
-   */
-  @Override
-  public AuthService getAuthService() {
-    return authServiceProvider.get();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.service.ApiClassicService#setAuthService(ee.eesti.riha.rest.auth.AuthServiceImpl)
-   */
-  @Override
-  public void setAuthService(AuthServiceImpl authService) {
-    authServiceProvider.set(authService);
-    if (authService == null) {
-      // use actual
-      TokenStoreImpl.setTest(false);
-    } else {
-      TokenStoreImpl.setTest(true);
-    }
   }
 
   /**
@@ -213,34 +169,15 @@ public class ApiClassicServiceImpl<T, K> implements ApiClassicService {
      * @return the response
      */
     public Response doIfHeadersOk() {
-      try {
-        String token = TokenValidator.getToken(httpHeaders);
-        if (!StringUtils.isEmpty(token)) {
-          // if (TokenValidator.areHeadersOk(httpHeaders)) {
-
-          // return commandMethod(TokenValidator.isTokenOk(
-          // TokenValidator.getToken(httpHeaders), getAuthService()));
-          return commandMethod(TokenValidator.isTokenOk(TokenValidator.getToken(httpHeaders), tokenStore));
-        } else {
-          return commandMethod(AuthInfo.DEFAULT);
-        }
-        // areHeadersOK must return true or throw exception
-        // throw new RuntimeException("This should never happen!");
-      } catch (RihaRestException e) {
-        RihaRestError error = (RihaRestError) e.getError();
-        // don't show stacktrace
-        // error.setErrtrace(Arrays.toString(e.getStackTrace()));
-        return Response.status(Status.BAD_REQUEST).entity(error).build();
-      }
+      return commandMethod();
     }
 
     /**
      * Abstract method which should call ServiceLogic method.
      *
-     * @param user the user
      * @return the response
      */
-    public abstract Response commandMethod(Object user);
+    public abstract Response commandMethod();
   }
 
 }

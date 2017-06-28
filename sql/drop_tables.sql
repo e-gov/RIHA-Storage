@@ -38,19 +38,9 @@ DROP INDEX riha.ixfk_main_resource_main_resource;
 
 DROP TABLE riha.main_resource;
 
--- Index: riha.ixfk_user_rights_kind
-
-DROP INDEX riha.ixfk_user_rights_kind;
-
--- Table: riha.role_right
-
-DROP TABLE riha.role_right;
-
 -- Table: riha.kind
 
 DROP TABLE riha.kind;
-
-
 
 -- Sequence: riha.comment_seq
 
@@ -71,7 +61,3 @@ DROP SEQUENCE riha.kind_seq;
 -- Sequence: riha.main_resource_seq
 
 DROP SEQUENCE riha.main_resource_seq;
-
--- Sequence: riha.role_right_seq
-
-DROP SEQUENCE riha.role_right_seq;

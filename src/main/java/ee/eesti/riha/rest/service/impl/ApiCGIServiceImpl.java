@@ -7,9 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import ee.eesti.riha.rest.auth.AuthService;
-import ee.eesti.riha.rest.auth.AuthServiceImpl;
-import ee.eesti.riha.rest.auth.AuthServiceProvider;
 import ee.eesti.riha.rest.logic.ServiceLogic;
 import ee.eesti.riha.rest.service.ApiCGIService;
 
@@ -25,8 +22,6 @@ public class ApiCGIServiceImpl<T, K> implements ApiCGIService<T> {
 
   @Autowired
   ServiceLogic<T, K> serviceLogic;
-
-  AuthServiceProvider authServiceProvider = AuthServiceProvider.getInstance();
 
   private static final Logger LOG = LoggerFactory.getLogger(ApiCGIServiceImpl.class);
 
@@ -65,26 +60,6 @@ public class ApiCGIServiceImpl<T, K> implements ApiCGIService<T> {
 
     return serviceLogic.postCGI(json);
 
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.service.ApiCGIService#getAuthService()
-   */
-  @Override
-  public AuthService getAuthService() {
-    return authServiceProvider.get();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.service.ApiCGIService#setAuthService(ee.eesti.riha.rest.auth.AuthServiceImpl)
-   */
-  @Override
-  public void setAuthService(AuthServiceImpl authService) {
-    authServiceProvider.set(authService);
   }
 
 }

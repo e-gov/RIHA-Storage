@@ -17,7 +17,6 @@ import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.MyExceptionHandler;
 import ee.eesti.riha.rest.logic.Validator;
 import ee.eesti.riha.rest.model.readonly.Kind;
-import ee.eesti.riha.rest.model.readonly.Role_right;
 import ee.eesti.riha.rest.service.ApiTableService;
 
 // TODO: Auto-generated Javadoc
@@ -35,7 +34,6 @@ public class ApiTableServiceImpl<T> implements ApiTableService {
 
   static {
     fullScanTables.put(Kind.class.getSimpleName().toLowerCase(), Kind.class);
-    fullScanTables.put(Role_right.class.getSimpleName().toLowerCase(), Role_right.class);
   }
 
   @Autowired
