@@ -33,7 +33,7 @@ import ee.eesti.riha.rest.model.util.FieldIsPK;
 @TypeDefs({@TypeDef(name = "JsonObject", typeClass = JsonObjectUserType.class) })
 @Transactional
 @Entity
-@Table(name = "comment")
+@Table(name = "comment", schema = "riha")
 @JsonInclude(Include.NON_NULL)
 public class Comment implements BaseModel {
 

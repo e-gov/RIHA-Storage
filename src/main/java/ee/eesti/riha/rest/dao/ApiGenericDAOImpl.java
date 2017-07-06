@@ -74,7 +74,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       return clazz.getSimpleName();
     } else {
       Table table = clazz.getAnnotation(Table.class);
-      return table.schema() + "." + table.name();
+      return (StringUtils.isBlank(table.schema()) ? "" : table.schema() + ".") + table.name();
     }
   }
 
