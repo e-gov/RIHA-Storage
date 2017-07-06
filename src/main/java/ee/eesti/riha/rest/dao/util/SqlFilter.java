@@ -1,11 +1,7 @@
 package ee.eesti.riha.rest.dao.util;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -94,6 +90,9 @@ public class SqlFilter {
         } else {
           throw new IllegalArgumentException("This operator (null_or_>) is meant for end_date");
         }
+      } else if (fieldHolder.getType().equals(UUID.class)) {
+        filterExpr = itemPrefix + fc.getOperandLeft() + " = " + (":" + (opRight + i) + "\\:\\:uuid");
+        params.put(opRight + i, fc.getOperandRight());
       } else {
         // by default treat as string (also applies to date)
         filterExpr = itemPrefix + fc.getOperandLeft() + " " + fc.getOperator() + " :" + (opRight + i);
