@@ -335,6 +335,7 @@ CREATE TABLE riha.comment
   creation_date timestamp without time zone, -- Kirje tekitamise ajamoment.
   modified_date timestamp without time zone, -- Kirje viimase muutmise ajamoment.
   kind character varying(150),
+  infosystem_uuid UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
   CONSTRAINT pk_comment PRIMARY KEY (comment_id),
   CONSTRAINT fk_comment_comment FOREIGN KEY (comment_parent_id)
   REFERENCES riha.comment (comment_id) MATCH SIMPLE
@@ -360,6 +361,7 @@ COMMENT ON COLUMN riha.comment.creator IS 'Kirje tekitanud isiku isikukood või 
 COMMENT ON COLUMN riha.comment.modifier IS 'Kirjet viimati muutnud isiku isikukood või muu identifikaator';
 COMMENT ON COLUMN riha.comment.creation_date IS 'Kirje tekitamise ajamoment.';
 COMMENT ON COLUMN riha.comment.modified_date IS 'Kirje viimase muutmise ajamoment.';
+COMMENT ON COLUMN riha.comment.infosystem_uuid IS 'InfoSystem uuid';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.comment TO riha;
 
