@@ -26,7 +26,7 @@ public final class JsonContentBasedTable {
     jsonContentBasedTables.add(Main_resource.class);
     jsonContentBasedTables.add(Document.class);
     jsonContentBasedTables.add(Data_object.class);
-    jsonContentBasedTables.add(Comment.class);
+//    jsonContentBasedTables.add(Comment.class);
   }
 
   /**

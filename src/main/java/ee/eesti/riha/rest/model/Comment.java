@@ -1,6 +1,7 @@
 package ee.eesti.riha.rest.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,7 +34,7 @@ import ee.eesti.riha.rest.model.util.FieldIsPK;
 @TypeDefs({@TypeDef(name = "JsonObject", typeClass = JsonObjectUserType.class) })
 @Transactional
 @Entity
-@Table(name = "comment")
+@Table(name = "comment", schema = "riha")
 @JsonInclude(Include.NON_NULL)
 public class Comment implements BaseModel {
 
@@ -72,6 +73,7 @@ public class Comment implements BaseModel {
 
   private String kind;
 
+  private UUID infosystem_uuid;
   /*
    * (non-Javadoc)
    * 
@@ -401,4 +403,12 @@ public class Comment implements BaseModel {
     kind = aKind;
   }
 
+  public UUID getInfosystem_uuid() {
+    return infosystem_uuid;
+  }
+
+  @DisallowUseMethodForUpdate
+  public void setInfosystem_uuid(UUID infosystem_uuid) {
+    this.infosystem_uuid = infosystem_uuid;
+  }
 }
