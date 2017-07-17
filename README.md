@@ -10,7 +10,7 @@ __Andmehoidja__,  tehnilise nimetusega __RIHA-Storage__, on serveriteenus (e RIH
     - `RIHA-Andmebaas (VANA)` - RIHA vana andmebaasi mudel (palju tabeleid)
     - `RIHA-Storage` PostgreSQL andmebaasi mudel
 3. Kommenteeritud SQL-skriptid  
-4. [Arendusjuhend](docs/Arendusjuhend) - dokument kirjeldab komponendi paigaldamisse ja arendamisse puutuvat
+4. [Arendusjuhend](docs/Arendusjuhend.md) - dokument kirjeldab komponendi paigaldamisse ja arendamisse puutuvat
 5. koodis olevad kommentaarid.
 
 Andmehoidja lühike kirjeldus on ka RIHA arhitektuuriteatmikus: [Andmehoidja](https://arhitektuur.riha.ee/Andmehoidja) (repos RIHA-Index).
