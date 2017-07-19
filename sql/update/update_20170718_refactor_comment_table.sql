@@ -19,6 +19,7 @@ ALTER TABLE riha.comment ADD author_personal_code VARCHAR(11) NULL;
 ALTER TABLE riha.comment ADD organization_name VARCHAR(255) NULL;
 ALTER TABLE riha.comment ADD organization_code VARCHAR(50) NULL;
 ALTER TABLE riha.comment ADD status VARCHAR(150) NULL;
+ALTER TABLE riha.comment ADD type VARCHAR(150) NULL;
 ALTER TABLE riha.comment ADD title VARCHAR(255) NULL;
 
 -- Remove limit from comment

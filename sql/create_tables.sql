@@ -326,6 +326,7 @@ CREATE TABLE riha.comment
   organization_name VARCHAR(255),
   organization_code VARCHAR(50),
   status VARCHAR(150),
+  type VARCHAR(150),
   CONSTRAINT pk_comment PRIMARY KEY (comment_id),
   CONSTRAINT fk_comment_comment FOREIGN KEY (comment_parent_id)
   REFERENCES riha.comment (comment_id) MATCH SIMPLE
@@ -348,6 +349,7 @@ COMMENT ON COLUMN riha.comment.author_personal_code IS 'Hinnangu/kommentaari kas
 COMMENT ON COLUMN riha.comment.organization_name IS 'Hinnangu/kommentaari kasutaja asutuse numetus';
 COMMENT ON COLUMN riha.comment.organization_code IS 'Hinnangu/kommentaari kasutaja asutuse kood';
 COMMENT ON COLUMN riha.comment.status IS 'Hinnangu staatus';
+COMMENT ON COLUMN riha.comment.type IS 'Hinnangu tüüp';
 
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.comment TO riha;

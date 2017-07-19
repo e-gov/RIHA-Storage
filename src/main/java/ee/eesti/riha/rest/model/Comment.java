@@ -67,6 +67,8 @@ public class Comment implements BaseModel {
   @Column(name = "status")
   private String status;
 
+  @Column(name = "type")
+  private String type;
   /*
    * (non-Javadoc)
    * 
@@ -331,4 +333,11 @@ public class Comment implements BaseModel {
     this.status = status;
   }
 
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
 }
