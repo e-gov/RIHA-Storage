@@ -1,30 +1,21 @@
 package ee.eesti.riha.rest.model;
 
-import java.util.Date;
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.gson.JsonObject;
+import ee.eesti.riha.rest.logic.Finals;
+import ee.eesti.riha.rest.model.hibernate.JsonObjectUserType;
+import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
+import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.google.gson.JsonObject;
-
-import ee.eesti.riha.rest.logic.Finals;
-import ee.eesti.riha.rest.model.hibernate.JsonObjectUserType;
-import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
-import ee.eesti.riha.rest.model.util.FieldIsPK;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.UUID;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -42,25 +33,7 @@ public class Comment implements BaseModel {
   @Id
   @Column(updatable = false)
   private Integer comment_id;
-  private String uri;
   private Integer comment_parent_id;
-  private String organization;
-
-  // http://stackoverflow.com/questions/15974474/mapping-postgresql-json-column-to-hibernate-value-type
-  // @Type(type = "StringJsonObject")
-  @JsonRawValue
-  // otherwise mapping exception
-  @Type(type = "JsonObject")
-  private JsonObject json_content;
-
-  private String main_resource_uri;
-  private String data_object_uri;
-  private String document_uri;
-  private String comment_uri;
-  private Character state;
-
-  private String creator;
-  private String modifier;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
   @Temporal(TemporalType.TIMESTAMP)
@@ -70,9 +43,30 @@ public class Comment implements BaseModel {
   @Temporal(TemporalType.TIMESTAMP)
   private Date modified_date;
 
-  private String kind;
-
+  @Type(type="pg-uuid")
   private UUID infosystem_uuid;
+
+  @Column(name = "title")
+  private String title;
+
+  @Column(name = "comment")
+  private String comment;
+
+  @Column(name = "author_name")
+  private String author_name;
+
+  @Column(name = "author_personal_code")
+  private String author_personal_code;
+
+  @Column(name = "organization_name")
+  private String organization_name;
+
+  @Column(name = "organization_code")
+  private String organization_code;
+
+  @Column(name = "status")
+  private String status;
+
   /*
    * (non-Javadoc)
    * 
@@ -94,6 +88,26 @@ public class Comment implements BaseModel {
   }
 
   /**
+   * @return null
+   * @deprecated not used anymore and will be removed in the future
+   */
+  @Override
+  @Deprecated
+  @Transient
+  public String getUri() {
+    return null;
+  }
+
+  /**
+   * @deprecated not used anymore and will be removed in the future
+   */
+  @Override
+  @Deprecated
+  @Transient
+  public void setUri(String uri) {
+  }
+
+  /**
    * Gets the comment_id.
    *
    * @return the comment_id
@@ -110,27 +124,6 @@ public class Comment implements BaseModel {
   @DisallowUseMethodForUpdate
   public void setComment_id(Integer aComment_id) {
     comment_id = aComment_id;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#getUri()
-   */
-  @Override
-  public String getUri() {
-    return uri;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#setUri(java.lang.String)
-   */
-  @Override
-  @DisallowUseMethodForUpdate
-  public void setUri(String aUri) {
-    uri = aUri;
   }
 
   /**
@@ -152,172 +145,63 @@ public class Comment implements BaseModel {
   }
 
   /**
-   * Gets the organization.
-   *
-   * @return the organization
-   */
-  public String getOrganization() {
-    return organization;
-  }
-
-  /**
-   * Sets the organization.
-   *
-   * @param aOrganization the new organization
-   */
-  public void setOrganization(String aOrganization) {
-    organization = aOrganization;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#getJson_content()
+   * @return null
+   * @deprecated not used anymore and will be removed in the future
    */
   @Override
+  @Deprecated
+  @Transient
   public JsonObject getJson_content() {
-    return json_content;
+    return null;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#setJson_content(com.google.gson.JsonObject)
+  /**
+   * @deprecated not used anymore and will be removed in the future
    */
   @Override
+  @Deprecated
+  @Transient
   public void setJson_content(JsonObject aJson_content) {
-    json_content = aJson_content;
   }
 
   /**
-   * Gets the main_resource_uri.
-   *
-   * @return the main_resource_uri
-   */
-  public String getMain_resource_uri() {
-    return main_resource_uri;
-  }
-
-  /**
-   * Sets the main_resource_uri.
-   *
-   * @param aMain_resource_uri the new main_resource_uri
-   */
-  public void setMain_resource_uri(String aMain_resource_uri) {
-    main_resource_uri = aMain_resource_uri;
-  }
-
-  /**
-   * Gets the data_object_uri.
-   *
-   * @return the data_object_uri
-   */
-  public String getData_object_uri() {
-    return data_object_uri;
-  }
-
-  /**
-   * Sets the data_object_uri.
-   *
-   * @param aData_object_uri the new data_object_uri
-   */
-  public void setData_object_uri(String aData_object_uri) {
-    data_object_uri = aData_object_uri;
-  }
-
-  /**
-   * Gets the document_uri.
-   *
-   * @return the document_uri
-   */
-  public String getDocument_uri() {
-    return document_uri;
-  }
-
-  /**
-   * Sets the document_uri.
-   *
-   * @param aDocument_uri the new document_uri
-   */
-  public void setDocument_uri(String aDocument_uri) {
-    document_uri = aDocument_uri;
-  }
-
-  /**
-   * Gets the comment_uri.
-   *
-   * @return the comment_uri
-   */
-  public String getComment_uri() {
-    return comment_uri;
-  }
-
-  /**
-   * Sets the comment_uri.
-   *
-   * @param aComment_uri the new comment_uri
-   */
-  public void setComment_uri(String aComment_uri) {
-    comment_uri = aComment_uri;
-  }
-
-  /**
-   * Gets the state.
-   *
-   * @return the state
-   */
-  public Character getState() {
-    return state;
-  }
-
-  /**
-   * Sets the state.
-   *
-   * @param aState the new state
-   */
-  public void setState(Character aState) {
-    state = aState;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#getCreator()
+   * @return null
+   * @deprecated not used anymore and will be removed in the future
    */
   @Override
+  @Deprecated
+  @Transient
   public String getCreator() {
-    return creator;
+    return null;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#setCreator(java.lang.String)
+  /**
+   * @deprecated not used anymore and will be removed in the future
    */
   @Override
-  @DisallowUseMethodForUpdate
-  public void setCreator(String aCreator) {
-    creator = aCreator;
+  @Deprecated
+  @Transient
+  public void setCreator(String creator) {
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#getModifier()
+  /**
+   * @return null
+   * @deprecated not used anymore and will be removed in the future
    */
   @Override
+  @Deprecated
+  @Transient
   public String getModifier() {
-    return modifier;
+    return null;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#setModifier(java.lang.String)
+  /**
+   * @deprecated not used anymore and will be removed in the future
    */
   @Override
-  public void setModifier(String aModifier) {
-    modifier = aModifier;
+  @Deprecated
+  @Transient
+  public void setModifier(String modifier) {
   }
 
   /*
@@ -361,25 +245,25 @@ public class Comment implements BaseModel {
     modified_date = aModified_date;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#getKind()
+  /**
+   * @return null
+   * @deprecated not used anymore and will be removed in the future
    */
   @Override
+  @Deprecated
+  @Transient
   public String getKind() {
-    return kind;
+    return null;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see ee.eesti.riha.rest.model.BaseModel#setKind(java.lang.String)
+  /**
+   * @deprecated not used anymore and will be removed in the future
    */
   @Override
+  @Deprecated
+  @Transient
   @DisallowUseMethodForUpdate
   public void setKind(String aKind) {
-    kind = aKind;
   }
 
   public UUID getInfosystem_uuid() {
@@ -390,4 +274,61 @@ public class Comment implements BaseModel {
   public void setInfosystem_uuid(UUID infosystem_uuid) {
     this.infosystem_uuid = infosystem_uuid;
   }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
+
+  public String getAuthor_name() {
+    return author_name;
+  }
+
+  public void setAuthor_name(String author_name) {
+    this.author_name = author_name;
+  }
+
+  public String getAuthor_personal_code() {
+    return author_personal_code;
+  }
+
+  public void setAuthor_personal_code(String author_personal_code) {
+    this.author_personal_code = author_personal_code;
+  }
+
+  public String getOrganization_name() {
+    return organization_name;
+  }
+
+  public void setOrganization_name(String organization_name) {
+    this.organization_name = organization_name;
+  }
+
+  public String getOrganization_code() {
+    return organization_code;
+  }
+
+  public void setOrganization_code(String organization_code) {
+    this.organization_code = organization_code;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
 }

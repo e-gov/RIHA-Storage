@@ -315,21 +315,17 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.document TO riha;
 CREATE TABLE riha.comment
 (
   comment_id integer NOT NULL, -- Kommentaari unikaalne ID.
-  uri character varying(50), -- Kommentaari unikaalne URI. See on ühine kogu ühe kommentaari hierarhiale
   comment_parent_id integer, -- Kui on tegemist hierarhilise kommentaariumiga, siis viitab vanemale
-  organization character varying(50), -- Kommentaari loonud ettevõtte kood
   json_content jsonb, -- Kommentaari väljade esitus json formaadis.
-  main_resource_uri character varying(150), -- Potentsiaalne viide põhiressursi URI-le
-  data_object_uri character varying(150), -- Potentsiaalne viide andmeobjekti URI-le
-  document_uri character varying(150), -- Potentsiaalne viide dokumendi URI-le
-  comment_uri character varying(150), -- Potentsiaalne viide kommentaari URI-le
-  state character(1), -- Kommentaari staatus (A-active, D-deleted jne)
-  creator character varying(150), -- Kirje tekitanud isiku isikukood või muu identifikaator
-  modifier character varying(150), -- Kirjet viimati muutnud isiku isikukood või muu identifikaator
   creation_date timestamp without time zone, -- Kirje tekitamise ajamoment.
   modified_date timestamp without time zone, -- Kirje viimase muutmise ajamoment.
-  kind character varying(150),
   infosystem_uuid UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  comment varchar(1000),
+  author_name VARCHAR(255),
+  author_personal_code VARCHAR(11),
+  organization_name VARCHAR(255),
+  organization_code VARCHAR(50),
+  status VARCHAR(150),
   CONSTRAINT pk_comment PRIMARY KEY (comment_id),
   CONSTRAINT fk_comment_comment FOREIGN KEY (comment_parent_id)
   REFERENCES riha.comment (comment_id) MATCH SIMPLE
@@ -341,20 +337,18 @@ OIDS=FALSE
 COMMENT ON TABLE riha.comment
 IS 'Tabelis hoitakse põhiressursside või andmeobjektide kohta esitatud kommentaare. Kommentaarid pole ühegi ressursi ega andmeobjekti ametlik kirjelduse koosseisu kuuluv info, vaid aitab kirjeldada ja lahti seletada ametlikku infot. Muuhulgas esitatakse ka kommentaaridena näiteks kooskõlastajate poolt tehtud märkused infosüsteemi kirjelduse kohta ja ka infosüsteemi omaniku endapoolsed kommentaarid kooskõlastajatele.';
 COMMENT ON COLUMN riha.comment.comment_id IS 'Kommentaari unikaalne ID.';
-COMMENT ON COLUMN riha.comment.uri IS 'Kommentaari unikaalne URI. See on ühine kogu ühe kommentaari hierarhiale';
 COMMENT ON COLUMN riha.comment.comment_parent_id IS 'Kui on tegemist hierarhilise kommentaariumiga, siis viitab vanemale';
-COMMENT ON COLUMN riha.comment.organization IS 'Kommentaari loonud ettevõtte kood ';
 COMMENT ON COLUMN riha.comment.json_content IS 'Kommentaari väljade esitus json formaadis.';
-COMMENT ON COLUMN riha.comment.main_resource_uri IS 'Potentsiaalne viide põhiressursi URI-le';
-COMMENT ON COLUMN riha.comment.data_object_uri IS 'Potentsiaalne viide andmeobjekti URI-le';
-COMMENT ON COLUMN riha.comment.document_uri IS 'Potentsiaalne viide dokumendi URI-le';
-COMMENT ON COLUMN riha.comment.comment_uri IS 'Potentsiaalne viide kommentaari URI-le';
-COMMENT ON COLUMN riha.comment.state IS 'Kommentaari staatus (A-active, D-deleted jne)';
-COMMENT ON COLUMN riha.comment.creator IS 'Kirje tekitanud isiku isikukood või muu identifikaator';
-COMMENT ON COLUMN riha.comment.modifier IS 'Kirjet viimati muutnud isiku isikukood või muu identifikaator';
 COMMENT ON COLUMN riha.comment.creation_date IS 'Kirje tekitamise ajamoment.';
 COMMENT ON COLUMN riha.comment.modified_date IS 'Kirje viimase muutmise ajamoment.';
 COMMENT ON COLUMN riha.comment.infosystem_uuid IS 'InfoSystem uuid';
+COMMENT ON COLUMN riha.comment.comment IS 'Hinnangu või kommentaari sisu';
+COMMENT ON COLUMN riha.comment.author_name IS 'Hinnangu/kommentaari kasutaja nimi või muu identifikaator';
+COMMENT ON COLUMN riha.comment.author_personal_code IS 'Hinnangu/kommentaari kasutaja isikukood';
+COMMENT ON COLUMN riha.comment.organization_name IS 'Hinnangu/kommentaari kasutaja asutuse numetus';
+COMMENT ON COLUMN riha.comment.organization_code IS 'Hinnangu/kommentaari kasutaja asutuse kood';
+COMMENT ON COLUMN riha.comment.status IS 'Hinnangu staatus';
+
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.comment TO riha;
 
