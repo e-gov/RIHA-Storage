@@ -108,7 +108,6 @@ CREATE TABLE riha.main_resource
   parent_uri character varying(150), -- Hierarhilise ressursi puhul on siin näidatud vanema URI
   main_resource_parent_id integer, -- Hierarhilise ressursi puhul on siin näidatud vanema ID
   kind character varying(150), -- Ressursi liik (infosystem, classifier, service, dictionary, xmlresource vms.)
-  access_restriction integer, -- Kui on 0, siis on avalik kirje, kui suurem nullist siis sõltub tasemest, kelle eest varjatud
   state character(1), -- Ressursi olek (C-current, O-old, T-temporary, D-deleted jms.) Vaikimisi 'C'.
   start_date timestamp without time zone, -- Käesoleva versiooni kehtivuse algus
   end_date timestamp without time zone, -- Käesoleva versiooni kehtivuse lõpp
@@ -140,7 +139,6 @@ COMMENT ON COLUMN riha.main_resource.json_content IS 'Ressursi kirjelduse täisi
 COMMENT ON COLUMN riha.main_resource.parent_uri IS 'Hierarhilise ressursi puhul on siin näidatud vanema URI';
 COMMENT ON COLUMN riha.main_resource.main_resource_parent_id IS 'Hierarhilise ressursi puhul on siin näidatud vanema ID';
 COMMENT ON COLUMN riha.main_resource.kind IS 'Ressursi liik (infosystem, classifier, service, dictionary, xmlresource vms.)';
-COMMENT ON COLUMN riha.main_resource.access_restriction IS 'Kui on 0, siis on avalik kirje, kui suurem nullist siis sõltub tasemest, kelle eest varjatud';
 COMMENT ON COLUMN riha.main_resource.state IS 'Ressursi olek (C-current, O-old, T-temporary, D-deleted jms.) Vaikimisi ''C''.';
 COMMENT ON COLUMN riha.main_resource.start_date IS 'Käesoleva versiooni kehtivuse algus';
 COMMENT ON COLUMN riha.main_resource.end_date IS 'Käesoleva versiooni kehtivuse lõpp';
@@ -193,7 +191,6 @@ CREATE TABLE riha.data_object
   json_content jsonb, -- Andmeobjekti sisu kirjeldus esitatuna json struktuurina.
   data_object_parent_id integer, -- Hierarhilise andmeobjekti puhul on siin vanema ID
   kind character varying(150), -- Andmeobjekti tüüp (databse, table, field, json, input, output jne)
-  access_restriction integer, -- Juurdepääsupiirang. Värtus 0 või väärtuse puudumine tähedab, et tegemist on avaliku infoga, sellest erinev väärtus tähistab juurdepääsupiiranguga infot.
   state character(1), -- Andmeobjekti staatus (C-current, O-old, T-temporary, D-deleted jne)
   start_date timestamp without time zone, -- Andmeobjekti versiooni kehtivuse algus
   end_date timestamp without time zone, -- Andmeobjekti versiooni kehtivuse lõpp
@@ -227,7 +224,6 @@ COMMENT ON COLUMN riha.data_object.main_resource_id IS 'Ressursi ID, mille alla 
 COMMENT ON COLUMN riha.data_object.json_content IS 'Andmeobjekti sisu kirjeldus esitatuna json struktuurina.';
 COMMENT ON COLUMN riha.data_object.data_object_parent_id IS 'Hierarhilise andmeobjekti puhul on siin vanema ID';
 COMMENT ON COLUMN riha.data_object.kind IS 'Andmeobjekti tüüp (databse, table, field, json, input, output jne)';
-COMMENT ON COLUMN riha.data_object.access_restriction IS 'Juurdepääsupiirang. Värtus 0 või väärtuse puudumine tähedab, et tegemist on avaliku infoga, sellest erinev väärtus tähistab juurdepääsupiiranguga infot.';
 COMMENT ON COLUMN riha.data_object.state IS 'Andmeobjekti staatus (C-current, O-old, T-temporary, D-deleted jne)';
 COMMENT ON COLUMN riha.data_object.start_date IS 'Andmeobjekti versiooni kehtivuse algus';
 COMMENT ON COLUMN riha.data_object.end_date IS 'Andmeobjekti versiooni kehtivuse lõpp';
@@ -269,7 +265,6 @@ CREATE TABLE riha.document
   filename character varying(150), -- Dokumendifaili nimi serveri failisüsteemis dokumentidele ette nähtud kausta suhtes. Võib olla ka tühi, kui dokument on antud URL abil.
   mime character varying(150), -- MIME tüüp, kui see on teada
   json_content jsonb, -- Dokumendi info esitatuna json struktuurina.
-  access_restriction integer,
   state character(1), -- Dokumendi staatus (C-current, D-deleted, O-old, T-temporary jne)
   start_date timestamp without time zone, -- Dokumendi kehtivuse algus
   end_date timestamp without time zone, -- Dokumendi kehtivuse lõpp
@@ -328,7 +323,6 @@ CREATE TABLE riha.comment
   data_object_uri character varying(150), -- Potentsiaalne viide andmeobjekti URI-le
   document_uri character varying(150), -- Potentsiaalne viide dokumendi URI-le
   comment_uri character varying(150), -- Potentsiaalne viide kommentaari URI-le
-  access_restriction integer, -- Juurdepääsupiirangu määrang. Kui väärtus on puudu või 0, on tegemist avaliku infoga, vastasel korral on tegemist piiratud juurdepääsuga infoga.
   state character(1), -- Kommentaari staatus (A-active, D-deleted jne)
   creator character varying(150), -- Kirje tekitanud isiku isikukood või muu identifikaator
   modifier character varying(150), -- Kirjet viimati muutnud isiku isikukood või muu identifikaator
@@ -355,7 +349,6 @@ COMMENT ON COLUMN riha.comment.main_resource_uri IS 'Potentsiaalne viide põhire
 COMMENT ON COLUMN riha.comment.data_object_uri IS 'Potentsiaalne viide andmeobjekti URI-le';
 COMMENT ON COLUMN riha.comment.document_uri IS 'Potentsiaalne viide dokumendi URI-le';
 COMMENT ON COLUMN riha.comment.comment_uri IS 'Potentsiaalne viide kommentaari URI-le';
-COMMENT ON COLUMN riha.comment.access_restriction IS 'Juurdepääsupiirangu määrang. Kui väärtus on puudu või 0, on tegemist avaliku infoga, vastasel korral on tegemist piiratud juurdepääsuga infoga.';
 COMMENT ON COLUMN riha.comment.state IS 'Kommentaari staatus (A-active, D-deleted jne)';
 COMMENT ON COLUMN riha.comment.creator IS 'Kirje tekitanud isiku isikukood või muu identifikaator';
 COMMENT ON COLUMN riha.comment.modifier IS 'Kirjet viimati muutnud isiku isikukood või muu identifikaator';

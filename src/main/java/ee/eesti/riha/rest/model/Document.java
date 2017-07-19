@@ -54,7 +54,6 @@ public class Document implements BaseModel {
   @Type(type = "JsonObject")
   private JsonObject json_content;
 
-  private Integer access_restriction;
   private Character state;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
@@ -233,26 +232,6 @@ public class Document implements BaseModel {
   @Override
   public void setJson_content(JsonObject aJson_content) {
     this.json_content = aJson_content;
-  }
-
-  /**
-   * Gets the access_restriction.
-   *
-   * @return the access_restriction
-   */
-  @Override
-  public Integer getAccess_restriction() {
-    return access_restriction;
-  }
-
-  /**
-   * Sets the access_restriction.
-   *
-   * @param aAccess_restriction the new access_restriction
-   */
-  @Override
-  public void setAccess_restriction(Integer aAccess_restriction) {
-    this.access_restriction = aAccess_restriction;
   }
 
   /**

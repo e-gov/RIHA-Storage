@@ -57,7 +57,6 @@ public class Comment implements BaseModel {
   private String data_object_uri;
   private String document_uri;
   private String comment_uri;
-  private Integer access_restriction;
   private Character state;
 
   private String creator;
@@ -260,26 +259,6 @@ public class Comment implements BaseModel {
    */
   public void setComment_uri(String aComment_uri) {
     comment_uri = aComment_uri;
-  }
-
-  /**
-   * Gets the access_restriction.
-   *
-   * @return the access_restriction
-   */
-  @Override
-  public Integer getAccess_restriction() {
-    return access_restriction;
-  }
-
-  /**
-   * Sets the access_restriction.
-   *
-   * @param aAccess_restriction the new access_restriction
-   */
-  @Override
-  public void setAccess_restriction(Integer aAccess_restriction) {
-    access_restriction = aAccess_restriction;
   }
 
   /**

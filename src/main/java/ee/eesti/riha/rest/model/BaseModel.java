@@ -122,7 +122,4 @@ public interface BaseModel {
    */
   void setKind(String kind);
 
-  Integer getAccess_restriction();
-
-  void setAccess_restriction(Integer aAccess_restriction);
 }
