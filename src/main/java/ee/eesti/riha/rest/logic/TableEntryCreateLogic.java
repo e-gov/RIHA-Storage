@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
@@ -36,7 +35,7 @@ import ee.eesti.riha.rest.model.readonly.Kind;
  * @param <T> the generic type
  */
 @Component
-public class TableEntryCreateLogic<T> {
+public class TableEntryCreateLogic<T extends BaseModel> {
 
   @Autowired
   UtilitiesDAO<T> utilitiesDAO;
@@ -107,6 +106,8 @@ public class TableEntryCreateLogic<T> {
         } else {
           fromJson = fromJsonContentToObj(json, classRepresentingTable);
         }
+      } else {
+        fromJson = fromJsonContentToObj(json, classRepresentingTable);
       }
 
     } catch (Exception e) {
@@ -181,7 +182,6 @@ public class TableEntryCreateLogic<T> {
    * @return the t
    */
   private T fromJsonToObjHelper(JsonObject jsonContent, Integer pkId, Class<T> classRepresentingTable) {
-    T constructedJsonObj;
     Gson gson = JsonHelper.GSON;
 
     Date dt = new Date();
@@ -195,26 +195,22 @@ public class TableEntryCreateLogic<T> {
 
     String adjustedJsonObj = gson.toJson(jsonContent);
 
-    // let gson construct blindly the table entry fields by fields
-    // it can find from provided json
+    // Map json to fields of class that represents table
+    T entity = gson.fromJson(adjustedJsonObj, classRepresentingTable);
 
+    // Set required fields
+    entity.callSetId(pkId);
+
+    // When dealing with json content table, initialize json_content field with source json and check if it was set correctly
     if (JsonContentBasedTable.isJsonContentBasedTable(classRepresentingTable)) {
-      BaseModel objToCreate = (BaseModel) gson.fromJson(adjustedJsonObj, classRepresentingTable);
-      // store json_content into objToCreate
-      objToCreate.callSetId(pkId);
-      objToCreate.setJson_content(jsonContent);
-      constructedJsonObj = (T) objToCreate;
-    } else {
-      throw new IllegalArgumentException("can not convert " + classRepresentingTable + " with chosen method");
+      entity.setJson_content(jsonContent);
+      if (entity.getJson_content() == null) {
+        throw new IllegalArgumentException("JsonContent can't be null! JsonContent " + jsonContent + " Created object "
+                                                   + entity);
+      }
     }
 
-    if (((BaseModel) constructedJsonObj).getJson_content() == null) {
-      throw new IllegalArgumentException("JsonContent can't be null! JsonContent " + jsonContent + " Created object "
-          + constructedJsonObj);
-    }
-
-    return constructedJsonObj;
-
+    return entity;
   }
 
   /**
@@ -323,9 +319,9 @@ public class TableEntryCreateLogic<T> {
   /**
    * Purpose of this class is just to be holder for json and its parse (json to object) results.
    */
-  public class JsonParseData {
+  public class JsonParseData<U> {
     private String json;
-    private T result;
+    private U result;
 
     /**
      * Instantiates a new json parse data.
@@ -333,7 +329,7 @@ public class TableEntryCreateLogic<T> {
      * @param json the json
      * @param result the result
      */
-    public JsonParseData(String json, T result) {
+    public JsonParseData(String json, U result) {
       this.json = json;
       this.result = result;
     }
@@ -352,7 +348,7 @@ public class TableEntryCreateLogic<T> {
      *
      * @return the result
      */
-    public T getResult() {
+    public U getResult() {
       return result;
     }
   }

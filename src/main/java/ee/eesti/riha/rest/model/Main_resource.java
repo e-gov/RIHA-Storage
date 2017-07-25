@@ -56,7 +56,6 @@ public class Main_resource implements BaseModel {
   private String parent_uri;
   private Integer main_resource_parent_id;
   private String kind;
-  private Integer access_restriction;
   private Character state;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
@@ -271,26 +270,6 @@ public class Main_resource implements BaseModel {
   @DisallowUseMethodForUpdate
   public void setKind(String aKind) {
     this.kind = aKind;
-  }
-
-  /**
-   * Gets the access_restriction.
-   *
-   * @return the access_restriction
-   */
-  @Override
-  public Integer getAccess_restriction() {
-    return access_restriction;
-  }
-
-  /**
-   * Sets the access_restriction.
-   *
-   * @param aAccess_restriction the new access_restriction
-   */
-  @Override
-  public void setAccess_restriction(Integer aAccess_restriction) {
-    this.access_restriction = aAccess_restriction;
   }
 
   /**
