@@ -7,6 +7,7 @@ import ee.eesti.riha.rest.model.Comment;
 import ee.eesti.riha.rest.model.Data_object;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
+import ee.eesti.riha.rest.model.readonly.Main_resource_view;
 
 /**
  * Json_content based table is table that contains field json_content. All the other fields that exist in table must
@@ -26,7 +27,7 @@ public final class JsonContentBasedTable {
     jsonContentBasedTables.add(Main_resource.class);
     jsonContentBasedTables.add(Document.class);
     jsonContentBasedTables.add(Data_object.class);
-//    jsonContentBasedTables.add(Comment.class);
+    jsonContentBasedTables.add(Main_resource_view.class);
   }
 
   /**

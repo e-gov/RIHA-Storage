@@ -150,6 +150,9 @@ COMMENT ON COLUMN riha.main_resource.kind_id IS 'Ressursi liik (infosystem, clas
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.main_resource TO riha;
 
+CREATE INDEX main_resource_uuid
+  ON riha.main_resource (((json_content ->> 'uuid')));
+
 -- Index: riha.ixfk_main_resource_main_resource
 
 -- DROP INDEX riha.ixfk_main_resource_main_resource;

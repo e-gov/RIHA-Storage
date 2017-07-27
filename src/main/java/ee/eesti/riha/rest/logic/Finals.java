@@ -12,6 +12,7 @@ import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
 import ee.eesti.riha.rest.model.readonly.Asutus;
 import ee.eesti.riha.rest.model.readonly.Isik;
+import ee.eesti.riha.rest.model.readonly.Main_resource_view;
 import ee.eesti.riha.rest.util.PropsReader;
 
 // TODO: Auto-generated Javadoc
@@ -38,8 +39,10 @@ public final class Finals {
     // read only
     addClassRepresentingTable(Isik.class);
     addClassRepresentingTable(Asutus.class);
+    addClassRepresentingTable(Main_resource_view.class);
     TABLE_CLASS_MAP_READONLY.put(Isik.class.getSimpleName().toLowerCase(), Isik.class);
     TABLE_CLASS_MAP_READONLY.put(Asutus.class.getSimpleName().toLowerCase(), Asutus.class);
+    TABLE_CLASS_MAP_READONLY.put(Main_resource_view.class.getSimpleName().toLowerCase(), Main_resource_view.class);
   }
 
   /**
