@@ -100,8 +100,4 @@ public interface ApiClassicService {
   @DELETE
   Response delete(@PathParam(value = "tableName") String tableName, @PathParam(value = "id") Integer id);
 
-  // getters and setters won't work without being a service themselves
-  // this is needed to use fake AuthService in integration tests
-  // TODO find if better solution exists, maybe ignore those paths?
-
 }
