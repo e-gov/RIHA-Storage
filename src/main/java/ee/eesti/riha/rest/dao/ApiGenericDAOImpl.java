@@ -304,8 +304,11 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
         qry.append(joinedAsOneStr);
 
         if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
-          String jsonField = Finals.JSON_CONTENT + "->>" + "'" + orderData.getOrderByField() + "'";
-          qry.append(" ORDER BY " + "item." + jsonField + (orderData.isAsc() ? " ASC " : " DESC "));
+          String orderByParameterName = "jOrderParameter";
+          qry.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
+
+          String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
+          params.put(orderByParameterName, jsonOrderByFieldName);
         }
 
         if (isCount) {
@@ -324,6 +327,14 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     return query;
   }
 
+  private String createJsonQueryClause(String orderByParameterName, OrderByData orderData) {
+    return "ORDER BY" +
+            " item." + Finals.JSON_CONTENT +
+            " #>>" +
+            " :" + orderByParameterName + "\\:\\:text[]" +
+            (orderData.isAsc() ? " ASC" : " DESC");
+  }
+
   /**
    * No filter order helper.
    *
@@ -340,14 +351,20 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     boolean orderByIsJsonContentField = (!DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz));
     if (orderByIsJsonContentField) {
-      StringBuffer qry = new StringBuffer();
-      // qry.append("SELECT * FROM " + clazz.getSimpleName() + " item ");
-      qry.append("SELECT * FROM " + getTableName(clazz) + " item ");
-      String jsonField = Finals.JSON_CONTENT + "->>" + "'" + orderData.getOrderByField() + "'";
-      qry.append(" ORDER BY " + "item." + jsonField + (orderData.isAsc() ? " ASC " : " DESC "));
-      Query queryExisting = session.createSQLQuery(qry.toString()).addEntity(clazz);
-      queryExisting.setFirstResult(offset);
-      objectList = queryExisting.setMaxResults(limit).list();
+      StringBuilder qry = new StringBuilder();
+      qry.append("SELECT *")
+              .append(" FROM ").append(getTableName(clazz)).append(" item ");
+
+      String orderByParameterName = "jOrderParameter";
+      qry.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
+
+      Query query = session.createSQLQuery(qry.toString()).addEntity(clazz);
+
+      String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
+      query.setParameter(orderByParameterName, jsonOrderByFieldName);
+
+      query.setFirstResult(offset);
+      objectList = query.setMaxResults(limit).list();
     } else {
       if (orderData.isAsc()) {
         criteria.addOrder(Order.asc(orderData.getOrderByField()));
