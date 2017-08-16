@@ -510,6 +510,18 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     if (existing == null) {
       return 0;
     }
+
+    if (JsonContentBasedTable.isJsonContentBasedTable(clazz)) {
+      return updateJsonContentEntity(existing, newValue);
+    } else {
+      return updateEntity(newValue);
+    }
+
+  }
+
+  private int updateJsonContentEntity(T existing, T newValue) throws RihaRestException {
+    Class<T> clazz = (Class<T>) newValue.getClass();
+    Session session = sessionFactory.getCurrentSession();
     try {
       BaseModel baseModel = (BaseModel) existing;
       BaseModel updateInfo = (BaseModel) newValue;
@@ -540,7 +552,12 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     }
     // success then 1 updated
     return 1;
+  }
 
+  private int updateEntity(T updatedEntity) {
+    Session session = sessionFactory.getCurrentSession();
+    session.merge(updatedEntity);
+    return 1;
   }
 
   /**
@@ -654,6 +671,18 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
    * (non-Javadoc)
    * 
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#update(java.util.List, java.lang.String)
+   */
+
+  /**
+   * Update of non json entities is not supported. Use {@link #update(Object, Integer)} method instead.
+   * @param objects
+   * @param idFieldName name of the field by which the update will be done, must not be null in object list elements
+   * @return
+   * @throws NoSuchFieldException
+   * @throws SecurityException
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws RihaRestException
    */
   @Override
   public int update(List<T> objects, String idFieldName) throws NoSuchFieldException, SecurityException,
