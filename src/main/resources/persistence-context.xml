@@ -36,6 +36,7 @@
 				<value>ee.eesti.riha.rest.model.readonly.Kind</value>
 				<value>ee.eesti.riha.rest.model.readonly.Isik</value>
 				<value>ee.eesti.riha.rest.model.readonly.Asutus</value>
+				<value>ee.eesti.riha.rest.model.readonly.Main_resource_view</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">
