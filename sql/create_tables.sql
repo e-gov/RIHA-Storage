@@ -319,17 +319,18 @@ CREATE TABLE riha.comment
 (
   comment_id integer NOT NULL, -- Kommentaari unikaalne ID.
   comment_parent_id integer, -- Kui on tegemist hierarhilise kommentaariumiga, siis viitab vanemale
-  json_content jsonb, -- Kommentaari väljade esitus json formaadis.
   creation_date timestamp without time zone, -- Kirje tekitamise ajamoment.
   modified_date timestamp without time zone, -- Kirje viimase muutmise ajamoment.
-  infosystem_uuid UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
-  comment varchar(1000),
-  author_name VARCHAR(255),
-  author_personal_code VARCHAR(11),
-  organization_name VARCHAR(255),
-  organization_code VARCHAR(50),
-  status VARCHAR(150),
-  type VARCHAR(150),
+  infosystem_uuid UUID,
+  comment VARCHAR,
+  author_name VARCHAR(255) NULL,
+  author_personal_code VARCHAR(11) NULL,
+  organization_name VARCHAR(255) NULL,
+  organization_code VARCHAR(50) NULL,
+  status VARCHAR(150) NULL,
+  type VARCHAR(150) NULL,
+  title VARCHAR(255) NULL,
+  sub_type VARCHAR(150) NULL,
   CONSTRAINT pk_comment PRIMARY KEY (comment_id),
   CONSTRAINT fk_comment_comment FOREIGN KEY (comment_parent_id)
   REFERENCES riha.comment (comment_id) MATCH SIMPLE
@@ -342,7 +343,6 @@ COMMENT ON TABLE riha.comment
 IS 'Tabelis hoitakse põhiressursside või andmeobjektide kohta esitatud kommentaare. Kommentaarid pole ühegi ressursi ega andmeobjekti ametlik kirjelduse koosseisu kuuluv info, vaid aitab kirjeldada ja lahti seletada ametlikku infot. Muuhulgas esitatakse ka kommentaaridena näiteks kooskõlastajate poolt tehtud märkused infosüsteemi kirjelduse kohta ja ka infosüsteemi omaniku endapoolsed kommentaarid kooskõlastajatele.';
 COMMENT ON COLUMN riha.comment.comment_id IS 'Kommentaari unikaalne ID.';
 COMMENT ON COLUMN riha.comment.comment_parent_id IS 'Kui on tegemist hierarhilise kommentaariumiga, siis viitab vanemale';
-COMMENT ON COLUMN riha.comment.json_content IS 'Kommentaari väljade esitus json formaadis.';
 COMMENT ON COLUMN riha.comment.creation_date IS 'Kirje tekitamise ajamoment.';
 COMMENT ON COLUMN riha.comment.modified_date IS 'Kirje viimase muutmise ajamoment.';
 COMMENT ON COLUMN riha.comment.infosystem_uuid IS 'InfoSystem uuid';
@@ -353,6 +353,8 @@ COMMENT ON COLUMN riha.comment.organization_name IS 'Hinnangu/kommentaari kasuta
 COMMENT ON COLUMN riha.comment.organization_code IS 'Hinnangu/kommentaari kasutaja asutuse kood';
 COMMENT ON COLUMN riha.comment.status IS 'Hinnangu staatus';
 COMMENT ON COLUMN riha.comment.type IS 'Hinnangu tüüp';
+COMMENT ON COLUMN riha.comment.title IS 'Hinnangu pealkiri';
+COMMENT ON COLUMN riha.comment.sub_type IS 'Hinnangu alamtüüp';
 
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.comment TO riha;
