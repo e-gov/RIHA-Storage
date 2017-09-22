@@ -324,7 +324,7 @@ CREATE TABLE riha.comment
   infosystem_uuid UUID,
   comment VARCHAR,
   author_name VARCHAR(255) NULL,
-  author_personal_code VARCHAR(11) NULL,
+  author_personal_code VARCHAR(13) NULL,
   organization_name VARCHAR(255) NULL,
   organization_code VARCHAR(50) NULL,
   status VARCHAR(150) NULL,
