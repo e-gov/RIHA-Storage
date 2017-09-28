@@ -146,6 +146,7 @@ public class Comment implements BaseModel {
    *
    * @param aComment_parent_id the new comment_parent_id
    */
+  @DisallowUseMethodForUpdate
   public void setComment_parent_id(Integer aComment_parent_id) {
     comment_parent_id = aComment_parent_id;
   }
@@ -301,6 +302,7 @@ public class Comment implements BaseModel {
     return author_name;
   }
 
+  @DisallowUseMethodForUpdate
   public void setAuthor_name(String author_name) {
     this.author_name = author_name;
   }
@@ -309,6 +311,7 @@ public class Comment implements BaseModel {
     return author_personal_code;
   }
 
+  @DisallowUseMethodForUpdate
   public void setAuthor_personal_code(String author_personal_code) {
     this.author_personal_code = author_personal_code;
   }
@@ -317,6 +320,7 @@ public class Comment implements BaseModel {
     return organization_name;
   }
 
+  @DisallowUseMethodForUpdate
   public void setOrganization_name(String organization_name) {
     this.organization_name = organization_name;
   }
@@ -325,6 +329,7 @@ public class Comment implements BaseModel {
     return organization_code;
   }
 
+  @DisallowUseMethodForUpdate
   public void setOrganization_code(String organization_code) {
     this.organization_code = organization_code;
   }
@@ -341,6 +346,7 @@ public class Comment implements BaseModel {
     return type;
   }
 
+  @DisallowUseMethodForUpdate
   public void setType(String type) {
     this.type = type;
   }
@@ -349,6 +355,7 @@ public class Comment implements BaseModel {
     return sub_type;
   }
 
+  @DisallowUseMethodForUpdate
   public void setSub_type(String sub_type) {
     this.sub_type = sub_type;
   }
