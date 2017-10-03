@@ -514,7 +514,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     if (JsonContentBasedTable.isJsonContentBasedTable(clazz)) {
       return updateJsonContentEntity(existing, newValue);
     } else {
-      return updateEntity(newValue);
+      return updateEntity(existing, newValue);
     }
 
   }
@@ -554,9 +554,18 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     return 1;
   }
 
-  private int updateEntity(T updatedEntity) {
+  private int updateEntity(T existing, T updatedEntity) {
     Session session = sessionFactory.getCurrentSession();
-    session.merge(updatedEntity);
+
+    try {
+      copyNotNullValues(existing, updatedEntity);
+      session.update(existing);
+    } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
+      LOG.error("Failed to update entity {}", existing);
+      LOG.debug("Failed to update entity", e);
+      
+      return 0;
+    }
     return 1;
   }
 
