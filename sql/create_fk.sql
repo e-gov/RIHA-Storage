@@ -26,4 +26,8 @@ alter table riha.comment add CONSTRAINT fk_comment_comment FOREIGN KEY (comment_
 REFERENCES riha.comment (comment_id) MATCH SIMPLE
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+ALTER TABLE riha.file_resource ADD CONSTRAINT fk_file_resource_large_object FOREIGN KEY (large_object_id)
+REFERENCES riha.large_object (id) MATCH SIMPLE
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+
 CREATE TRIGGER tr_infosystem_update AFTER UPDATE ON main_resource FOR EACH ROW EXECUTE PROCEDURE infosystem_trg();

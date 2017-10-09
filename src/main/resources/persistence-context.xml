@@ -32,6 +32,8 @@
 				<value>ee.eesti.riha.rest.model.Document</value>
 				<value>ee.eesti.riha.rest.model.Data_object</value>
 				<value>ee.eesti.riha.rest.model.Comment</value>
+				<value>ee.eesti.riha.rest.model.LargeObject</value>
+				<value>ee.eesti.riha.rest.model.FileResource</value>
 
 				<value>ee.eesti.riha.rest.model.readonly.Kind</value>
 				<value>ee.eesti.riha.rest.model.readonly.Isik</value>
@@ -41,7 +43,7 @@
 		</property>
 		<property name="hibernateProperties">
 			<props>
-				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.dialect">ee.eesti.riha.rest.model.hibernate.JsonPostgreSQLDialect</prop>
 				<prop key="hibernate.show_sql">true</prop>
 				<!-- <prop key="hibernate.format_sql" >true</prop> -->
 				<!-- <prop key="hibernate.use_sql_comments">true</prop> -->
