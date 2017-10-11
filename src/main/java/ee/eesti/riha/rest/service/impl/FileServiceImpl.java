@@ -24,39 +24,40 @@ import java.io.IOException;
 import java.util.UUID;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class FileServiceImpl.
  */
 public class FileServiceImpl implements FileService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FileServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileServiceImpl.class);
 
-  @Autowired
-  ChangeLogic changeLogic;
+    @Autowired
+    ChangeLogic changeLogic;
 
-  @Autowired
-  private FileResourceLogic fileResourceLogic;
+    @Autowired
+    private FileResourceLogic fileResourceLogic;
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see ee.eesti.riha.rest.service.FileService#getFile(java.lang.Integer, java.lang.String)
-   */
-  @Override
-  public Response getFile(Integer documentId, String token) {
+    /*
+     * (non-Javadoc)
+     *
+     * @see ee.eesti.riha.rest.service.FileService#getDocument(java.lang.Integer, java.lang.String)
+     */
+    @Override
+    public Response getDocument(Integer documentId, String token) {
 
-    try {
-      String fields = "[\"document_id\", \"filename\"]";
-      ObjectNode jsonObject = (ObjectNode) changeLogic.doGet(Document.class, documentId, fields);
+        try {
+            String fields = "[\"document_id\", \"filename\"]";
+            ObjectNode jsonObject = (ObjectNode) changeLogic.doGet(Document.class, documentId, fields);
 
-      return getFileLogic(documentId, jsonObject);
+            return getDocumentLogic(documentId, jsonObject);
 
-    } catch (RihaRestException e) {
-      return Response.status(Status.BAD_REQUEST).entity(MyExceptionHandler.unmapped(e, "FileService error"))
-          .type(MediaType.APPLICATION_JSON + "; charset=UTF-8").build();
+        } catch (RihaRestException e) {
+            return Response.status(Status.BAD_REQUEST).entity(MyExceptionHandler.unmapped(e, "FileService error"))
+                    .type(MediaType.APPLICATION_JSON + "; charset=UTF-8").build();
+        }
+
     }
-
-  }
 
     @Override
     public Response uploadFile(Attachment attachment) {
@@ -76,15 +77,15 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-  private Response getFileLogic(Integer documentId, ObjectNode document) throws RihaRestException {
-    String filePath = FileHelper.createDocumentFilePathWithRoot(documentId);
-    File file = new File(filePath);
+    private Response getDocumentLogic(Integer documentId, ObjectNode document) throws RihaRestException {
+        String documentFilePath = FileHelper.createDocumentFilePathWithRoot(documentId);
+        File file = new File(documentFilePath);
 
-    Validator.documentFileMustExist(file, documentId);
+        Validator.documentFileMustExist(file, documentId);
 
-    String fileName = JsonHelper.get(document, "filename", file.getName());
+        String fileName = JsonHelper.get(document, "filename", file.getName());
 
-    return Response.ok(file).header("content-disposition", "attachment; filename =" + fileName).build();
-  }
+        return Response.ok(file).header("content-disposition", "attachment; filename =" + fileName).build();
+    }
 
 }

@@ -21,9 +21,9 @@ public interface FileService {
    * @return the file
    */
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  @Path("/api/file/{documentId}")
+  @Path("/api/document/{documentId}")
   @GET
-  Response getFile(@PathParam(value = "documentId") Integer documentId, @QueryParam(value = "token") String token);
+  Response getDocument(@PathParam(value = "documentId") Integer documentId, @QueryParam(value = "token") String token);
 
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")

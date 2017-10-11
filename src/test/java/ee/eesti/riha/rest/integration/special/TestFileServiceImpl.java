@@ -12,11 +12,9 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.AfterClass;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +31,6 @@ import ee.eesti.riha.rest.integration.IntegrationTestHelper;
 import ee.eesti.riha.rest.integration.TestFinals;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
-import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import ee.eesti.riha.rest.service.FileService;
 
@@ -97,7 +94,7 @@ public class TestFileServiceImpl {
   @Test
   public void testGetFile() throws Exception {
 
-    Response response = serviceUnderTest.getFile(idUnderTestList.get(0), "testToken");
+    Response response = serviceUnderTest.getDocument(idUnderTestList.get(0), "testToken");
 
     assertNotNull(response.getEntity());
 
@@ -109,7 +106,7 @@ public class TestFileServiceImpl {
   @Test
   public void testGetFileError() throws Exception {
     int documentId = idUnderTestList.get(1);
-    Response response = serviceUnderTest.getFile(documentId, "testToken");
+    Response response = serviceUnderTest.getDocument(documentId, "testToken");
 
     assertNotNull(response.getEntity());
 
