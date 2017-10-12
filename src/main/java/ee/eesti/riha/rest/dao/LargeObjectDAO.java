@@ -1,5 +1,6 @@
 package ee.eesti.riha.rest.dao;
 
+import ee.eesti.riha.rest.logic.util.LengthCalculatingInputStream;
 import ee.eesti.riha.rest.model.LargeObject;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -45,15 +46,17 @@ public class LargeObjectDAO {
      * @return id of created entity or id of existing entity with the same hash
      */
     public int create(InputStream inputStream) {
+        LengthCalculatingInputStream lengthCalculatingInputStream = new LengthCalculatingInputStream(inputStream);
         DigestInputStream digestInputStream;
         try {
-            digestInputStream = new DigestInputStream(inputStream, MessageDigest.getInstance(HASH_ALGORITHM));
+            digestInputStream = new DigestInputStream(lengthCalculatingInputStream, MessageDigest.getInstance(HASH_ALGORITHM));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Could not create DigestInputStream with algorithm " + HASH_ALGORITHM, e);
         }
 
         LargeObject entity = createEntityFromInputStream(digestInputStream);
-        updateEntityWithCalculatedHash(entity, digestInputStream.getMessageDigest());
+        setHash(entity, digestInputStream.getMessageDigest());
+        setLength(entity, lengthCalculatingInputStream.getLength());
 
         if (deleteWhenReuseFound) {
             Integer reusableEntityId = getFirstReusableEntityId(entity);
@@ -117,7 +120,7 @@ public class LargeObjectDAO {
         return entity;
     }
 
-    private void updateEntityWithCalculatedHash(LargeObject entity, MessageDigest digest) {
+    private void setHash(LargeObject entity, MessageDigest digest) {
         String hash = DatatypeConverter.printHexBinary(digest.digest());
         String algorithm = digest.getAlgorithm();
 
@@ -126,6 +129,12 @@ public class LargeObjectDAO {
         }
 
         entity.setHash(hash);
+
+        sessionFactory.getCurrentSession().saveOrUpdate(entity);
+    }
+
+    private void setLength(LargeObject entity, long length) {
+        entity.setLength(length);
 
         sessionFactory.getCurrentSession().saveOrUpdate(entity);
     }

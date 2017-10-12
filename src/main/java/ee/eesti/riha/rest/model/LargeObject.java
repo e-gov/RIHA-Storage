@@ -29,6 +29,9 @@ public class LargeObject {
     @Column(name = "hash")
     private String hash;
 
+    @Column(name = "length")
+    private Long length;
+
     @Lob
     @Column(name = "data")
     private Blob data;
@@ -55,6 +58,14 @@ public class LargeObject {
 
     public void setHash(String hash) {
         this.hash = hash;
+    }
+
+    public Long getLength() {
+        return length;
+    }
+
+    public void setLength(Long length) {
+        this.length = length;
     }
 
     public Blob getData() {

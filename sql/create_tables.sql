@@ -376,6 +376,7 @@ CREATE TABLE riha.large_object
   creation_date timestamp without time zone,
   data oid,
   hash character varying(255),
+  length bigint,
   CONSTRAINT large_object_pkey PRIMARY KEY (id)
 )
 WITH (
