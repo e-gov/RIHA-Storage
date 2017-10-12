@@ -9,6 +9,7 @@ import ee.eesti.riha.rest.logic.Validator;
 import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Document;
+import ee.eesti.riha.rest.model.FileResource;
 import ee.eesti.riha.rest.service.FileService;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.slf4j.Logger;
@@ -16,11 +17,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.SQLException;
 import java.util.UUID;
 
 // TODO: Auto-generated Javadoc
@@ -60,7 +65,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Response uploadFile(Attachment attachment) {
+    public Response upload(Attachment attachment) {
         DataHandler dataHandler = attachment.getDataHandler();
         String name = dataHandler.getName();
         String contentType = dataHandler.getContentType();
@@ -73,8 +78,37 @@ public class FileServiceImpl implements FileService {
             UUID fileResourceUuid = fileResourceLogic.create(dataHandler.getInputStream(), name, contentType);
             return Response.ok(fileResourceUuid.toString()).build();
         } catch (IOException e) {
-            throw new RuntimeException("Could not retrieve request attachment data input stream", e);
+            throw new IllegalStateException("Could not retrieve request attachment input stream", e);
         }
+    }
+
+    @Override
+    public Response download(String uuid) {
+        final UUID fileResourceUuid = UUID.fromString(uuid);
+        LOG.debug("Handling file {} download", fileResourceUuid);
+
+        FileResource fileResource = fileResourceLogic.get(fileResourceUuid);
+        if (fileResource == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        StreamingOutput streamingOutput = new StreamingOutput() {
+            @Override
+            public void write(final OutputStream output) throws IOException {
+                try {
+                    fileResourceLogic.copyLargeObjectData(fileResourceUuid, output);
+                } catch (SQLException e) {
+                    throw new IllegalStateException("Could not retrieve requested file data", e);
+                }
+            }
+        };
+
+        return Response.ok()
+                .header(HttpHeaders.CONTENT_LENGTH, fileResource.getLargeObject().getLength())
+                .header(HttpHeaders.CONTENT_TYPE, fileResource.getContentType())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"" + fileResource.getName() + "\"")
+                .entity(streamingOutput)
+                .build();
     }
 
     private Response getDocumentLogic(Integer documentId, ObjectNode document) throws RihaRestException {

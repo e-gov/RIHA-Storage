@@ -8,27 +8,32 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Interface FileService.
  */
 public interface FileService {
 
-  /**
-   * Gets the file.
-   *
-   * @param documentId the document id
-   * @param token the token
-   * @return the file
-   */
-  @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  @Path("/api/document/{documentId}")
-  @GET
-  Response getDocument(@PathParam(value = "documentId") Integer documentId, @QueryParam(value = "token") String token);
+    /**
+     * Gets the file.
+     *
+     * @param documentId the document id
+     * @param token      the token
+     * @return the file
+     */
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Path("/api/document/{documentId}")
+    @GET
+    Response getDocument(@PathParam(value = "documentId") Integer documentId, @QueryParam(value = "token") String token);
 
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
-  @Path("/api/file")
-  @POST
-  Response uploadFile(@Multipart("file") Attachment attachment);
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
+    @Path("/api/file")
+    @POST
+    Response upload(@Multipart("file") Attachment attachment);
+
+    @Path("/api/file/{uuid}")
+    @GET
+    Response download(@PathParam("uuid") String uuid);
 
 }

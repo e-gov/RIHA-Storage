@@ -51,7 +51,7 @@ public class LargeObjectDAO {
         try {
             digestInputStream = new DigestInputStream(lengthCalculatingInputStream, MessageDigest.getInstance(HASH_ALGORITHM));
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Could not create DigestInputStream with algorithm " + HASH_ALGORITHM, e);
+            throw new IllegalStateException("Could not create DigestInputStream with algorithm " + HASH_ALGORITHM, e);
         }
 
         LargeObject entity = createEntityFromInputStream(digestInputStream);
@@ -140,13 +140,13 @@ public class LargeObjectDAO {
     }
 
     /**
-     * Load {@link LargeObject} entity by id. Throws exception in case entity with provided id does not exist.
+     * Get {@link LargeObject} entity by id. Throws exception in case entity with provided id does not exist.
      *
-     * @param id loaded entity id
-     * @return loaded entity
+     * @param id entity id for loading
+     * @return loaded entity or null if not found
      */
-    public LargeObject load(int id) {
-        return (LargeObject) sessionFactory.getCurrentSession().load(LargeObject.class, id);
+    public LargeObject get(int id) {
+        return (LargeObject) sessionFactory.getCurrentSession().get(LargeObject.class, id);
     }
 
     /**
@@ -176,4 +176,5 @@ public class LargeObjectDAO {
     public void setDeleteWhenReuseFound(boolean deleteWhenReuseFound) {
         this.deleteWhenReuseFound = deleteWhenReuseFound;
     }
+
 }
