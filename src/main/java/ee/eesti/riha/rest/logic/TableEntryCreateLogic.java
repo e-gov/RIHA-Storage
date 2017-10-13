@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ee.eesti.riha.rest.model.Main_resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,7 +188,10 @@ public class TableEntryCreateLogic<T extends BaseModel> {
     Date dt = new Date();
     String dtJsonFormat = DateHelper.FORMATTER.format(dt);
     LOG.info(dtJsonFormat);
-    jsonContent.addProperty("creation_date", dtJsonFormat);
+
+    if (classRepresentingTable != Main_resource.class) {
+      jsonContent.addProperty("creation_date", dtJsonFormat);
+    }
 
     // save primary key to json_content as well
     String pkFieldName = createPKFieldName(classRepresentingTable);
@@ -200,6 +204,7 @@ public class TableEntryCreateLogic<T extends BaseModel> {
 
     // Set required fields
     entity.callSetId(pkId);
+    entity.setCreation_date(dt);
 
     // When dealing with json content table, initialize json_content field with source json and check if it was set correctly
     if (JsonContentBasedTable.isJsonContentBasedTable(classRepresentingTable)) {
