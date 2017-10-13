@@ -15,6 +15,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
 import javax.ws.rs.core.HttpHeaders;
@@ -103,12 +104,21 @@ public class FileServiceImpl implements FileService {
             }
         };
 
-        return Response.ok()
-                .header(HttpHeaders.CONTENT_LENGTH, fileResource.getLargeObject().getLength())
-                .header(HttpHeaders.CONTENT_TYPE, fileResource.getContentType())
-                .header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"" + fileResource.getName() + "\"")
-                .entity(streamingOutput)
-                .build();
+        Response.ResponseBuilder response = Response.ok();
+
+        if (fileResource.getLargeObject().getLength() != null) {
+            response.header(HttpHeaders.CONTENT_LENGTH, fileResource.getLargeObject().getLength());
+        }
+
+        if (StringUtils.hasText(fileResource.getContentType())) {
+            response.header(HttpHeaders.CONTENT_TYPE, fileResource.getContentType());
+        }
+
+        if (StringUtils.hasText(fileResource.getName())) {
+            response.header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"" + fileResource.getName() + "\"");
+        }
+
+        return response.entity(streamingOutput).build();
     }
 
     private Response getDocumentLogic(Integer documentId, ObjectNode document) throws RihaRestException {
