@@ -48,6 +48,9 @@ public class Main_resource_view implements BaseModel {
 
     private String kind;
 
+    @Column(name = "j_creation_timestamp")
+    private Date j_creation_timestamp;
+
     public Integer getMain_resource_id() {
         return main_resource_id;
     }
