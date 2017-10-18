@@ -42,6 +42,14 @@ DROP TABLE riha.main_resource;
 
 DROP TABLE riha.kind;
 
+-- Table: riha.file_resource
+
+DROP TABLE riha.file_resource;
+
+-- Table: riha.large_object
+
+DROP TABLE riha.large_object;
+
 -- Sequence: riha.comment_seq
 
 DROP SEQUENCE riha.comment_seq;
