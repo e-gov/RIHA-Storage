@@ -25,7 +25,7 @@ import java.util.UUID;
 @TypeDefs({@TypeDef(name = "JsonObject", typeClass = JsonObjectUserType.class) })
 @Transactional
 @Entity
-@Table(name = "comment", schema = "riha")
+@Table(name = "comment")
 @JsonInclude(Include.NON_NULL)
 public class Comment implements BaseModel {
 
