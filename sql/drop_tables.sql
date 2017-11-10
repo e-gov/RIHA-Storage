@@ -22,6 +22,11 @@ DROP INDEX riha.ixfk_data_object_data_object;
 
 DROP TABLE riha.data_object;
 
+-- Table: riha.main_resource_relation
+DROP INDEX riha.idx_main_resource_relation_infosystem_uuid;
+DROP INDEX riha.idx_main_resource_relation_related_infosystem_uuid;
+DROP TABLE riha.main_resource_relation;
+
 -- Index: riha.ixfk_main_resource_kind_template
 
 DROP INDEX riha.ixfk_main_resource_kind_template;
@@ -69,3 +74,7 @@ DROP SEQUENCE riha.kind_seq;
 -- Sequence: riha.main_resource_seq
 
 DROP SEQUENCE riha.main_resource_seq;
+
+-- Sequence: riha.main_resource_relation_seq
+
+DROP SEQUENCE riha.main_resource_relation_seq;
