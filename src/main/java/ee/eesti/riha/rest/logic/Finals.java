@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import ee.eesti.riha.rest.logic.util.StringHelper;
-import ee.eesti.riha.rest.model.Comment;
-import ee.eesti.riha.rest.model.Data_object;
-import ee.eesti.riha.rest.model.Document;
-import ee.eesti.riha.rest.model.Main_resource;
+import ee.eesti.riha.rest.model.*;
 import ee.eesti.riha.rest.model.readonly.Asutus;
 import ee.eesti.riha.rest.model.readonly.Isik;
+import ee.eesti.riha.rest.model.readonly.Main_resource_relation_view;
 import ee.eesti.riha.rest.model.readonly.Main_resource_view;
 import ee.eesti.riha.rest.util.PropsReader;
 
@@ -35,14 +33,17 @@ public final class Finals {
     addClassRepresentingTable(Document.class);
     addClassRepresentingTable(Data_object.class);
     addClassRepresentingTable(Comment.class);
+    addClassRepresentingTable(Main_resource_relation.class);
 
     // read only
     addClassRepresentingTable(Isik.class);
     addClassRepresentingTable(Asutus.class);
     addClassRepresentingTable(Main_resource_view.class);
+    addClassRepresentingTable(Main_resource_relation_view.class);
     TABLE_CLASS_MAP_READONLY.put(Isik.class.getSimpleName().toLowerCase(), Isik.class);
     TABLE_CLASS_MAP_READONLY.put(Asutus.class.getSimpleName().toLowerCase(), Asutus.class);
     TABLE_CLASS_MAP_READONLY.put(Main_resource_view.class.getSimpleName().toLowerCase(), Main_resource_view.class);
+    TABLE_CLASS_MAP_READONLY.put(Main_resource_relation_view.class.getSimpleName().toLowerCase(), Main_resource_relation_view.class);
   }
 
   /**
