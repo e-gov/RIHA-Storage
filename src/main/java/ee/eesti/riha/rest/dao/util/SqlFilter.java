@@ -157,6 +157,21 @@ public class SqlFilter {
 
         params.put(jsonFieldNameParameter, jsonFieldName);
         params.put(opRight + i, fc.getOperandRight());
+      } else if (fc.getOperator().equals("jarr")) {
+        String updatedOperandLeft = fc.getOperandLeft().replaceAll("\\.", ",");
+        String jsonFieldAndArrayParametersValues = "{" + updatedOperandLeft + "}";
+
+        String jsonFieldNameParameter = "jFieldParam";
+        String jsonArrayTextValueParameter = "jArrayParam";
+
+        String filter = "EXISTS(SELECT FROM jsonb_array_elements_text((" + ITEM_PREFIX + Finals.JSON_CONTENT + " #> :"
+                + jsonFieldNameParameter + "\\:\\:text[])) WHERE " + ITEM_PREFIX + Finals.JSON_CONTENT + " #>> :" + jsonArrayTextValueParameter
+                + "\\:\\:text[] is not null AND value ilike :" + (opRight + i) + ")";
+        allFilters.add(filter);
+
+        params.put(jsonFieldNameParameter, jsonFieldAndArrayParametersValues);
+        params.put(jsonArrayTextValueParameter, jsonFieldAndArrayParametersValues);
+        params.put(opRight + i, fc.getOperandRight());
       } else if (StringHelper.isNumber(fc.getOperandRight())) {
         jsonField = Finals.JSON_CONTENT + "->>" + "'" + fc.getOperandLeft() + "'";
         allFilters.add("cast(item." + jsonField + " AS int) " + fc.getOperator() + " :" + (opRight + i));
