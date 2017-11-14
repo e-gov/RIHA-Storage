@@ -49,6 +49,8 @@ public class FilterComponent {
 
     // nested json value operators
     ALLOWED_OPERATORS.put("jilike", "ok");
+    // operator to look for text values in json arrays
+    ALLOWED_OPERATORS.put("jarr", "ok");
   }
 
   /**

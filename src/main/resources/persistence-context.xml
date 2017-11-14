@@ -34,11 +34,13 @@
 				<value>ee.eesti.riha.rest.model.Comment</value>
 				<value>ee.eesti.riha.rest.model.LargeObject</value>
 				<value>ee.eesti.riha.rest.model.FileResource</value>
+				<value>ee.eesti.riha.rest.model.Main_resource_relation</value>
 
 				<value>ee.eesti.riha.rest.model.readonly.Kind</value>
 				<value>ee.eesti.riha.rest.model.readonly.Isik</value>
 				<value>ee.eesti.riha.rest.model.readonly.Asutus</value>
 				<value>ee.eesti.riha.rest.model.readonly.Main_resource_view</value>
+				<value>ee.eesti.riha.rest.model.readonly.Main_resource_relation_view</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">
