@@ -29,3 +29,16 @@ CREATE INDEX idx_main_resource_relation_infosystem_uuid
 -- DROP INDEX riha.idx_main_resource_relation_related_infosystem_uuid;
 CREATE INDEX idx_main_resource_relation_related_infosystem_uuid
   ON riha.main_resource_relation (related_infosystem_uuid);
+
+-- DROP VIEW riha.main_resource_relation_view;
+CREATE OR REPLACE VIEW riha.main_resource_relation_view AS
+  SELECT
+    mrr.*,
+    infosystem.json_content ->> 'short_name'         AS infosystem_short_name,
+    infosystem.json_content ->> 'name'               AS infosystem_name,
+    related_infosystem.json_content ->> 'short_name' AS related_infosystem_short_name,
+    related_infosystem.json_content ->> 'name'       AS related_infosystem_name
+  FROM riha.main_resource_relation mrr
+    LEFT JOIN riha.main_resource_view infosystem ON (infosystem.json_content ->> 'uuid') = mrr.infosystem_uuid :: TEXT
+    LEFT JOIN riha.main_resource_view related_infosystem
+ON (related_infosystem.json_content ->> 'uuid') = mrr.related_infosystem_uuid :: TEXT;
