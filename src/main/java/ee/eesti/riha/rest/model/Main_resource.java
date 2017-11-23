@@ -81,6 +81,9 @@ public class Main_resource implements BaseModel {
 
   private Integer kind_id;
 
+  // Needed for indication that this field should not be searched in json content
+  private String search_content;
+
   /*
    * (non-Javadoc)
    * 
