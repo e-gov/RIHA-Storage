@@ -1,3 +1,6 @@
+-- Extensions
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 -- Sequence: riha.comment_seq
 
 -- DROP SEQUENCE riha.comment_seq;
@@ -135,6 +138,7 @@ CREATE TABLE riha.main_resource
   field_name character varying(150),
   kind_id integer, -- Ressursi liik (infosystem, classifier, service, dictionary, xmlresource vms.).
   main_resource_template_id integer,
+  search_content text, -- Indexed full text search column.
   CONSTRAINT pk_main_resource PRIMARY KEY (main_resource_id),
   CONSTRAINT fk_main_resource_main_resource_02 FOREIGN KEY (main_resource_template_id)
   REFERENCES riha.main_resource (main_resource_id) MATCH SIMPLE
@@ -163,6 +167,7 @@ COMMENT ON COLUMN riha.main_resource.modifier IS 'Viimati kirjet muutnud isiku i
 COMMENT ON COLUMN riha.main_resource.creation_date IS 'Kirje loomise ajahetk.';
 COMMENT ON COLUMN riha.main_resource.modified_date IS 'Kirje viimati muutmise ajahetk.';
 COMMENT ON COLUMN riha.main_resource.kind_id IS 'Ressursi liik (infosystem, classifier, service, dictionary, xmlresource vms.).';
+COMMENT ON COLUMN riha.main_resource.search_content IS 'Indexed full text search column.';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.main_resource TO riha;
 
@@ -195,6 +200,13 @@ CREATE INDEX ixfk_main_resource_kind_template
   ON riha.main_resource
   USING btree
   (main_resource_template_id);
+
+-- DROP INDEX IF EXISTS idx_main_resource_search;
+
+CREATE INDEX idx_main_resource_search
+  ON riha.main_resource
+  USING GIN (search_content gin_trgm_ops);
+
 
 
 -- Table: riha.data_object

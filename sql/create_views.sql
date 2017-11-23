@@ -1,4 +1,4 @@
--- DROP VIEW riha.main_resource_relation_view;
+DROP VIEW IF EXISTS riha.main_resource_view CASCADE;
 CREATE OR REPLACE VIEW riha.main_resource_view AS
   SELECT DISTINCT ON (json_content ->> 'uuid')
     *,
@@ -9,8 +9,7 @@ CREATE OR REPLACE VIEW riha.main_resource_view AS
     j_update_timestamp DESC NULLS LAST,
     main_resource_id DESC;
 
-
--- DROP VIEW riha.main_resource_relation_view;
+DROP VIEW IF EXISTS riha.main_resource_relation_view;
 CREATE OR REPLACE VIEW riha.main_resource_relation_view AS
   SELECT
     mrr.*,
