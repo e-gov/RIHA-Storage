@@ -48,6 +48,9 @@ public class Main_resource_view implements BaseModel {
 
     private String kind;
 
+    // Needed for indication that this field should not be searched in json content
+    private String search_content;
+
     @Column(name = "j_creation_timestamp")
     private Date j_creation_timestamp;
 
