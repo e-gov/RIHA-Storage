@@ -5,7 +5,7 @@
 
 	<groupId>ee.eesti.riha</groupId>
 	<artifactId>rest</artifactId>
-	<version>0.9.0</version>
+	<version>0.10.0</version>
 
 	<packaging>war</packaging>
 
@@ -171,7 +171,6 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>${POSTGRESQL.VERSION}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
