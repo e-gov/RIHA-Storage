@@ -22,3 +22,15 @@ CREATE OR REPLACE VIEW riha.main_resource_relation_view AS
     LEFT JOIN riha.main_resource_view infosystem ON (infosystem.json_content ->> 'uuid') = mrr.infosystem_uuid :: TEXT
     LEFT JOIN riha.main_resource_view related_infosystem
       ON (related_infosystem.json_content ->> 'uuid') = mrr.related_infosystem_uuid :: TEXT;
+
+
+-- DROP VIEW riha.comment_type_issue_view;
+CREATE OR REPLACE VIEW riha.comment_type_issue_view AS
+  SELECT
+    issue.*,
+    infosystem.json_content ->> 'short_name' AS infosystem_short_name
+  FROM riha.comment issue
+    INNER JOIN riha.main_resource_view infosystem
+      ON (infosystem.json_content ->> 'uuid') = issue.infosystem_uuid :: TEXT
+  WHERE issue.type = 'ISSUE'
+  ORDER BY issue.comment_id;
