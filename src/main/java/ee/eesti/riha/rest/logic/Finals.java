@@ -7,10 +7,7 @@ import java.util.Map;
 
 import ee.eesti.riha.rest.logic.util.StringHelper;
 import ee.eesti.riha.rest.model.*;
-import ee.eesti.riha.rest.model.readonly.Asutus;
-import ee.eesti.riha.rest.model.readonly.Isik;
-import ee.eesti.riha.rest.model.readonly.Main_resource_relation_view;
-import ee.eesti.riha.rest.model.readonly.Main_resource_view;
+import ee.eesti.riha.rest.model.readonly.*;
 import ee.eesti.riha.rest.util.PropsReader;
 
 // TODO: Auto-generated Javadoc
@@ -40,10 +37,12 @@ public final class Finals {
     addClassRepresentingTable(Asutus.class);
     addClassRepresentingTable(Main_resource_view.class);
     addClassRepresentingTable(Main_resource_relation_view.class);
+    addClassRepresentingTable(Comment_type_issue_view.class);
     TABLE_CLASS_MAP_READONLY.put(Isik.class.getSimpleName().toLowerCase(), Isik.class);
     TABLE_CLASS_MAP_READONLY.put(Asutus.class.getSimpleName().toLowerCase(), Asutus.class);
     TABLE_CLASS_MAP_READONLY.put(Main_resource_view.class.getSimpleName().toLowerCase(), Main_resource_view.class);
     TABLE_CLASS_MAP_READONLY.put(Main_resource_relation_view.class.getSimpleName().toLowerCase(), Main_resource_relation_view.class);
+    TABLE_CLASS_MAP_READONLY.put(Comment_type_issue_view.class.getSimpleName().toLowerCase(), Comment_type_issue_view.class);
   }
 
   /**
