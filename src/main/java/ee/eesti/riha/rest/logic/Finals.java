@@ -77,7 +77,7 @@ public final class Finals {
     TABLE_CLASS_MAP.put(clazz.getSimpleName().toLowerCase(), clazz);
   }
 
-  public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+  public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
   public static final String OK = "ok";
   public static final String KEY = "key";
   // default limit for returned items
