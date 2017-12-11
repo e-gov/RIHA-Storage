@@ -1,5 +1,7 @@
 package ee.eesti.riha.rest.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import ee.eesti.riha.rest.logic.Finals;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
@@ -20,6 +22,7 @@ public class FileResource {
     @Type(type = "pg-uuid")
     private UUID uuid;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date")
     private Date creationDate;

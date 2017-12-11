@@ -1,5 +1,7 @@
 package ee.eesti.riha.rest.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import ee.eesti.riha.rest.logic.Finals;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
@@ -22,6 +24,7 @@ public class LargeObject {
     @Column(name = "id", updatable = false)
     private int id;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date")
     private Date creationDate;
