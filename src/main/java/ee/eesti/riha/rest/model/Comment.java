@@ -367,7 +367,6 @@ public class Comment implements BaseModel {
     return resolution_type;
   }
 
-  @DisallowUseMethodForUpdate
   public void setResolution_type(String resolution_type) {
     this.resolution_type = resolution_type;
   }

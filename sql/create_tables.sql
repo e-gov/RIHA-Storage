@@ -359,7 +359,7 @@ CREATE TABLE riha.comment
   type VARCHAR(150) NULL,
   title VARCHAR(255) NULL,
   sub_type VARCHAR(150) NULL,
-  resolution_type VARCHAR(255) NULL
+  resolution_type VARCHAR(255) NULL,
   CONSTRAINT pk_comment PRIMARY KEY (comment_id),
   CONSTRAINT fk_comment_comment FOREIGN KEY (comment_parent_id)
   REFERENCES riha.comment (comment_id) MATCH SIMPLE
