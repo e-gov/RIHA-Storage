@@ -69,6 +69,9 @@ public class Comment_type_issue_view implements BaseModel {
     @Column(name = "infosystem_short_name")
     private String infosystem_short_name;
 
+    @Column(name = "resolution_type")
+    private String resolution_type;
+
     public Integer getComment_id() {
         return comment_id;
     }
@@ -301,5 +304,13 @@ public class Comment_type_issue_view implements BaseModel {
     @Transient
     public void setKind(String kind) {
         throw new UnsupportedOperationException();
+    }
+
+    public String getResolution_type() {
+        return resolution_type;
+    }
+
+    public void setResolution_type(String resolution_type) {
+        this.resolution_type = resolution_type;
     }
 }
