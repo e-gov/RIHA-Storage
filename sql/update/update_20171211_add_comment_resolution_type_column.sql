@@ -1,0 +1,1 @@
+ALTER TABLE riha.comment ADD resolution_type VARCHAR(255) NULL;

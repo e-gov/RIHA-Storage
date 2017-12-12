@@ -359,6 +359,7 @@ CREATE TABLE riha.comment
   type VARCHAR(150) NULL,
   title VARCHAR(255) NULL,
   sub_type VARCHAR(150) NULL,
+  resolution_type VARCHAR(255) NULL
   CONSTRAINT pk_comment PRIMARY KEY (comment_id),
   CONSTRAINT fk_comment_comment FOREIGN KEY (comment_parent_id)
   REFERENCES riha.comment (comment_id) MATCH SIMPLE
@@ -383,6 +384,7 @@ COMMENT ON COLUMN riha.comment.status IS 'Hinnangu staatus';
 COMMENT ON COLUMN riha.comment.type IS 'Hinnangu tüüp';
 COMMENT ON COLUMN riha.comment.title IS 'Hinnangu pealkiri';
 COMMENT ON COLUMN riha.comment.sub_type IS 'Hinnangu alamtüüp';
+COMMENT ON COLUMN riha.comment.resolution_type IS 'Hinnangu resolutsiooni tüüp';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.comment TO riha;
 
