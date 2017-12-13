@@ -73,6 +73,9 @@ public class Comment implements BaseModel {
   @Column(name = "sub_type")
   private String sub_type;
 
+  @Column(name = "resolution_type")
+  private String resolution_type;
+
   /*
    * (non-Javadoc)
    * 
@@ -358,5 +361,13 @@ public class Comment implements BaseModel {
   @DisallowUseMethodForUpdate
   public void setSub_type(String sub_type) {
     this.sub_type = sub_type;
+  }
+
+  public String getResolution_type() {
+    return resolution_type;
+  }
+
+  public void setResolution_type(String resolution_type) {
+    this.resolution_type = resolution_type;
   }
 }

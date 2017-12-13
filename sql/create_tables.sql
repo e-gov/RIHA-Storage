@@ -87,12 +87,12 @@ CREATE TABLE riha.kind
   name character varying(150) NOT NULL, -- Ressursi liigi nimetus
   json_content jsonb,
   state character(1) DEFAULT 'C'::bpchar, -- Olek
-  start_date timestamp without time zone, -- Ressursi tüübi kehtivuse alguse ajamoment
-  end_date timestamp without time zone, -- Ressursi tüübi kehtivuse lõpu ajamoment
+  start_date timestamp with time zone, -- Ressursi tüübi kehtivuse alguse ajamoment
+  end_date timestamp with time zone, -- Ressursi tüübi kehtivuse lõpu ajamoment
   creator character varying(150), -- Kirje tekitaja isikukood
   modifier character varying(150), -- Kirje muutja isikukood
-  creation_date timestamp without time zone, -- Kirje loomise ajamoment
-  modified_date timestamp without time zone, -- Kirje muutmise ajamoment
+  creation_date timestamp with time zone, -- Kirje loomise ajamoment
+  modified_date timestamp with time zone, -- Kirje muutmise ajamoment
   CONSTRAINT pk_kind PRIMARY KEY (kind_id)
 )
 WITH (
@@ -128,12 +128,12 @@ CREATE TABLE riha.main_resource
   main_resource_parent_id integer, -- Hierarhilise ressursi puhul on siin näidatud vanema ID
   kind character varying(150), -- Ressursi liik (infosystem, classifier, service, dictionary, xmlresource vms.)
   state character(1), -- Ressursi olek (C-current, O-old, T-temporary, D-deleted jms.) Vaikimisi 'C'.
-  start_date timestamp without time zone, -- Käesoleva versiooni kehtivuse algus
-  end_date timestamp without time zone, -- Käesoleva versiooni kehtivuse lõpp
+  start_date timestamp with time zone, -- Käesoleva versiooni kehtivuse algus
+  end_date timestamp with time zone, -- Käesoleva versiooni kehtivuse lõpp
   creator character varying(150), -- Kirje loonud isiku isikukood või muu identifikaator
   modifier character varying(150), -- Viimati kirjet muutnud isiku isikukood või muu identifikaator
-  creation_date timestamp without time zone, -- Kirje loomise ajahetk.
-  modified_date timestamp without time zone, -- Kirje viimati muutmise ajahetk.
+  creation_date timestamp with time zone, -- Kirje loomise ajahetk.
+  modified_date timestamp with time zone, -- Kirje viimati muutmise ajahetk.
   old_id integer,
   field_name character varying(150),
   kind_id integer, -- Ressursi liik (infosystem, classifier, service, dictionary, xmlresource vms.).
@@ -223,12 +223,12 @@ CREATE TABLE riha.data_object
   data_object_parent_id integer, -- Hierarhilise andmeobjekti puhul on siin vanema ID
   kind character varying(150), -- Andmeobjekti tüüp (databse, table, field, json, input, output jne)
   state character(1), -- Andmeobjekti staatus (C-current, O-old, T-temporary, D-deleted jne)
-  start_date timestamp without time zone, -- Andmeobjekti versiooni kehtivuse algus
-  end_date timestamp without time zone, -- Andmeobjekti versiooni kehtivuse lõpp
+  start_date timestamp with time zone, -- Andmeobjekti versiooni kehtivuse algus
+  end_date timestamp with time zone, -- Andmeobjekti versiooni kehtivuse lõpp
   creator character varying(150) NOT NULL, -- Kirje loonud isiku isikukood või muu identifikaator
   modifier character varying(150), -- Kirjet viimati muutnud isiku isikukood või muu identifikaator
-  creation_date timestamp without time zone NOT NULL, -- Kirje loomise ajamoment.
-  modified_date timestamp without time zone, -- Kirje viimase muutmise ajamoment.
+  creation_date timestamp with time zone NOT NULL, -- Kirje loomise ajamoment.
+  modified_date timestamp with time zone, -- Kirje viimase muutmise ajamoment.
   field_name character varying(150),
   old_id integer,
   kind_id integer,
@@ -297,12 +297,12 @@ CREATE TABLE riha.document
   mime character varying(150), -- MIME tüüp, kui see on teada
   json_content jsonb, -- Dokumendi info esitatuna json struktuurina.
   state character(1), -- Dokumendi staatus (C-current, D-deleted, O-old, T-temporary jne)
-  start_date timestamp without time zone, -- Dokumendi kehtivuse algus
-  end_date timestamp without time zone, -- Dokumendi kehtivuse lõpp
+  start_date timestamp with time zone, -- Dokumendi kehtivuse algus
+  end_date timestamp with time zone, -- Dokumendi kehtivuse lõpp
   creator character varying(150), -- Kirje loonud isiku isikukood või muu identifikaator
   modifier character varying(150), -- Kirjet viimati muutnud isiku isikukood või muu identifikaator
-  creation_date timestamp without time zone, -- Kirje loomise ajamoment.
-  modified_date timestamp without time zone, -- Kirje viimase muutmise ajamoment.
+  creation_date timestamp with time zone, -- Kirje loomise ajamoment.
+  modified_date timestamp with time zone, -- Kirje viimase muutmise ajamoment.
   main_resource_id integer,
   data_object_id integer,
   field_name character varying(150),
@@ -347,8 +347,8 @@ CREATE TABLE riha.comment
 (
   comment_id integer NOT NULL, -- Kommentaari unikaalne ID.
   comment_parent_id integer, -- Kui on tegemist hierarhilise kommentaariumiga, siis viitab vanemale
-  creation_date timestamp without time zone, -- Kirje tekitamise ajamoment.
-  modified_date timestamp without time zone, -- Kirje viimase muutmise ajamoment.
+  creation_date timestamp with time zone, -- Kirje tekitamise ajamoment.
+  modified_date timestamp with time zone, -- Kirje viimase muutmise ajamoment.
   infosystem_uuid UUID,
   comment VARCHAR,
   author_name VARCHAR(255) NULL,
@@ -359,6 +359,7 @@ CREATE TABLE riha.comment
   type VARCHAR(150) NULL,
   title VARCHAR(255) NULL,
   sub_type VARCHAR(150) NULL,
+  resolution_type VARCHAR(255) NULL,
   CONSTRAINT pk_comment PRIMARY KEY (comment_id),
   CONSTRAINT fk_comment_comment FOREIGN KEY (comment_parent_id)
   REFERENCES riha.comment (comment_id) MATCH SIMPLE
@@ -383,6 +384,7 @@ COMMENT ON COLUMN riha.comment.status IS 'Hinnangu staatus';
 COMMENT ON COLUMN riha.comment.type IS 'Hinnangu tüüp';
 COMMENT ON COLUMN riha.comment.title IS 'Hinnangu pealkiri';
 COMMENT ON COLUMN riha.comment.sub_type IS 'Hinnangu alamtüüp';
+COMMENT ON COLUMN riha.comment.resolution_type IS 'Hinnangu resolutsiooni tüüp';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.comment TO riha;
 
@@ -393,7 +395,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE riha.comment TO riha;
 CREATE TABLE riha.large_object
 (
   id integer NOT NULL,
-  creation_date timestamp without time zone,
+  creation_date timestamp with time zone,
   data oid,
   hash character varying(255),
   length bigint,
@@ -413,7 +415,7 @@ CREATE TABLE riha.file_resource
 (
   uuid uuid NOT NULL,
   content_type character varying(255),
-  creation_date timestamp without time zone,
+  creation_date timestamp with time zone,
   name character varying(255),
   large_object_id integer NOT NULL,
   CONSTRAINT file_resource_pkey PRIMARY KEY (uuid),
@@ -447,9 +449,9 @@ CREATE TABLE riha.main_resource_relation
   main_resource_relation_id INTEGER NOT NULL
     CONSTRAINT main_resource_relation_pkey
     PRIMARY KEY,
-  creation_date             TIMESTAMP,
+  creation_date             TIMESTAMP WITH TIME ZONE,
   infosystem_uuid           UUID,
-  modified_date             TIMESTAMP,
+  modified_date             TIMESTAMP WITH TIME ZONE,
   related_infosystem_uuid   UUID,
   type                      VARCHAR(255)
 );
