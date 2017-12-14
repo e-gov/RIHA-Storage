@@ -231,23 +231,20 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
       // if any of the fields does not exist in model, then query over
       // json_content field
-      boolean allFieldsExistInModel = DaoHelper.allFieldsInFilterAppearInModel(filterComponents, clazz)
-          && DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz);
+      boolean allFilterFieldsExistInModel = DaoHelper.allFieldsInFilterAppearInModel(filterComponents, clazz);
 
-      StringBuffer qry = new StringBuffer();
+      StringBuffer queryString = new StringBuffer();
 
       // next construct where clause separated by AND
       String joinedAsOneStr = "";
 
-      if (allFieldsExistInModel) {
+      //construct HQL query if isCount == false
+      queryString.append(isCount ? "SELECT count(*) FROM (SELECT * FROM " : "SELECT * FROM ")
+              .append(tableName)
+              .append(" item WHERE ");
 
-        if (isCount) {
-          qry.append("SELECT count(*) FROM (SELECT * FROM " + tableName + " item WHERE ");
-        } else {
-          // construct HQL query
-          qry.append("SELECT * FROM " + tableName + " item WHERE ");
-        }
-        Map<String, Object> params = null;
+      Map<String, Object> params = new HashMap<>();
+      if (allFilterFieldsExistInModel) {
         try {
           // Tuple<String, Map<String, Object>> filterTuple = constructSqlFilter(filterComponents, clazz);
           Tuple<String, Map<String, Object>> filterTuple = sqlFilter.constructSqlFilter(filterComponents, clazz);
@@ -264,32 +261,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           e.printStackTrace();
           throw new RuntimeException(e);
         }
-
-        qry.append(joinedAsOneStr);
-
-        // field already checked
-        qry.append(" ORDER BY " + "item." + orderData.getOrderByField() + (orderData.isAsc() ? " ASC " : " DESC "));
-
-        if (isCount) {
-          qry.append(" LIMIT " + limit + " OFFSET " + offset + ") AS foo;");
-          query = session.createSQLQuery(qry.toString());
-        } else {
-          query = session.createSQLQuery(qry.toString()).addEntity(clazz);
-          query.setMaxResults(limit);
-          query.setFirstResult(offset);
-        }
-        query.setProperties(params);
-
       } else {
         // construct postgre SQL query over json_content
-
-        if (isCount) {
-          qry.append("SELECT count(*) FROM (SELECT * FROM " + tableName + " item WHERE ");
-        } else {
-          qry.append("SELECT * FROM " + tableName + " item WHERE ");
-        }
-
-        Map<String, Object> params = new HashMap<>();
         if (jsonFilterFieldsExist(session, tableName, filterComponents)) {
           // Tuple<String, Map<String, Object>> filterTuple = constructSqlOverJsonFilter(filterComponents, clazz);
           Tuple<String, Map<String, Object>> filterTuple = sqlFilter
@@ -300,28 +273,36 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           // always false WHERE clause
           joinedAsOneStr = "1 = 0";
         }
-
-        qry.append(joinedAsOneStr);
-
-        if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
-          String orderByParameterName = "jOrderParameter";
-          qry.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
-
-          String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
-          params.put(orderByParameterName, jsonOrderByFieldName);
-        }
-
-        if (isCount) {
-          qry.append(" LIMIT " + limit + " OFFSET " + offset + ") AS foo;");
-          query = session.createSQLQuery(qry.toString());
-        } else {
-          // get object of type clazz in results
-          query = session.createSQLQuery(qry.toString()).addEntity(clazz);
-          query.setMaxResults(limit);
-          query.setFirstResult(offset);
-        }
-        query.setProperties(params);
       }
+
+      queryString.append(joinedAsOneStr);
+
+      if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
+        String orderByParameterName = "jOrderParameter";
+        queryString.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
+
+        String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
+        params.put(orderByParameterName, jsonOrderByFieldName);
+      } else {
+        queryString.append(" ORDER BY item.")
+                .append(orderData.getOrderByField())
+                .append((orderData.isAsc() ? " ASC " : " DESC "));
+      }
+
+      if (isCount) {
+        queryString.append(" LIMIT ")
+                .append(limit)
+                .append(" OFFSET ")
+                .append(offset)
+                .append(") AS foo;");
+        query = session.createSQLQuery(queryString.toString());
+      } else {
+        // get object of type clazz in results
+        query = session.createSQLQuery(queryString.toString()).addEntity(clazz);
+        query.setMaxResults(limit);
+        query.setFirstResult(offset);
+      }
+      query.setProperties(params);
     }
 
     return query;
