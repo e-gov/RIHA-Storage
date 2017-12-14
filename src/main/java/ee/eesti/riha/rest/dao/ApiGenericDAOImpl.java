@@ -232,6 +232,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       // if any of the fields does not exist in model, then query over
       // json_content field
       boolean allFilterFieldsExistInModel = DaoHelper.allFieldsInFilterAppearInModel(filterComponents, clazz);
+      boolean orderFieldExistsInModel = DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz);
 
       StringBuffer queryString = new StringBuffer();
 
@@ -239,7 +240,10 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       String joinedAsOneStr = "";
 
       //construct HQL query if isCount == false
-      queryString.append(isCount ? "SELECT count(*) FROM (SELECT * FROM " : "SELECT * FROM ")
+      if (isCount) {
+        queryString.append("SELECT count(*) FROM (");
+      }
+      queryString.append("SELECT * FROM ")
               .append(tableName)
               .append(" item WHERE ");
 
@@ -277,16 +281,18 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
       queryString.append(joinedAsOneStr);
 
-      if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
-        String orderByParameterName = "jOrderParameter";
-        queryString.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
-
-        String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
-        params.put(orderByParameterName, jsonOrderByFieldName);
-      } else {
+      if (orderFieldExistsInModel) {
         queryString.append(" ORDER BY item.")
                 .append(orderData.getOrderByField())
                 .append((orderData.isAsc() ? " ASC " : " DESC "));
+      } else {
+        if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
+          String orderByParameterName = "jOrderParameter";
+          queryString.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
+
+          String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
+          params.put(orderByParameterName, jsonOrderByFieldName);
+        }
       }
 
       if (isCount) {
