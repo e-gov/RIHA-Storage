@@ -3,7 +3,6 @@ package ee.eesti.riha.rest.dao.util;
 import java.text.ParseException;
 import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.util.DateHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.logic.util.StringHelper;
-import ee.eesti.riha.rest.logic.util.Tuple;
 import ee.eesti.riha.rest.model.Comment;
 import ee.eesti.riha.rest.model.readonly.Kind;
 
@@ -34,182 +32,171 @@ public class SqlFilter {
   /**
    * Construct sql filter.
    *
-   * @param filterComponents the filter components
+   * @param filterComponent the filter component
    * @param clazz the clazz
-   * @return the tuple
+   * @param params map that contains Hibernate parameters
+   * @param index unique index to use in parametrized properties
+   * @return created filter as string
    * @throws NoSuchFieldException the no such field exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
    * @throws IllegalAccessException the illegal access exception
    * @throws ParseException the parse exception
    */
-  public <T> Tuple<String, Map<String, Object>> constructSqlFilter(List<FilterComponent> filterComponents,
-      Class<T> clazz)
-      throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, ParseException {
-    List<String> allFilters = new ArrayList<>();
-    Map<String, Object> params = new HashMap<>();
-    String joinedAsOneStr = "";
+  public <T> String constructSqlFilter(FilterComponent filterComponent, Class<T> clazz,
+             Map<String, Object> params, int index)
+          throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, ParseException {
     String opRight = "fcOpr";
 
-    for (int i = 0; i < filterComponents.size(); i++) {
-      FilterComponent fc = filterComponents.get(i);
-      // detect type of field (map parameter name to field of
-      // given class)
-      FieldTypeHolder fieldHolder = FieldTypeHolder.construct(clazz, fc.getOperandLeft());
-      // fc.getOperandLeft() is already checked before this method call
-      // it is certain that it is a field in sql table
+    // detect type of field (map parameter name to field of
+    // given class)
+    FieldTypeHolder fieldHolder = FieldTypeHolder.construct(clazz, filterComponent.getOperandLeft());
+    // fc.getOperandLeft() is already checked before this method call
+    // it is certain that it is a field in sql table
 
-      String filterExpr = null;
-      String itemPrefix = ITEM_PREFIX;
+    String filterExpr = null;
+    String itemPrefix = ITEM_PREFIX;
 
-      fc = replaceKindWithKindId(fc, clazz);
-      fieldHolder = FieldTypeHolder.construct(clazz, fc.getOperandLeft());
+    filterComponent = replaceKindWithKindId(filterComponent, clazz);
+    fieldHolder = FieldTypeHolder.construct(clazz, filterComponent.getOperandLeft());
 
-      if (fc.getOperator().equals("isnull")) {
-        filterExpr = itemPrefix + fc.getOperandLeft() + " IS NULL";
+    if (filterComponent.getOperator().equals("isnull")) {
+      filterExpr = itemPrefix + filterComponent.getOperandLeft() + " IS NULL";
 
-      } else if (fc.getOperator().equals("isnotnull")) {
-        filterExpr = itemPrefix + fc.getOperandLeft() + " IS NOT NULL";
+    } else if (filterComponent.getOperator().equals("isnotnull")) {
+      filterExpr = itemPrefix + filterComponent.getOperandLeft() + " IS NOT NULL";
 
-      } else if (fc.getOperator().equals("null_or_<=")) {
+    } else if (filterComponent.getOperator().equals("null_or_<=")) {
 
-        filterExpr = "(" + itemPrefix + fc.getOperandLeft() + " <= :" + (opRight + i) + " OR " + itemPrefix
-            + fc.getOperandLeft() + " IS NULL )";
-        params.put(opRight + i, Double.valueOf(fc.getOperandRight()).intValue());
+      filterExpr = "(" + itemPrefix + filterComponent.getOperandLeft() + " <= :" + (opRight + index) + " OR " + itemPrefix
+          + filterComponent.getOperandLeft() + " IS NULL )";
+      params.put(opRight + index, Double.valueOf(filterComponent.getOperandRight()).intValue());
 
-      } else if (fieldHolder.getType().getName().equals(Integer.class.getName())) {
-        // get Double value because may contain decimal point then get intValue
-        filterExpr = itemPrefix + fc.getOperandLeft() + fc.getOperator()
-            + Double.valueOf(fc.getOperandRight()).intValue();
-      } else if (fc.getOperator().equals("null_or_>")) {
+    } else if (fieldHolder.getType().getName().equals(Integer.class.getName())) {
+      // get Double value because may contain decimal point then get intValue
+      filterExpr = itemPrefix + filterComponent.getOperandLeft() + filterComponent.getOperator()
+          + Double.valueOf(filterComponent.getOperandRight()).intValue();
+    } else if (filterComponent.getOperator().equals("null_or_>")) {
 
-        filterExpr = "(" + itemPrefix + fc.getOperandLeft() + " > :" + (opRight + i) + " OR " + itemPrefix
-            + fc.getOperandLeft() + " IS NULL )";
-        if (fieldHolder.getType().getName().equals(Date.class.getName())) {
-          params.put(opRight + i, DateHelper.fromString(fc.getOperandRight()));
-        } else {
-          throw new IllegalArgumentException("This operator (null_or_>) is meant for end_date");
-        }
-      } else if (fieldHolder.getType().equals(UUID.class)) {
-        filterExpr = itemPrefix + fc.getOperandLeft() + " = " + (":" + (opRight + i) + "\\:\\:uuid");
-        params.put(opRight + i, fc.getOperandRight());
+      filterExpr = "(" + itemPrefix + filterComponent.getOperandLeft() + " > :" + (opRight + index) + " OR " + itemPrefix
+          + filterComponent.getOperandLeft() + " IS NULL )";
+      if (fieldHolder.getType().getName().equals(Date.class.getName())) {
+        params.put(opRight + index, DateHelper.fromString(filterComponent.getOperandRight()));
       } else {
-        // by default treat as string (also applies to date)
-        filterExpr = itemPrefix + fc.getOperandLeft() + " " + fc.getOperator() + " :" + (opRight + i);
-        if (fieldHolder.getType().getName().equals(Date.class.getName())) {
-          params.put(opRight + i, DateHelper.fromString(fc.getOperandRight()));
-        } else {
-          params.put(opRight + i, fc.getOperandRight());
-        }
+        throw new IllegalArgumentException("This operator (null_or_>) is meant for end_date");
       }
-
-      allFilters.add(filterExpr);
+    } else if (fieldHolder.getType().equals(UUID.class)) {
+      filterExpr = itemPrefix + filterComponent.getOperandLeft() + " = " + (":" + (opRight + index) + "\\:\\:uuid");
+      params.put(opRight + index, filterComponent.getOperandRight());
+    } else {
+      // by default treat as string (also applies to date)
+      filterExpr = itemPrefix + filterComponent.getOperandLeft() + " " + filterComponent.getOperator() + " :" + (opRight + index);
+      if (fieldHolder.getType().getName().equals(Date.class.getName())) {
+        params.put(opRight + index, DateHelper.fromString(filterComponent.getOperandRight()));
+      } else {
+        params.put(opRight + index, filterComponent.getOperandRight());
+      }
     }
-    joinedAsOneStr = StringUtils.join(allFilters, " AND ");
-    LOG.info("SQL FILTER: " + joinedAsOneStr + " params " + params);
-    return new Tuple<>(joinedAsOneStr, params);
+
+    return filterExpr;
   }
 
   /**
    * Construct sql over json filter.
    *
-   * @param filterComponents the filter components
+   * @param filterComponent the filter component
    * @param clazz the clazz
-   * @return the tuple
+   * @param params map that contains Hibernate parameters
+   * @param index unique index to use in parametrized properties
+   * @return created filter as string
    * @throws RihaRestException the riha rest exception
    */
-  public <T> Tuple<String, Map<String, Object>> constructSqlOverJsonFilter(List<FilterComponent> filterComponents,
-      Class<T> clazz) throws RihaRestException {
-    List<String> allFilters = new ArrayList<>();
-    String joinedAsOneStr = "";
+  public <T> String constructSqlOverJsonFilter(FilterComponent filterComponent, Class<T> clazz,
+             Map<String, Object> params, int index) throws RihaRestException {
+    String filterExpr = null;
     String opRight = "fcOprJson";
-    Map<String, Object> params = new HashMap<>();
-    for (int i = 0; i < filterComponents.size(); i++) {
-      FilterComponent fc = filterComponents.get(i);
-      String jsonField = "";
-      // fc.getOperandLeft() is already checked before this method call
-      // it is certain that it is a field in sql table json column
 
-      // change kind to kind_id
-      fc = replaceKindWithKindId(fc, clazz);
+    String jsonField = "";
+    // fc.getOperandLeft() is already checked before this method call
+    // it is certain that it is a field in sql table json column
 
-      // if (org.apache.commons.lang3.StringUtils.isNumeric(fc.getOperandRight())) {
-      if (fc.getOperator().equals("isnull")) {
-        jsonField = Finals.JSON_CONTENT + "->>" + "'" + fc.getOperandLeft() + "'";
-        allFilters.add("item." + jsonField + " IS NULL");
+    // change kind to kind_id
+    filterComponent = replaceKindWithKindId(filterComponent, clazz);
 
-      } else if (fc.getOperator().equals("isnotnull")) {
-        jsonField = Finals.JSON_CONTENT + "->>" + "'" + fc.getOperandLeft() + "'";
-        allFilters.add("item." + jsonField + " IS NOT NULL");
+    // if (org.apache.commons.lang3.StringUtils.isNumeric(fc.getOperandRight())) {
+    if (filterComponent.getOperator().equals("isnull")) {
+      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
+      filterExpr = "item." + jsonField + " IS NULL";
 
-      } else if (fc.getOperator().equals("null_or_<=")) {
-        jsonField = Finals.JSON_CONTENT + "->>" + "'" + fc.getOperandLeft() + "'";
-        allFilters.add("(cast(item." + jsonField + " AS int) <= :" + (opRight + i) + " OR item." + jsonField
-            + " IS NULL )");
+    } else if (filterComponent.getOperator().equals("isnotnull")) {
+      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
+      filterExpr = "item." + jsonField + " IS NOT NULL";
 
-        params.put(opRight + i, Double.valueOf(fc.getOperandRight()).intValue());
-      } else if (fc.getOperator().equals("jilike")) {
-        String updatedOperandLeft = fc.getOperandLeft().replaceAll("\\.", ",");
-        String jsonFieldName = "{" + updatedOperandLeft + "}";
+    } else if (filterComponent.getOperator().equals("null_or_<=")) {
+      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
+      filterExpr = "(cast(item." + jsonField + " AS int) <= :" + (opRight + index) + " OR item." + jsonField
+          + " IS NULL )";
 
-        String jsonFieldNameParameter = "jField" + i;
-        allFilters.add("(item." + Finals.JSON_CONTENT + " #>> " + ":" + jsonFieldNameParameter + "\\:\\:text[]) ilike :" + (opRight + i));
+      params.put(opRight + index, Double.valueOf(filterComponent.getOperandRight()).intValue());
+    } else if (filterComponent.getOperator().equals("jilike")) {
+      String updatedOperandLeft = filterComponent.getOperandLeft().replaceAll("\\.", ",");
+      String jsonFieldName = "{" + updatedOperandLeft + "}";
 
-        params.put(jsonFieldNameParameter, jsonFieldName);
-        params.put(opRight + i, fc.getOperandRight());
-      } else if (fc.getOperator().equals("jarr")) {
-        String updatedOperandLeft = fc.getOperandLeft().replaceAll("\\.", ",");
-        String jsonFieldAndArrayParametersValues = "{" + updatedOperandLeft + "}";
+      String jsonFieldNameParameter = "jField" + index;
+      filterExpr = "(item." + Finals.JSON_CONTENT + " #>> " + ":" + jsonFieldNameParameter + "\\:\\:text[]) ilike :" + (opRight + index);
 
-        String jsonFieldNameParameter = "jFieldParam";
-        String jsonArrayTextValueParameter = "jArrayParam";
+      params.put(jsonFieldNameParameter, jsonFieldName);
+      params.put(opRight + index, filterComponent.getOperandRight());
+    } else if (filterComponent.getOperator().equals("jarr")) {
+      String updatedOperandLeft = filterComponent.getOperandLeft().replaceAll("\\.", ",");
+      String jsonFieldAndArrayParametersValues = "{" + updatedOperandLeft + "}";
 
-        String filter = "EXISTS(SELECT FROM jsonb_array_elements_text((" + ITEM_PREFIX + Finals.JSON_CONTENT + " #> :"
-                + jsonFieldNameParameter + "\\:\\:text[])) WHERE " + ITEM_PREFIX + Finals.JSON_CONTENT + " #>> :" + jsonArrayTextValueParameter
-                + "\\:\\:text[] is not null AND value ilike :" + (opRight + i) + ")";
-        allFilters.add(filter);
+      String jsonFieldNameParameter = "jFieldParam";
+      String jsonArrayTextValueParameter = "jArrayParam";
 
-        params.put(jsonFieldNameParameter, jsonFieldAndArrayParametersValues);
-        params.put(jsonArrayTextValueParameter, jsonFieldAndArrayParametersValues);
-        params.put(opRight + i, fc.getOperandRight());
-      } else if (StringHelper.isNumber(fc.getOperandRight())) {
-        jsonField = Finals.JSON_CONTENT + "->>" + "'" + fc.getOperandLeft() + "'";
-        allFilters.add("cast(item." + jsonField + " AS int) " + fc.getOperator() + " :" + (opRight + i));
-        params.put(opRight + i, Double.valueOf(fc.getOperandRight()));
-      } else if (fc.getOperator().equals("?&")) {
+      filterExpr = "EXISTS(SELECT FROM jsonb_array_elements_text((" + ITEM_PREFIX + Finals.JSON_CONTENT + " #> :"
+              + jsonFieldNameParameter + "\\:\\:text[])) WHERE " + ITEM_PREFIX + Finals.JSON_CONTENT + " #>> :" + jsonArrayTextValueParameter
+              + "\\:\\:text[] is not null AND value ilike :" + (opRight + index) + ")";
 
-        if (JsonHelper.isValidJson(fc.getOperandRight()) && JsonHelper.isJsonArray(fc.getOperandRight())) {
-          jsonField = Finals.JSON_CONTENT + "->" + "'" + fc.getOperandLeft() + "'";
-          // workaround can't find a way to escape '?' in query
-          // use without ? instead
-          // https://www.postgresql.org/docs/9.5/static/functions-json.html
-          allFilters.add("item." + jsonField + " @> cast(:" + (opRight + i) + " AS jsonb)");
-          params.put(opRight + i, fc.getOperandRight());
-        } else {
-          RihaRestError error = new RihaRestError();
-          error.setErrcode(ErrorCodes.FILTER_OP_VALUE_MUST_BE_ARRAY);
-          error.setErrmsg(ErrorCodes.FILTER_OP_VALUE_MUST_BE_ARRAY_MSG);
-          error.setErrtrace("Filter: " + fc);
-          throw new RihaRestException(error);
-        }
+      params.put(jsonFieldNameParameter, jsonFieldAndArrayParametersValues);
+      params.put(jsonArrayTextValueParameter, jsonFieldAndArrayParametersValues);
+      params.put(opRight + index, filterComponent.getOperandRight());
+    } else if (StringHelper.isNumber(filterComponent.getOperandRight())) {
+      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
+      filterExpr = "cast(item." + jsonField + " AS int) " + filterComponent.getOperator() + " :" + (opRight + index);
+      params.put(opRight + index, Double.valueOf(filterComponent.getOperandRight()));
+    } else if (filterComponent.getOperator().equals("?&")) {
 
-      } else if (fc.getOperator().equals("null_or_>")) {
-        jsonField = Finals.JSON_CONTENT + "->>" + "'" + fc.getOperandLeft() + "'";
-        allFilters.add("(item." + jsonField + " > :" + (opRight + i) + " OR item." + jsonField + " IS NULL )");
-
-        params.put(opRight + i, fc.getOperandRight());
-
+      if (JsonHelper.isValidJson(filterComponent.getOperandRight()) && JsonHelper.isJsonArray(filterComponent.getOperandRight())) {
+        jsonField = Finals.JSON_CONTENT + "->" + "'" + filterComponent.getOperandLeft() + "'";
+        // workaround can't find a way to escape '?' in query
+        // use without ? instead
+        // https://www.postgresql.org/docs/9.5/static/functions-json.html
+        filterExpr = "item." + jsonField + " @> cast(:" + (opRight + index) + " AS jsonb)";
+        params.put(opRight + index, filterComponent.getOperandRight());
       } else {
-        jsonField = Finals.JSON_CONTENT + "->>" + "'" + fc.getOperandLeft() + "'";
-        allFilters.add("item." + jsonField + " " + fc.getOperator() + " :" + (opRight + i));
-        params.put(opRight + i, fc.getOperandRight());
+        RihaRestError error = new RihaRestError();
+        error.setErrcode(ErrorCodes.FILTER_OP_VALUE_MUST_BE_ARRAY);
+        error.setErrmsg(ErrorCodes.FILTER_OP_VALUE_MUST_BE_ARRAY_MSG);
+        error.setErrtrace("Filter: " + filterComponent);
+        throw new RihaRestException(error);
       }
-      // allFilters.add("item." + jsonField + " " + fc.getOperator() + " :" + (opRight + i));
-      // params.put(opRight + i, fc.getOperandRight());
+
+    } else if (filterComponent.getOperator().equals("null_or_>")) {
+      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
+      filterExpr = "(item." + jsonField + " > :" + (opRight + index) + " OR item." + jsonField + " IS NULL )";
+
+      params.put(opRight + index, filterComponent.getOperandRight());
+
+    } else {
+      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
+      filterExpr = "item." + jsonField + " " + filterComponent.getOperator() + " :" + (opRight + index);
+      params.put(opRight + index, filterComponent.getOperandRight());
     }
-    joinedAsOneStr = StringUtils.join(allFilters, " AND ");
-    LOG.info("SQL JSON FILTER: " + joinedAsOneStr + " params " + params);
-    return new Tuple<>(joinedAsOneStr, params);
+    // allFilters.add("item." + jsonField + " " + fc.getOperator() + " :" + (opRight + i));
+    // params.put(opRight + i, fc.getOperandRight());
+
+    return filterExpr;
   }
 
   private <T> FilterComponent replaceKindWithKindId(FilterComponent fc, Class<T> clazz) {

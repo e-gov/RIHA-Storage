@@ -231,57 +231,59 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
       // if any of the fields does not exist in model, then query over
       // json_content field
-      boolean allFilterFieldsExistInModel = DaoHelper.allFieldsInFilterAppearInModel(filterComponents, clazz);
-      boolean orderFieldExistsInModel = DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz);
 
       StringBuffer queryString = new StringBuffer();
 
       // next construct where clause separated by AND
       String joinedAsOneStr = "";
-
+      List<String> allFilters = new ArrayList<>();
       //construct HQL query if isCount == false
       if (isCount) {
         queryString.append("SELECT count(*) FROM (");
       }
       queryString.append("SELECT * FROM ")
               .append(tableName)
-              .append(" item WHERE ");
+              .append(" item ");
 
       Map<String, Object> params = new HashMap<>();
-      if (allFilterFieldsExistInModel) {
-        try {
-          // Tuple<String, Map<String, Object>> filterTuple = constructSqlFilter(filterComponents, clazz);
-          Tuple<String, Map<String, Object>> filterTuple = sqlFilter.constructSqlFilter(filterComponents, clazz);
-          // joinedAsOneStr = constructSqlFilter(filterComponents, clazz);
-          joinedAsOneStr = filterTuple.x;
-          params = filterTuple.y;
-        } catch (NumberFormatException e) {
-          MyExceptionHandler.numberFormat(e, " filter " + filterComponents);
-        } catch (ParseException e) {
-          MyExceptionHandler.dateFormat(e, " filter " + filterComponents);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-          // this should never happen, because allFieldsExistInModel
-          // already tested whether field exists or not
-          e.printStackTrace();
-          throw new RuntimeException(e);
-        }
-      } else {
-        // construct postgre SQL query over json_content
-        if (jsonFilterFieldsExist(session, tableName, filterComponents)) {
-          // Tuple<String, Map<String, Object>> filterTuple = constructSqlOverJsonFilter(filterComponents, clazz);
-          Tuple<String, Map<String, Object>> filterTuple = sqlFilter
-              .constructSqlOverJsonFilter(filterComponents, clazz);
-          joinedAsOneStr = filterTuple.x;
-          params = filterTuple.y;
+      for (int i = 0 ; i < filterComponents.size(); i++) {
+        FilterComponent filterComponent = filterComponents.get(i);
+        if (DaoHelper.isFieldPartOfModel(filterComponent.getOperandLeft(), clazz)) {
+          try {
+            String filter = sqlFilter.constructSqlFilter(filterComponent, clazz, params, i);
+            allFilters.add(filter);
+          } catch (NumberFormatException e) {
+            MyExceptionHandler.numberFormat(e, " filter " + filterComponents);
+          } catch (ParseException e) {
+            MyExceptionHandler.dateFormat(e, " filter " + filterComponents);
+          } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            // this should never happen, because allFieldsExistInModel
+            // already tested whether field exists or not
+            e.printStackTrace();
+            throw new RuntimeException(e);
+          }
         } else {
-          // always false WHERE clause
-          joinedAsOneStr = "1 = 0";
+          if (jsonFieldExists(session, tableName, filterComponent.getOperandLeft())) {
+            String filter = sqlFilter.constructSqlOverJsonFilter(filterComponent, clazz, params, i);
+            allFilters.add(filter);
+          }
         }
       }
 
+      joinedAsOneStr = StringUtils.join(allFilters, " AND ");
+      if (!allFilters.isEmpty()) {
+        queryString.append("WHERE ");
+      }
       queryString.append(joinedAsOneStr);
+      LOG.info("SQL FILTER: " + joinedAsOneStr + " params " + params);
 
-      if (orderFieldExistsInModel) {
+      if (allFilters.isEmpty()) {
+        LOG.info("SQL FILTER: No existing filter fields were found.");
+      } else if (allFilters.size() != filterComponents.size()) {
+        LOG.info("SQL FILTER: Some filter fields were not taken into account as they exist neither in model nor in JSON content.");
+      }
+
+      if (DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz)) {
         queryString.append(" ORDER BY item.")
                 .append(orderData.getOrderByField())
                 .append((orderData.isAsc() ? " ASC " : " DESC "));
@@ -292,6 +294,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
           String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
           params.put(orderByParameterName, jsonOrderByFieldName);
+        } else {
+          LOG.info("Sorting order field was not taken into account as it exists neither in model nor in JSON content.");
         }
       }
 
@@ -951,6 +955,12 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     }
     // select count(*) from main_resource
     // where (json_content->'test_abc') is not null;
+
+    Class classRepresentingTable = Finals.getClassRepresentingTable(tableName) == null ?
+            Finals.getClassRepresentingTableReadOnly(tableName) : Finals.getClassRepresentingTable(tableName);
+    if (!JsonContentBasedTable.isJsonContentBasedTable(classRepresentingTable)) {
+      return false;
+    }
 
     // Construct SQL query respecting nested keys
     String[] keyTokens = StringUtils.split(key, ".");
