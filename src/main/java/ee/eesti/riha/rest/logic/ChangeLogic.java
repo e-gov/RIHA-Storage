@@ -105,7 +105,6 @@ public class ChangeLogic<T, K> {
       // all = genericDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
       all = secureDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
       replaceContentWithFileUrl(all, appConfigURL.getRestApiBaseUrl());
-      all = filterByFields(all, fields);
 
       // FileHelper.readDocumentFileToContent(all, classRepresentingTable);
     } catch (RihaRestException e) {
@@ -235,7 +234,6 @@ public class ChangeLogic<T, K> {
 
     // List<T> entityList = genericDAO.findByMainResourceId(classRepresentingTable, id);
     List<T> entityList = secureDAO.findByMainResourceId(classRepresentingTable, id);
-    entityList = tableEntryReadLogic.getAdjustedObjsBasedOnExpectedJson(entityList, null);
 
     // INFO: file content inclusion
     // FileHelper.readDocumentFileToContent(entityList, classRepresentingTable);
@@ -261,7 +259,6 @@ public class ChangeLogic<T, K> {
     Validator.noSuchIdInGivenTable(entity, id);
 
     replaceContentWithFileUrl(entity, id, appConfigURL.getRestApiBaseUrl());
-    entity = filterByFields(entity, fields);
 
     // FileHelper.readDocumentFileToContent(entity, classRepresentingTable);
 
@@ -501,12 +498,6 @@ public class ChangeLogic<T, K> {
       LOG.info(JsonHelper.GSON.toJson(items));
       List<T> itemList = new ArrayList<>(Arrays.asList(items));
 
-      // set modifed jsonObject to corresponding item
-      for (int i = 0; i < itemList.size(); i++) {
-        JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
-        ((BaseModel) itemList.get(i)).setJson_content(jsonObject);
-      }
-
       try {
         if (StringHelper.areEqual(idFieldName, Finals.KIND) && classRepresentingTable != Comment.class) {
           // kind doesn't exist in database, must be replaced
@@ -532,7 +523,6 @@ public class ChangeLogic<T, K> {
 
       // create from modified
       T item = JsonHelper.GSON.fromJson(jsonObject, classRepresentingTable);
-      ((BaseModel) item).setJson_content(jsonObject);
       // id needed to create file path
       ((BaseModel) item).callSetId(id);
 

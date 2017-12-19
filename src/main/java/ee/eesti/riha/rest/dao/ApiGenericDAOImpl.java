@@ -511,12 +511,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       return 0;
     }
 
-    if (JsonContentBasedTable.isJsonContentBasedTable(clazz)) {
-      return updateJsonContentEntity(existing, newValue);
-    } else {
       return updateEntity(existing, newValue);
-    }
-
   }
 
   private int updateJsonContentEntity(T existing, T newValue) throws RihaRestException {
