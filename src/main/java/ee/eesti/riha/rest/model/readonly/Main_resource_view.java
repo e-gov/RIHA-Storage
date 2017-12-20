@@ -60,6 +60,13 @@ public class Main_resource_view implements BaseModel {
     @Column(name = "j_creation_timestamp")
     private Date j_creation_timestamp;
 
+    @Column(name = "last_positive_approval_request_type")
+    private String last_positive_approval_request_type;
+
+    @Column(name = "last_positive_approval_request_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date last_positive_approval_request_date;
+
     public Integer getMain_resource_id() {
         return main_resource_id;
     }
@@ -142,5 +149,21 @@ public class Main_resource_view implements BaseModel {
     @Override
     public void setKind(String kind) {
         throw new UnsupportedOperationException();
+    }
+
+    public String getLast_positive_approval_request_type() {
+        return last_positive_approval_request_type;
+    }
+
+    public void setLast_positive_approval_request_type(String last_positive_approval_request_type) {
+        this.last_positive_approval_request_type = last_positive_approval_request_type;
+    }
+
+    public Date getLast_positive_approval_request_date() {
+        return last_positive_approval_request_date;
+    }
+
+    public void setLast_positive_approval_request_date(Date last_positive_approval_request_date) {
+        this.last_positive_approval_request_date = last_positive_approval_request_date;
     }
 }
