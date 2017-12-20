@@ -206,15 +206,6 @@ public class TableEntryCreateLogic<T extends BaseModel> {
     entity.callSetId(pkId);
     entity.setCreation_date(dt);
 
-    // When dealing with json content table, initialize json_content field with source json and check if it was set correctly
-    if (JsonContentBasedTable.isJsonContentBasedTable(classRepresentingTable)) {
-      entity.setJson_content(jsonContent);
-      if (entity.getJson_content() == null) {
-        throw new IllegalArgumentException("JsonContent can't be null! JsonContent " + jsonContent + " Created object "
-                                                   + entity);
-      }
-    }
-
     return entity;
   }
 

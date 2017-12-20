@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -41,9 +42,17 @@ public class Main_resource implements BaseModel {
   @Id
   @Column(updatable = false)
   private Integer main_resource_id;
+
+  @JsonIgnore
   private String uri;
+
+  @JsonIgnore
   private String name;
+
+  @JsonIgnore
   private String short_name;
+
+  @JsonIgnore
   private String version;
 
   // http://stackoverflow.com/questions/15974474/mapping-postgresql-json-column-to-hibernate-value-type
@@ -53,35 +62,51 @@ public class Main_resource implements BaseModel {
   @Type(type = "JsonObject")
   private JsonObject json_content;
 
+  @JsonIgnore
   private String parent_uri;
+
+  @JsonIgnore
   private Integer main_resource_parent_id;
+
+  @JsonIgnore
   private String kind;
+
+  @JsonIgnore
   private Character state;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
+  @JsonIgnore
   @Temporal(TemporalType.TIMESTAMP)
   private Date start_date;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
+  @JsonIgnore
   @Temporal(TemporalType.TIMESTAMP)
   private Date end_date;
+
+  @JsonIgnore
   private String creator;
+
+  @JsonIgnore
   private String modifier;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
+  @JsonIgnore
   @Temporal(TemporalType.TIMESTAMP)
   private Date creation_date;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
+  @JsonIgnore
   @Temporal(TemporalType.TIMESTAMP)
   private Date modified_date;
 
+  @JsonIgnore
   private Integer old_id;
+
+  @JsonIgnore
   private String field_name;
 
+  @JsonIgnore
   private Integer kind_id;
 
   // Needed for indication that this field should not be searched in json content
+  @JsonIgnore
   private String search_content;
 
   /*
