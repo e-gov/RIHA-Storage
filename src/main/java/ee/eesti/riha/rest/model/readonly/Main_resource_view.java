@@ -1,8 +1,6 @@
 package ee.eesti.riha.rest.model.readonly;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.annotation.*;
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.model.BaseModel;
@@ -29,30 +27,45 @@ public class Main_resource_view implements BaseModel {
     @Id
     @Column(updatable = false)
     private Integer main_resource_id;
+
+    @JsonIgnore
     private String uri;
 
     @JsonRawValue
     @Type(type = "JsonObject")
     private JsonObject json_content;
 
+    @JsonIgnore
     private String creator;
+
+    @JsonIgnore
     private String modifier;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
+    @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     private Date creation_date;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
+    @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     private Date modified_date;
 
+    @JsonIgnore
     private String kind;
 
     // Needed for indication that this field should not be searched in json content
+    @JsonIgnore
     private String search_content;
 
+    @JsonIgnore
     @Column(name = "j_creation_timestamp")
     private Date j_creation_timestamp;
+
+    @Column(name = "last_positive_approval_request_type")
+    private String last_positive_approval_request_type;
+
+    @Column(name = "last_positive_approval_request_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date last_positive_approval_request_date;
 
     public Integer getMain_resource_id() {
         return main_resource_id;
@@ -136,5 +149,21 @@ public class Main_resource_view implements BaseModel {
     @Override
     public void setKind(String kind) {
         throw new UnsupportedOperationException();
+    }
+
+    public String getLast_positive_approval_request_type() {
+        return last_positive_approval_request_type;
+    }
+
+    public void setLast_positive_approval_request_type(String last_positive_approval_request_type) {
+        this.last_positive_approval_request_type = last_positive_approval_request_type;
+    }
+
+    public Date getLast_positive_approval_request_date() {
+        return last_positive_approval_request_date;
+    }
+
+    public void setLast_positive_approval_request_date(Date last_positive_approval_request_date) {
+        this.last_positive_approval_request_date = last_positive_approval_request_date;
     }
 }

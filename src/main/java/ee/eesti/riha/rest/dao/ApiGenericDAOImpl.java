@@ -231,97 +231,88 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
       // if any of the fields does not exist in model, then query over
       // json_content field
-      boolean allFieldsExistInModel = DaoHelper.allFieldsInFilterAppearInModel(filterComponents, clazz)
-          && DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz);
 
-      StringBuffer qry = new StringBuffer();
+      StringBuffer queryString = new StringBuffer();
 
       // next construct where clause separated by AND
       String joinedAsOneStr = "";
+      List<String> allFilters = new ArrayList<>();
+      //construct HQL query if isCount == false
+      if (isCount) {
+        queryString.append("SELECT count(*) FROM (");
+      }
+      queryString.append("SELECT * FROM ")
+              .append(tableName)
+              .append(" item ");
 
-      if (allFieldsExistInModel) {
-
-        if (isCount) {
-          qry.append("SELECT count(*) FROM (SELECT * FROM " + tableName + " item WHERE ");
+      Map<String, Object> params = new HashMap<>();
+      for (int i = 0 ; i < filterComponents.size(); i++) {
+        FilterComponent filterComponent = filterComponents.get(i);
+        if (DaoHelper.isFieldPartOfModel(filterComponent.getOperandLeft(), clazz)) {
+          try {
+            String filter = sqlFilter.constructSqlFilter(filterComponent, clazz, params, i);
+            allFilters.add(filter);
+          } catch (NumberFormatException e) {
+            MyExceptionHandler.numberFormat(e, " filter " + filterComponents);
+          } catch (ParseException e) {
+            MyExceptionHandler.dateFormat(e, " filter " + filterComponents);
+          } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            // this should never happen, because allFieldsExistInModel
+            // already tested whether field exists or not
+            e.printStackTrace();
+            throw new RuntimeException(e);
+          }
         } else {
-          // construct HQL query
-          qry.append("SELECT * FROM " + tableName + " item WHERE ");
+          if (jsonFieldExists(session, tableName, filterComponent.getOperandLeft())) {
+            String filter = sqlFilter.constructSqlOverJsonFilter(filterComponent, clazz, params, i);
+            allFilters.add(filter);
+          }
         }
-        Map<String, Object> params = null;
-        try {
-          // Tuple<String, Map<String, Object>> filterTuple = constructSqlFilter(filterComponents, clazz);
-          Tuple<String, Map<String, Object>> filterTuple = sqlFilter.constructSqlFilter(filterComponents, clazz);
-          // joinedAsOneStr = constructSqlFilter(filterComponents, clazz);
-          joinedAsOneStr = filterTuple.x;
-          params = filterTuple.y;
-        } catch (NumberFormatException e) {
-          MyExceptionHandler.numberFormat(e, " filter " + filterComponents);
-        } catch (ParseException e) {
-          MyExceptionHandler.dateFormat(e, " filter " + filterComponents);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-          // this should never happen, because allFieldsExistInModel
-          // already tested whether field exists or not
-          e.printStackTrace();
-          throw new RuntimeException(e);
-        }
+      }
 
-        qry.append(joinedAsOneStr);
+      joinedAsOneStr = StringUtils.join(allFilters, " AND ");
+      if (!allFilters.isEmpty()) {
+        queryString.append("WHERE ");
+      }
+      queryString.append(joinedAsOneStr);
+      LOG.info("SQL FILTER: " + joinedAsOneStr + " params " + params);
 
-        // field already checked
-        qry.append(" ORDER BY " + "item." + orderData.getOrderByField() + (orderData.isAsc() ? " ASC " : " DESC "));
+      if (allFilters.isEmpty()) {
+        LOG.info("SQL FILTER: No existing filter fields were found.");
+      } else if (allFilters.size() != filterComponents.size()) {
+        LOG.info("SQL FILTER: Some filter fields were not taken into account as they exist neither in model nor in JSON content.");
+      }
 
-        if (isCount) {
-          qry.append(" LIMIT " + limit + " OFFSET " + offset + ") AS foo;");
-          query = session.createSQLQuery(qry.toString());
-        } else {
-          query = session.createSQLQuery(qry.toString()).addEntity(clazz);
-          query.setMaxResults(limit);
-          query.setFirstResult(offset);
-        }
-        query.setProperties(params);
-
+      if (DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz)) {
+        queryString.append(" ORDER BY item.")
+                .append(orderData.getOrderByField())
+                .append((orderData.isAsc() ? " ASC " : " DESC "));
       } else {
-        // construct postgre SQL query over json_content
-
-        if (isCount) {
-          qry.append("SELECT count(*) FROM (SELECT * FROM " + tableName + " item WHERE ");
-        } else {
-          qry.append("SELECT * FROM " + tableName + " item WHERE ");
-        }
-
-        Map<String, Object> params = new HashMap<>();
-        if (jsonFilterFieldsExist(session, tableName, filterComponents)) {
-          // Tuple<String, Map<String, Object>> filterTuple = constructSqlOverJsonFilter(filterComponents, clazz);
-          Tuple<String, Map<String, Object>> filterTuple = sqlFilter
-              .constructSqlOverJsonFilter(filterComponents, clazz);
-          joinedAsOneStr = filterTuple.x;
-          params = filterTuple.y;
-        } else {
-          // always false WHERE clause
-          joinedAsOneStr = "1 = 0";
-        }
-
-        qry.append(joinedAsOneStr);
-
         if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
           String orderByParameterName = "jOrderParameter";
-          qry.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
+          queryString.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
 
           String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
           params.put(orderByParameterName, jsonOrderByFieldName);
-        }
-
-        if (isCount) {
-          qry.append(" LIMIT " + limit + " OFFSET " + offset + ") AS foo;");
-          query = session.createSQLQuery(qry.toString());
         } else {
-          // get object of type clazz in results
-          query = session.createSQLQuery(qry.toString()).addEntity(clazz);
-          query.setMaxResults(limit);
-          query.setFirstResult(offset);
+          LOG.info("Sorting order field was not taken into account as it exists neither in model nor in JSON content.");
         }
-        query.setProperties(params);
       }
+
+      if (isCount) {
+        queryString.append(" LIMIT ")
+                .append(limit)
+                .append(" OFFSET ")
+                .append(offset)
+                .append(") AS foo;");
+        query = session.createSQLQuery(queryString.toString());
+      } else {
+        // get object of type clazz in results
+        query = session.createSQLQuery(queryString.toString()).addEntity(clazz);
+        query.setMaxResults(limit);
+        query.setFirstResult(offset);
+      }
+      query.setProperties(params);
     }
 
     return query;
@@ -511,12 +502,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       return 0;
     }
 
-    if (JsonContentBasedTable.isJsonContentBasedTable(clazz)) {
-      return updateJsonContentEntity(existing, newValue);
-    } else {
       return updateEntity(existing, newValue);
-    }
-
   }
 
   private int updateJsonContentEntity(T existing, T newValue) throws RihaRestException {
@@ -964,6 +950,12 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     }
     // select count(*) from main_resource
     // where (json_content->'test_abc') is not null;
+
+    Class classRepresentingTable = Finals.getClassRepresentingTable(tableName) == null ?
+            Finals.getClassRepresentingTableReadOnly(tableName) : Finals.getClassRepresentingTable(tableName);
+    if (!JsonContentBasedTable.isJsonContentBasedTable(classRepresentingTable)) {
+      return false;
+    }
 
     // Construct SQL query respecting nested keys
     String[] keyTokens = StringUtils.split(key, ".");
