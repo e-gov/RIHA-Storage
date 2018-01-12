@@ -60,6 +60,10 @@ public class Main_resource_view implements BaseModel {
     @Column(name = "j_creation_timestamp")
     private Date j_creation_timestamp;
 
+    @JsonIgnore
+    @Column(name = "j_update_timestamp")
+    private Date j_update_timestamp;
+
     @Column(name = "last_positive_approval_request_type")
     private String last_positive_approval_request_type;
 
