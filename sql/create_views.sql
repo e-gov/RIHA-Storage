@@ -1,4 +1,5 @@
 DROP VIEW IF EXISTS riha.main_resource_view CASCADE;
+
 CREATE OR REPLACE VIEW riha.main_resource_view AS
   SELECT DISTINCT ON (json_content ->> 'uuid')
     main_resource.*,
@@ -7,7 +8,10 @@ CREATE OR REPLACE VIEW riha.main_resource_view AS
     ((main_resource.json_content #>>
       '{meta,update_timestamp}' :: TEXT [])) :: TIMESTAMP WITH TIME ZONE   AS j_update_timestamp,
     last_positive_approval_request.sub_type                                AS last_positive_approval_request_type,
-    last_positive_approval_request.modified_date                           AS last_positive_approval_request_date
+    last_positive_approval_request.modified_date                           AS last_positive_approval_request_date,
+    last_positive_establishment_request.modified_date                      AS last_positive_establishment_request_date,
+    last_positive_take_into_use_request.modified_date                      AS last_positive_take_into_use_request_date,
+    last_positive_finalization_request.modified_date                       AS last_positive_finalization_request_date
   FROM riha.main_resource AS main_resource
     LEFT JOIN (SELECT DISTINCT ON (infosystem_uuid)
                  infosystem_uuid,
@@ -23,6 +27,39 @@ CREATE OR REPLACE VIEW riha.main_resource_view AS
                  AND resolution_type = 'POSITIVE'
                ORDER BY infosystem_uuid, modified_date DESC) AS last_positive_approval_request
       ON (json_content ->> 'uuid') :: UUID = last_positive_approval_request.infosystem_uuid
+    LEFT JOIN (SELECT DISTINCT ON (infosystem_uuid)
+                infosystem_uuid,
+                modified_date
+              FROM riha.comment
+              WHERE
+                type = 'ISSUE'
+                AND sub_type = 'ESTABLISHMENT_REQUEST'
+                AND status = 'CLOSED'
+                AND resolution_type = 'POSITIVE'
+              ORDER BY infosystem_uuid, modified_date DESC) AS last_positive_establishment_request
+      ON (json_content ->> 'uuid') :: UUID = last_positive_establishment_request.infosystem_uuid
+      LEFT JOIN (SELECT DISTINCT ON (infosystem_uuid)
+                infosystem_uuid,
+                modified_date
+              FROM riha.comment
+              WHERE
+                type = 'ISSUE'
+                AND sub_type = 'TAKE_INTO_USE_REQUEST'
+                AND status = 'CLOSED'
+                AND resolution_type = 'POSITIVE'
+              ORDER BY infosystem_uuid, modified_date DESC) AS last_positive_take_into_use_request
+      ON (json_content ->> 'uuid') :: UUID = last_positive_take_into_use_request.infosystem_uuid
+      LEFT JOIN (SELECT DISTINCT ON (infosystem_uuid)
+                infosystem_uuid,
+                modified_date
+              FROM riha.comment
+              WHERE
+                type = 'ISSUE'
+                AND sub_type = 'FINALIZATION_REQUEST'
+                AND status = 'CLOSED'
+                AND resolution_type = 'POSITIVE'
+              ORDER BY infosystem_uuid, modified_date DESC) AS last_positive_finalization_request
+      ON (json_content ->> 'uuid') :: UUID = last_positive_finalization_request.infosystem_uuid
   ORDER BY json_content ->> 'uuid',
     j_update_timestamp DESC NULLS LAST,
     main_resource_id DESC;
