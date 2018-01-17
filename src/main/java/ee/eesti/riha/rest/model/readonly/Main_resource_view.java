@@ -60,12 +60,28 @@ public class Main_resource_view implements BaseModel {
     @Column(name = "j_creation_timestamp")
     private Date j_creation_timestamp;
 
+    @JsonIgnore
+    @Column(name = "j_update_timestamp")
+    private Date j_update_timestamp;
+
     @Column(name = "last_positive_approval_request_type")
     private String last_positive_approval_request_type;
 
     @Column(name = "last_positive_approval_request_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date last_positive_approval_request_date;
+
+    @Column(name = "last_positive_establishment_request_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date last_positive_establishment_request_date;
+
+    @Column(name = "last_positive_take_into_use_request_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date last_positive_take_into_use_request_date;
+
+    @Column(name = "last_positive_finalization_request_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date last_positive_finalization_request_date;
 
     public Integer getMain_resource_id() {
         return main_resource_id;
@@ -165,5 +181,29 @@ public class Main_resource_view implements BaseModel {
 
     public void setLast_positive_approval_request_date(Date last_positive_approval_request_date) {
         this.last_positive_approval_request_date = last_positive_approval_request_date;
+    }
+
+    public Date getLast_positive_establishment_request_date() {
+        return last_positive_establishment_request_date;
+    }
+
+    public void setLast_positive_establishment_request_date(Date last_positive_establishment_request_date) {
+        this.last_positive_establishment_request_date = last_positive_establishment_request_date;
+    }
+
+    public Date getLast_positive_take_into_use_request_date() {
+        return last_positive_take_into_use_request_date;
+    }
+
+    public void setLast_positive_take_into_use_request_date(Date last_positive_take_into_use_request_date) {
+        this.last_positive_take_into_use_request_date = last_positive_take_into_use_request_date;
+    }
+
+    public Date getLast_positive_finalization_request_date() {
+        return last_positive_finalization_request_date;
+    }
+
+    public void setLast_positive_finalization_request_date(Date last_positive_finalization_request_date) {
+        this.last_positive_finalization_request_date = last_positive_finalization_request_date;
     }
 }
