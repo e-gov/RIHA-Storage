@@ -124,56 +124,56 @@ public class SqlFilter {
     filterComponent = replaceKindWithKindId(filterComponent, clazz);
 
     // if (org.apache.commons.lang3.StringUtils.isNumeric(fc.getOperandRight())) {
+    String updatedOperandLeft = filterComponent.getOperandLeft().replaceAll("\\.", ",");
+    String jsonTextFieldName = "{" + updatedOperandLeft + "}";
+    String jsonFieldNameParameter = "jField" + index;
+
     if (filterComponent.getOperator().equals("isnull")) {
-      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
-      filterExpr = "item." + jsonField + " IS NULL";
-
+      filterExpr = "item." + Finals.JSON_CONTENT + " ->> :" + jsonFieldNameParameter + " IS NULL";
+      params.put(jsonFieldNameParameter, updatedOperandLeft);
     } else if (filterComponent.getOperator().equals("isnotnull")) {
-      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
-      filterExpr = "item." + jsonField + " IS NOT NULL";
-
+      filterExpr = "item." + Finals.JSON_CONTENT + " ->> :" + jsonFieldNameParameter + " IS NOT NULL";
+      params.put(jsonFieldNameParameter, updatedOperandLeft);
     } else if (filterComponent.getOperator().equals("null_or_<=")) {
-      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
-      filterExpr = "(cast(item." + jsonField + " AS int) <= :" + (opRight + index) + " OR item." + jsonField
-          + " IS NULL )";
+      String jsonNextFieldNameParameter = "jFieldNext" + index;
+      filterExpr = "(cast(item." + Finals.JSON_CONTENT + " ->> :" + jsonFieldNameParameter + " AS int) <= :"
+              + (opRight + index) + " OR item." + Finals.JSON_CONTENT + " ->> :"
+              + jsonNextFieldNameParameter + " IS NULL )";
 
       params.put(opRight + index, Double.valueOf(filterComponent.getOperandRight()).intValue());
+      params.put(jsonFieldNameParameter, updatedOperandLeft);
+      params.put(jsonNextFieldNameParameter, updatedOperandLeft);
     } else if (filterComponent.getOperator().equals("jilike")) {
-      String updatedOperandLeft = filterComponent.getOperandLeft().replaceAll("\\.", ",");
-      String jsonFieldName = "{" + updatedOperandLeft + "}";
+      filterExpr = "(item." + Finals.JSON_CONTENT + " #>> " + ":" + jsonFieldNameParameter
+              + "\\:\\:text[]) ilike :" + (opRight + index);
 
-      String jsonFieldNameParameter = "jField" + index;
-      filterExpr = "(item." + Finals.JSON_CONTENT + " #>> " + ":" + jsonFieldNameParameter + "\\:\\:text[]) ilike :" + (opRight + index);
-
-      params.put(jsonFieldNameParameter, jsonFieldName);
+      params.put(jsonFieldNameParameter, jsonTextFieldName);
       params.put(opRight + index, filterComponent.getOperandRight());
     } else if (filterComponent.getOperator().equals("jarr")) {
-      String updatedOperandLeft = filterComponent.getOperandLeft().replaceAll("\\.", ",");
-      String jsonFieldAndArrayParametersValues = "{" + updatedOperandLeft + "}";
-
-      String jsonFieldNameParameter = "jFieldParam";
-      String jsonArrayTextValueParameter = "jArrayParam";
+      String jsonNextFieldNameParameter = "jFieldNext" + index;
 
       filterExpr = "EXISTS(SELECT FROM jsonb_array_elements_text((" + ITEM_PREFIX + Finals.JSON_CONTENT + " #> :"
-              + jsonFieldNameParameter + "\\:\\:text[])) WHERE " + ITEM_PREFIX + Finals.JSON_CONTENT + " #>> :" + jsonArrayTextValueParameter
+              + jsonFieldNameParameter + "\\:\\:text[])) WHERE " + ITEM_PREFIX + Finals.JSON_CONTENT + " #>> :" + jsonNextFieldNameParameter
               + "\\:\\:text[] is not null AND value ilike :" + (opRight + index) + ")";
 
-      params.put(jsonFieldNameParameter, jsonFieldAndArrayParametersValues);
-      params.put(jsonArrayTextValueParameter, jsonFieldAndArrayParametersValues);
+      params.put(jsonFieldNameParameter, jsonTextFieldName);
+      params.put(jsonNextFieldNameParameter, jsonTextFieldName);
       params.put(opRight + index, filterComponent.getOperandRight());
     } else if (StringHelper.isNumber(filterComponent.getOperandRight())) {
-      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
-      filterExpr = "cast(item." + jsonField + " AS int) " + filterComponent.getOperator() + " :" + (opRight + index);
+      filterExpr = "cast(item." + Finals.JSON_CONTENT + " ->> :" + jsonFieldNameParameter + " AS int) "
+              + filterComponent.getOperator() + " :" + (opRight + index);
       params.put(opRight + index, Double.valueOf(filterComponent.getOperandRight()));
+      params.put(jsonFieldNameParameter, updatedOperandLeft);
     } else if (filterComponent.getOperator().equals("?&")) {
 
       if (JsonHelper.isValidJson(filterComponent.getOperandRight()) && JsonHelper.isJsonArray(filterComponent.getOperandRight())) {
-        jsonField = Finals.JSON_CONTENT + "->" + "'" + filterComponent.getOperandLeft() + "'";
         // workaround can't find a way to escape '?' in query
         // use without ? instead
         // https://www.postgresql.org/docs/9.5/static/functions-json.html
-        filterExpr = "item." + jsonField + " @> cast(:" + (opRight + index) + " AS jsonb)";
+        filterExpr = "item." + Finals.JSON_CONTENT + " -> :" + jsonFieldNameParameter
+                + " @> cast(:" + (opRight + index) + " AS jsonb)";
         params.put(opRight + index, filterComponent.getOperandRight());
+        params.put(jsonFieldNameParameter, updatedOperandLeft);
       } else {
         RihaRestError error = new RihaRestError();
         error.setErrcode(ErrorCodes.FILTER_OP_VALUE_MUST_BE_ARRAY);
@@ -183,15 +183,18 @@ public class SqlFilter {
       }
 
     } else if (filterComponent.getOperator().equals("null_or_>")) {
-      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
-      filterExpr = "(item." + jsonField + " > :" + (opRight + index) + " OR item." + jsonField + " IS NULL )";
+      String jsonNextFieldNameParameter = "jFieldNext" + index;
+      filterExpr = "(item." + Finals.JSON_CONTENT + " ->> :" + jsonFieldNameParameter + " > :" + (opRight + index)
+              + " OR item." + Finals.JSON_CONTENT + " ->> :" + jsonNextFieldNameParameter + " IS NULL )";
 
       params.put(opRight + index, filterComponent.getOperandRight());
-
+      params.put(jsonFieldNameParameter, updatedOperandLeft);
+      params.put(jsonNextFieldNameParameter, updatedOperandLeft);
     } else {
-      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
-      filterExpr = "item." + jsonField + " " + filterComponent.getOperator() + " :" + (opRight + index);
+      filterExpr = "item." + Finals.JSON_CONTENT + " ->> :" + jsonFieldNameParameter + " "
+              + filterComponent.getOperator() + " :" + (opRight + index);
       params.put(opRight + index, filterComponent.getOperandRight());
+      params.put(jsonFieldNameParameter, updatedOperandLeft);
     }
     // allFilters.add("item." + jsonField + " " + fc.getOperator() + " :" + (opRight + i));
     // params.put(opRight + i, fc.getOperandRight());
