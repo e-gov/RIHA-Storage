@@ -418,6 +418,7 @@ CREATE TABLE riha.file_resource
   creation_date timestamp with time zone,
   name character varying(255),
   large_object_id integer NOT NULL,
+  infosystem_uuid UUID NULL,
   CONSTRAINT file_resource_pkey PRIMARY KEY (uuid),
   CONSTRAINT fk_file_resource_large_object FOREIGN KEY (large_object_id)
   REFERENCES riha.large_object (id) MATCH SIMPLE
