@@ -33,7 +33,7 @@ public class FileResourceLogic {
      * @return UUID of created file resource
      */
     @Transactional
-    public UUID create(InputStream inputStream, String name, String contentType) {
+    public UUID create(InputStream inputStream, UUID infoSystemUuid, String name, String contentType) {
         int largeObjectId = largeObjectDAO.create(inputStream);
         LargeObject largeObject = largeObjectDAO.get(largeObjectId);
         if (largeObject == null) {
@@ -41,6 +41,7 @@ public class FileResourceLogic {
         }
 
         FileResource entity = new FileResource();
+        entity.setInfoSystemUuid(infoSystemUuid);
         entity.setName(name);
         entity.setContentType(contentType);
         entity.setLargeObject(largeObject);
@@ -48,11 +49,39 @@ public class FileResourceLogic {
         return fileResourceDAO.create(entity);
     }
 
+    /**
+     * Retrieves single {@link FileResource} by its UUID.
+     *
+     * @param fileUuid file resource UUID
+     * @return file resource or null
+     * @see FileResourceDAO#get(UUID)
+     */
     @Transactional
-    public FileResource get(UUID uuid) {
-        return fileResourceDAO.get(uuid);
+    public FileResource get(UUID fileUuid) {
+        return fileResourceDAO.get(fileUuid);
     }
 
+    /**
+     * Retrieves single {@link FileResource} by its UUID and info system UUID.
+     *
+     * @param fileUuid       file resource UUID
+     * @param infoSystemUuid UUID of an info system
+     * @return file resource or null
+     * @see FileResourceDAO#get(UUID, UUID)
+     */
+    @Transactional
+    public FileResource get(UUID fileUuid, UUID infoSystemUuid) {
+        return fileResourceDAO.get(fileUuid, infoSystemUuid);
+    }
+
+    /**
+     * Copies file resource data stream to output stream
+     *
+     * @param uuid   file resource UUID
+     * @param output destination output stream
+     * @throws SQLException in case of problems obtaining file resource binary data stream
+     * @throws IOException  in case of problems copying file resource data stream to output stream
+     */
     @Transactional
     public void copyLargeObjectData(UUID uuid, OutputStream output) throws SQLException, IOException {
         FileResource fileResource = get(uuid);

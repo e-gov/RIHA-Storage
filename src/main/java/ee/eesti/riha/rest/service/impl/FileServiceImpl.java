@@ -65,18 +65,32 @@ public class FileServiceImpl implements FileService {
 
     }
 
+    private Response getDocumentLogic(Integer documentId, ObjectNode document) throws RihaRestException {
+        String documentFilePath = FileHelper.createDocumentFilePathWithRoot(documentId);
+        File file = new File(documentFilePath);
+
+        Validator.documentFileMustExist(file, documentId);
+
+        String fileName = JsonHelper.get(document, "filename", file.getName());
+
+        return Response.ok(file).header("content-disposition", "attachment; filename =" + fileName).build();
+    }
+
     @Override
-    public Response upload(Attachment attachment) {
+    public Response upload(Attachment attachment, String infoSystemUuidStr) {
         DataHandler dataHandler = attachment.getDataHandler();
         String name = dataHandler.getName();
         String contentType = dataHandler.getContentType();
+        UUID infoSystemUuid = StringUtils.hasText(infoSystemUuidStr)
+                ? UUID.fromString(infoSystemUuidStr)
+                : null;
 
         if (LOG.isInfoEnabled()) {
             LOG.info("Receiving upload of file '{}' with content type '{}'", name, contentType);
         }
 
         try {
-            UUID fileResourceUuid = fileResourceLogic.create(dataHandler.getInputStream(), name, contentType);
+            UUID fileResourceUuid = fileResourceLogic.create(dataHandler.getInputStream(), infoSystemUuid, name, contentType);
             return Response.ok(fileResourceUuid.toString()).build();
         } catch (IOException e) {
             throw new IllegalStateException("Could not retrieve request attachment input stream", e);
@@ -84,11 +98,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Response download(String uuid) {
-        final UUID fileResourceUuid = UUID.fromString(uuid);
+    public Response download(String fileUuidStr, String infoSystemUuidStr) {
+        final UUID fileResourceUuid = UUID.fromString(fileUuidStr);
+        UUID infoSystemUuid = StringUtils.hasText(infoSystemUuidStr)
+                ? UUID.fromString(infoSystemUuidStr)
+                : null;
         LOG.debug("Handling file {} download", fileResourceUuid);
 
-        FileResource fileResource = fileResourceLogic.get(fileResourceUuid);
+        FileResource fileResource = fileResourceLogic.get(fileResourceUuid, infoSystemUuid);
         if (fileResource == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
@@ -119,17 +136,6 @@ public class FileServiceImpl implements FileService {
         }
 
         return response.entity(streamingOutput).build();
-    }
-
-    private Response getDocumentLogic(Integer documentId, ObjectNode document) throws RihaRestException {
-        String documentFilePath = FileHelper.createDocumentFilePathWithRoot(documentId);
-        File file = new File(documentFilePath);
-
-        Validator.documentFileMustExist(file, documentId);
-
-        String fileName = JsonHelper.get(document, "filename", file.getName());
-
-        return Response.ok(file).header("content-disposition", "attachment; filename =" + fileName).build();
     }
 
 }
