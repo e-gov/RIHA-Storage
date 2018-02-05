@@ -27,6 +27,10 @@ public class FileResource {
     @Column(name = "creation_date")
     private Date creationDate;
 
+    @Column(name = "infosystem_uuid")
+    @Type(type = "pg-uuid")
+    private UUID infoSystemUuid;
+
     @Column(name = "name")
     private String name;
 
@@ -43,6 +47,14 @@ public class FileResource {
 
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
+    }
+
+    public UUID getInfoSystemUuid() {
+        return infoSystemUuid;
+    }
+
+    public void setInfoSystemUuid(UUID infoSystemUuid) {
+        this.infoSystemUuid = infoSystemUuid;
     }
 
     public Date getCreationDate() {
