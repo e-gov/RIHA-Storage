@@ -284,9 +284,11 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       }
 
       if (DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz)) {
-        queryString.append(" ORDER BY item.")
-                .append(orderData.getOrderByField())
+        String orderByParameterName = "orderParameter";
+        queryString.append(" ORDER BY :")
+                .append(orderByParameterName)
                 .append((orderData.isAsc() ? " ASC " : " DESC "));
+        params.put(orderByParameterName, "item." + orderData.getOrderByField());
       } else {
         if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
           String orderByParameterName = "jOrderParameter";
@@ -648,13 +650,14 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     } else if (jsonFieldExists(session, tableName, idFieldName)) {
       // select * from main_resource
       // where json_content ->> 'test_abc' = '1234';
-
-      String sql = "SELECT * FROM " + tableName + " where json_content ->> '" + idFieldName + "' =:idFieldValue";
+      String idFieldNameParameter = "idFieldNameParam";
+      String sql = "SELECT * FROM " + tableName + " where json_content ->> :" + idFieldNameParameter + " =:idFieldValue";
       queryExisting = session.createSQLQuery(sql).addEntity(clazz);
 
       BaseModel bm = (BaseModel) updateInfo;
       String fieldValueString = bm.getJson_content().get(idFieldName).getAsString();
       queryExisting.setParameter("idFieldValue", fieldValueString);
+      queryExisting.setParameter(idFieldNameParameter, idFieldName);
     } else {
       // return NOT_PART_OF_MODEL_OR_JSON;
       queryExisting = null;
@@ -814,7 +817,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
   // if key is part of Document model
   private Query documentDeleteIds(Session session, String tableName, String className, String key) {
     Query documentQuery = null;
-    if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class) {
+    if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class
+            && DaoHelper.isFieldPartOfModel(key, Finals.getClassRepresentingTable(tableName))) {
       String documentHQL = "select document_id from " + className + " where " + key + " IN (:fieldValues)";
       documentQuery = session.createQuery(documentHQL);
     }
@@ -833,10 +837,13 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
   // if key is part of Document json
   private Query documentDeleteIdsJson(Session session, String tableName, String className, String key) {
     Query documentQuery = null;
-    if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class) {
-      String documentSQL = "select document_id from " + className + " where json_content ->> '" + key
-          + "' IN (:fieldValues)";
+    if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class
+            && jsonFieldExists(session, className, key)) {
+      String keyParameter = "keyParameter";
+      String documentSQL = "select document_id from " + className + " where json_content ->> :" + keyParameter
+          + " IN (:fieldValues)";
       documentQuery = session.createSQLQuery(documentSQL);
+      documentQuery.setParameter(keyParameter, key);
     }
     return documentQuery;
   }
@@ -898,8 +905,10 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       documentQuery = documentDeleteIdsJson(session, tableName, className, key);
       // delete from main_resource
       // where json_content ->> 'test_abc' IN ('test_123', 'test_1234');
-      String sql = "delete from " + className + " where json_content ->> '" + key + "' IN (:fieldValues)";
+      String keyParameter = "keyParam";
+      String sql = "delete from " + className + " where json_content ->> :" + keyParameter + " IN (:fieldValues)";
       query = session.createSQLQuery(sql);
+      query.setParameter(keyParameter, key);
       // psql cannot get number from json, only json or text
       // therefore possible numbers must be converted to strings
       // to enable comparison in DELETE WHERE clause
@@ -951,8 +960,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     // select count(*) from main_resource
     // where (json_content->'test_abc') is not null;
 
-    Class classRepresentingTable = Finals.getClassRepresentingTable(tableName) == null ?
-            Finals.getClassRepresentingTableReadOnly(tableName) : Finals.getClassRepresentingTable(tableName);
+    Class classRepresentingTable = Finals.getClassRepresentingTable(tableName);
     if (!JsonContentBasedTable.isJsonContentBasedTable(classRepresentingTable)) {
       return false;
     }
