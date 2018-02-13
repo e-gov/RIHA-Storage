@@ -1,7 +1,9 @@
 package ee.eesti.riha.rest.dao;
 
 import ee.eesti.riha.rest.model.FileResource;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +36,25 @@ public class FileResourceDAO {
      * @return loaded entity or null if not found
      */
     public FileResource get(UUID uuid) {
-        return (FileResource) sessionFactory.getCurrentSession().get(FileResource.class, uuid);
+        return get(uuid, null);
+    }
+
+    /**
+     * Retrieves single {@link FileResource} entity by its UUID. If info system UUID is provided it is used in the
+     * query.
+     *
+     * @param uuid           entity UUID
+     * @param infoSystemUuid associated info system UUID
+     * @return loaded entity or null if not found
+     */
+    public FileResource get(UUID uuid, UUID infoSystemUuid) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FileResource.class, "f");
+        criteria.add(Restrictions.idEq(uuid));
+
+        if (infoSystemUuid != null) {
+            criteria.add(Restrictions.eq("f.infoSystemUuid", infoSystemUuid));
+        }
+
+        return ((FileResource) criteria.uniqueResult());
     }
 }
