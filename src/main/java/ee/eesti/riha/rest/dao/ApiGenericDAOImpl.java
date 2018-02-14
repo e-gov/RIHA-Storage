@@ -284,11 +284,9 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       }
 
       if (DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz)) {
-        String orderByParameterName = "orderParameter";
-        queryString.append(" ORDER BY :")
-                .append(orderByParameterName)
+        queryString.append(" ORDER BY item.")
+                .append(orderData.getOrderByField())
                 .append((orderData.isAsc() ? " ASC " : " DESC "));
-        params.put(orderByParameterName, "item." + orderData.getOrderByField());
       } else {
         if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
           String orderByParameterName = "jOrderParameter";
