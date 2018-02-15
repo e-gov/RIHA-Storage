@@ -2,17 +2,23 @@ package ee.eesti.riha.rest.model.readonly;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.model.BaseModel;
+import ee.eesti.riha.rest.model.hibernate.JsonArrayUserType;
 import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
+@TypeDefs({@TypeDef(name = "JsonArray", typeClass = JsonArrayUserType.class)})
 @Entity
 @Table(name = "comment_type_issue_view")
 @Immutable
@@ -66,11 +72,18 @@ public class Comment_type_issue_view implements BaseModel {
     @Column(name = "sub_type")
     private String sub_type;
 
+    @Column(name = "resolution_type")
+    private String resolution_type;
+
     @Column(name = "infosystem_short_name")
     private String infosystem_short_name;
 
-    @Column(name = "resolution_type")
-    private String resolution_type;
+    @Column(name = "infosystem_full_name")
+    private String infosystem_full_name;
+
+    @JsonRawValue
+    @Type(type = "JsonArray")
+    private JsonArray events;
 
     public Integer getComment_id() {
         return comment_id;
@@ -168,11 +181,35 @@ public class Comment_type_issue_view implements BaseModel {
         throw new UnsupportedOperationException();
     }
 
+    public String getResolution_type() {
+        return resolution_type;
+    }
+
+    public void setResolution_type(String resolution_type) {
+        throw new UnsupportedOperationException();
+    }
+
     public String getInfosystem_short_name() {
         return infosystem_short_name;
     }
 
     public void setInfosystem_short_name(String infosystem_short_name) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getInfosystem_full_name() {
+        return infosystem_full_name;
+    }
+
+    public void setInfosystem_full_name(String infosystem_full_name) {
+        throw new UnsupportedOperationException();
+    }
+
+    public JsonArray getEvents() {
+        return events;
+    }
+
+    public void setEvents(JsonArray events) {
         throw new UnsupportedOperationException();
     }
 
@@ -304,13 +341,5 @@ public class Comment_type_issue_view implements BaseModel {
     @Transient
     public void setKind(String kind) {
         throw new UnsupportedOperationException();
-    }
-
-    public String getResolution_type() {
-        return resolution_type;
-    }
-
-    public void setResolution_type(String resolution_type) {
-        this.resolution_type = resolution_type;
     }
 }
