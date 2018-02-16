@@ -3,6 +3,7 @@ package ee.eesti.riha.rest.dao.util;
 import java.text.ParseException;
 import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,17 +140,12 @@ public class SqlFilter {
 
       params.put(opRight + index, Double.valueOf(filterComponent.getOperandRight()).intValue());
     } else if (filterComponent.getOperator().equals("jilike")) {
-      String updatedOperandLeft = filterComponent.getOperandLeft().replaceAll("\\.", ",");
-      String jsonFieldName = "{" + updatedOperandLeft + "}";
-
       String jsonFieldNameParameter = "jField" + index;
       filterExpr = "(" + ITEM_PREFIX + Finals.JSON_CONTENT + " #>> " + ":" + jsonFieldNameParameter + "\\:\\:text[]) ilike :" + (opRight + index);
-
-      params.put(jsonFieldNameParameter, jsonFieldName);
+      params.put(jsonFieldNameParameter, createJsonPath(filterComponent.getOperandLeft()));
       params.put(opRight + index, filterComponent.getOperandRight());
     } else if (filterComponent.getOperator().equals("jarr")) {
-      String updatedOperandLeft = filterComponent.getOperandLeft().replaceAll("\\.", ",");
-      String jsonFieldAndArrayParametersValues = "{" + updatedOperandLeft + "}";
+      String jsonFieldAndArrayParametersValues = createJsonPath(filterComponent.getOperandLeft());
 
       String jsonFieldNameParameter = "jFieldParam";
       String jsonArrayTextValueParameter = "jArrayParam";
@@ -197,6 +193,14 @@ public class SqlFilter {
     // params.put(opRight + i, fc.getOperandRight());
 
     return filterExpr;
+  }
+
+  private String createJsonPath(String dotSeparatedPath) {
+    if (StringUtils.isBlank(dotSeparatedPath)) {
+      return dotSeparatedPath;
+    }
+
+    return "{" + dotSeparatedPath.replaceAll("\\.", ",") + "}";
   }
 
   private <T> FilterComponent replaceKindWithKindId(FilterComponent fc, Class<T> clazz) {
