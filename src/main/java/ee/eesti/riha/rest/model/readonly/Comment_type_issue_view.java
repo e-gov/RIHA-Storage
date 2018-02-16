@@ -3,22 +3,17 @@ package ee.eesti.riha.rest.model.readonly;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.model.BaseModel;
-import ee.eesti.riha.rest.model.hibernate.JsonArrayUserType;
 import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
-@TypeDefs({@TypeDef(name = "JsonArray", typeClass = JsonArrayUserType.class)})
 @Entity
 @Table(name = "comment_type_issue_view")
 @Immutable
@@ -82,8 +77,7 @@ public class Comment_type_issue_view implements BaseModel {
     private String infosystem_full_name;
 
     @JsonRawValue
-    @Type(type = "JsonArray")
-    private JsonArray events;
+    private String events;
 
     public Integer getComment_id() {
         return comment_id;
@@ -205,11 +199,11 @@ public class Comment_type_issue_view implements BaseModel {
         throw new UnsupportedOperationException();
     }
 
-    public JsonArray getEvents() {
+    public String getEvents() {
         return events;
     }
 
-    public void setEvents(JsonArray events) {
+    public void setEvents(String events) {
         throw new UnsupportedOperationException();
     }
 
