@@ -126,13 +126,13 @@ public class SqlFilter {
 
     // if (org.apache.commons.lang3.StringUtils.isNumeric(fc.getOperandRight())) {
     if (filterComponent.getOperator().equals("isnull")) {
-      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
-      filterExpr = ITEM_PREFIX + jsonField + " IS NULL";
-
+      String jsonFieldNameParameter = "jField" + index;
+      filterExpr = "(" + Finals.JSON_CONTENT + " #>> " + ":" + jsonFieldNameParameter + "\\:\\:text[]" + ") IS NULL";
+      params.put(jsonFieldNameParameter, createJsonPath(filterComponent.getOperandLeft()));
     } else if (filterComponent.getOperator().equals("isnotnull")) {
-      jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
-      filterExpr = ITEM_PREFIX + jsonField + " IS NOT NULL";
-
+      String jsonFieldNameParameter = "jField" + index;
+      filterExpr = "(" + Finals.JSON_CONTENT + " #>> " + ":" + jsonFieldNameParameter + "\\:\\:text[]" + ") IS NOT NULL";
+      params.put(jsonFieldNameParameter, createJsonPath(filterComponent.getOperandLeft()));
     } else if (filterComponent.getOperator().equals("null_or_<=")) {
       jsonField = Finals.JSON_CONTENT + "->>" + "'" + filterComponent.getOperandLeft() + "'";
       filterExpr = "(cast(" + ITEM_PREFIX + jsonField + " AS int) <= :" + (opRight + index) + " OR " + ITEM_PREFIX + jsonField
