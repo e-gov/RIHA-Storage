@@ -1,9 +1,12 @@
 package ee.eesti.riha.rest.dao.grid;
 
 import ee.eesti.riha.rest.model.Comment;
+import ee.eesti.riha.rest.model.CommentTypeIssueViewModel;
+import ee.eesti.riha.rest.model.readonly.Comment_type_issue_view;
 import ee.eesti.riha.rest.util.FilterParameter;
 import ee.eesti.riha.rest.util.PagedRequest;
 import org.hibernate.criterion.*;
+import org.hibernate.transform.AliasToBeanResultTransformer;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +28,7 @@ public class CommentGrid extends AbstractQueryGrid {
     private static final String ACTION_AUTHOR_OR_ORGANIZATION_CODE = "author-or-organization-code";
 
     public CommentGrid() {
-        super(Comment.class, "comment");
+        super(Comment_type_issue_view.class, "comment");
     }
 
     @Override
@@ -37,6 +40,11 @@ public class CommentGrid extends AbstractQueryGrid {
         } else {
             super.setRestrictions(criteria, request);
         }
+    }
+
+    @Override
+    protected void setTransformation(DetachedCriteria criteria, PagedRequest request) {
+        criteria.setResultTransformer(new AliasToBeanResultTransformer(CommentTypeIssueViewModel.class));
     }
 
     /**

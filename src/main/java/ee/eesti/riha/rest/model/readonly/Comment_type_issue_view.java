@@ -79,6 +79,9 @@ public class Comment_type_issue_view implements BaseModel {
     @JsonRawValue
     private String events;
 
+    @JsonRawValue
+    private String last_comment;
+
     public Integer getComment_id() {
         return comment_id;
     }
@@ -204,6 +207,14 @@ public class Comment_type_issue_view implements BaseModel {
     }
 
     public void setEvents(String events) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getLast_comment() {
+        return last_comment;
+    }
+
+    public void setLast_comment(String last_comment) {
         throw new UnsupportedOperationException();
     }
 
