@@ -284,9 +284,15 @@ public abstract class AbstractQueryGrid {
      * @return created criterion
      */
     protected Criterion createPropertyFilterRestriction(FilterParameter filter) {
-        return projectionAliases.contains(filter.getProperty())
-                ? Restrictions.eq(filter.getProperty(), filter.getValue())
-                : null;
+        if (!projectionAliases.contains(filter.getProperty())) {
+            return null;
+        }
+
+        if (filter.getValue() != null) {
+            return Restrictions.eq(filter.getProperty(), filter.getValue());
+        } else {
+            return Restrictions.isNull(filter.getProperty());
+        }
     }
 
 }
