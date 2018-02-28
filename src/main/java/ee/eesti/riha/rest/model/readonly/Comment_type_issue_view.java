@@ -2,6 +2,7 @@ package ee.eesti.riha.rest.model.readonly;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.model.BaseModel;
@@ -66,11 +67,20 @@ public class Comment_type_issue_view implements BaseModel {
     @Column(name = "sub_type")
     private String sub_type;
 
+    @Column(name = "resolution_type")
+    private String resolution_type;
+
     @Column(name = "infosystem_short_name")
     private String infosystem_short_name;
 
-    @Column(name = "resolution_type")
-    private String resolution_type;
+    @Column(name = "infosystem_full_name")
+    private String infosystem_full_name;
+
+    @JsonRawValue
+    private String events;
+
+    @JsonRawValue
+    private String last_comment;
 
     public Integer getComment_id() {
         return comment_id;
@@ -168,11 +178,43 @@ public class Comment_type_issue_view implements BaseModel {
         throw new UnsupportedOperationException();
     }
 
+    public String getResolution_type() {
+        return resolution_type;
+    }
+
+    public void setResolution_type(String resolution_type) {
+        throw new UnsupportedOperationException();
+    }
+
     public String getInfosystem_short_name() {
         return infosystem_short_name;
     }
 
     public void setInfosystem_short_name(String infosystem_short_name) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getInfosystem_full_name() {
+        return infosystem_full_name;
+    }
+
+    public void setInfosystem_full_name(String infosystem_full_name) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getEvents() {
+        return events;
+    }
+
+    public void setEvents(String events) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getLast_comment() {
+        return last_comment;
+    }
+
+    public void setLast_comment(String last_comment) {
         throw new UnsupportedOperationException();
     }
 
@@ -304,13 +346,5 @@ public class Comment_type_issue_view implements BaseModel {
     @Transient
     public void setKind(String kind) {
         throw new UnsupportedOperationException();
-    }
-
-    public String getResolution_type() {
-        return resolution_type;
-    }
-
-    public void setResolution_type(String resolution_type) {
-        this.resolution_type = resolution_type;
     }
 }
