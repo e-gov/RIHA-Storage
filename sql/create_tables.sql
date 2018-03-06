@@ -399,6 +399,8 @@ CREATE TABLE riha.large_object
   data oid,
   hash character varying(255),
   length bigint,
+  indexed boolean DEFAULT false NOT NULL,
+  csv_search_content jsonb NULL,
   CONSTRAINT large_object_pkey PRIMARY KEY (id)
 )
 WITH (
