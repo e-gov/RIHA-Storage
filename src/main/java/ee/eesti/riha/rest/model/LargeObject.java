@@ -1,8 +1,14 @@
 package ee.eesti.riha.rest.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.logic.Finals;
+import ee.eesti.riha.rest.model.hibernate.JsonObjectUserType;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.sql.Blob;
@@ -16,6 +22,7 @@ import static javax.persistence.GenerationType.AUTO;
 @Entity
 @Table(name = "large_object")
 @DynamicUpdate
+@TypeDefs({@TypeDef(name = "JsonObject", typeClass = JsonObjectUserType.class)})
 public class LargeObject {
 
     @Id
@@ -38,6 +45,15 @@ public class LargeObject {
     @Lob
     @Column(name = "data")
     private Blob data;
+
+    @JsonIgnore
+    @Column(name = "csv_search_content")
+    @Type(type = "JsonObject")
+    private JsonObject csvSearchContent;
+
+    @JsonIgnore
+    @Column(name = "indexed")
+    private boolean indexed;
 
     public int getId() {
         return id;
@@ -77,5 +93,21 @@ public class LargeObject {
 
     public void setData(Blob data) {
         this.data = data;
+    }
+
+    public JsonObject getCsvSearchContent() {
+        return csvSearchContent;
+    }
+
+    public void setCsvSearchContent(JsonObject csvSearchContent) {
+        this.csvSearchContent = csvSearchContent;
+    }
+
+    public boolean isIndexed() {
+        return indexed;
+    }
+
+    public void setIndexed(boolean indexed) {
+        this.indexed = indexed;
     }
 }
