@@ -39,8 +39,8 @@ $$ LANGUAGE SQL
 IMMUTABLE;
 
 -- add trigger to update full text search column data
-DROP FUNCTION IF EXISTS riha.update_main_resource_search_content() CASCADE;
-CREATE OR REPLACE FUNCTION riha.update_main_resource_search_content()
+DROP FUNCTION IF EXISTS riha.on_before_main_resource_insert_or_update() CASCADE;
+CREATE OR REPLACE FUNCTION riha.on_before_main_resource_insert_or_update()
   RETURNS TRIGGER AS $$
 BEGIN
   new.search_content = riha.main_resource_search_content(new.json_content);
@@ -49,9 +49,9 @@ END
 $$ LANGUAGE plpgsql
 IMMUTABLE;
 
-DROP TRIGGER IF EXISTS update_search_content
+DROP TRIGGER IF EXISTS before_main_resource_insert_or_update
 ON riha.main_resource;
-CREATE TRIGGER update_search_content
+CREATE TRIGGER before_main_resource_insert_or_update
   BEFORE INSERT OR UPDATE
   ON riha.main_resource
   FOR EACH ROW EXECUTE PROCEDURE riha.on_before_main_resource_insert_or_update();
