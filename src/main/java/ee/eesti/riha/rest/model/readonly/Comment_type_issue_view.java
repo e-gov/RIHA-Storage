@@ -79,8 +79,24 @@ public class Comment_type_issue_view implements BaseModel {
     @JsonRawValue
     private String events;
 
-    @JsonRawValue
-    private String last_comment;
+    @Column(name = "last_comment_id")
+    private Integer last_comment_id;
+
+    @Column(name = "last_comment_parent_id")
+    private Integer last_comment_parent_id;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date last_comment_creation_date;
+
+    @Column(name = "last_comment_author_name")
+    private String last_comment_author_name;
+
+    @Column(name = "last_comment_organization_name")
+    private String last_comment_organization_name;
+
+    @Column(name = "last_comment_organization_code")
+    private String last_comment_organization_code;
 
     public Integer getComment_id() {
         return comment_id;
@@ -210,11 +226,51 @@ public class Comment_type_issue_view implements BaseModel {
         throw new UnsupportedOperationException();
     }
 
-    public String getLast_comment() {
-        return last_comment;
+    public Integer getLast_comment_id() {
+        return last_comment_id;
     }
 
-    public void setLast_comment(String last_comment) {
+    public void setLast_comment_id(Integer last_comment_id) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Integer getLast_comment_parent_id() {
+        return last_comment_parent_id;
+    }
+
+    public void setLast_comment_parent_id(Integer last_comment_parent_id) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Date getLast_comment_creation_date() {
+        return last_comment_creation_date;
+    }
+
+    public void setLast_comment_creation_date(Date last_comment_creation_date) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getLast_comment_author_name() {
+        return last_comment_author_name;
+    }
+
+    public void setLast_comment_author_name(String last_comment_author_name) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getLast_comment_organization_name() {
+        return last_comment_organization_name;
+    }
+
+    public void setLast_comment_organization_name(String last_comment_organization_name) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getLast_comment_organization_code() {
+        return last_comment_organization_code;
+    }
+
+    public void setLast_comment_organization_code(String last_comment_organization_code) {
         throw new UnsupportedOperationException();
     }
 

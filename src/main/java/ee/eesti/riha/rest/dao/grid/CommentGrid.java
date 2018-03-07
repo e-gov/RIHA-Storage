@@ -7,6 +7,7 @@ import ee.eesti.riha.rest.util.FilterParameter;
 import ee.eesti.riha.rest.util.PagedRequest;
 import org.hibernate.criterion.*;
 import org.hibernate.transform.AliasToBeanResultTransformer;
+import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class CommentGrid extends AbstractQueryGrid {
     private static final String PROPERTY_AUTHOR_PERSONAL_CODE = "author_personal_code";
     private static final String PROPERTY_ORGANIZATION_CODE = "organization_code";
     private static final String ACTION_AUTHOR_OR_ORGANIZATION_CODE = "author-or-organization-code";
+    private static final String ACTION_ORGANIZATION_INFOSYSTEMS_RELATED_ISSUES = "organization-infosystems-issues";
 
     public CommentGrid() {
         super(Comment_type_issue_view.class, "comment");
@@ -37,6 +39,8 @@ public class CommentGrid extends AbstractQueryGrid {
 
         if (request.containsFilter(ACTION_AUTHOR_OR_ORGANIZATION_CODE)) {
             restrictForAuthorOrOrganizationCode(criteria, request);
+        } else if (request.containsFilter(ACTION_ORGANIZATION_INFOSYSTEMS_RELATED_ISSUES)) {
+            restrictForOrganizationInfoSystemsRelatedIssues(criteria, request);
         } else {
             super.setRestrictions(criteria, request);
         }
@@ -70,6 +74,17 @@ public class CommentGrid extends AbstractQueryGrid {
 
             criteria.add(Restrictions.disjunction(propagatedCriterion, Subqueries.exists(subCriteria)));
         }
+    }
+
+    private void restrictForOrganizationInfoSystemsRelatedIssues(DetachedCriteria criteria, PagedRequest request) {
+        Criterion mainCriterion = getMainCriterion(request);
+        if (mainCriterion != null) {
+            criteria.add(mainCriterion);
+        }
+
+        criteria.add(Restrictions.sqlRestriction("{alias}.infosystem_uuid :: TEXT IN (" +
+                "SELECT json_content ->> 'uuid' uuid FROM main_resource_view WHERE json_content #>> '{owner,code}' = ?)",
+                request.getFilter(PROPERTY_ORGANIZATION_CODE).get(0).getValue(), StringType.INSTANCE));
     }
 
     private Criterion getMainCriterion(PagedRequest request) {

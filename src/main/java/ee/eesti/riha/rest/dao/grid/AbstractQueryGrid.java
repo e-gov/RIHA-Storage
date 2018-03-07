@@ -5,6 +5,7 @@ import ee.eesti.riha.rest.util.PagedRequest;
 import ee.eesti.riha.rest.util.PagedResponse;
 import ee.eesti.riha.rest.util.SortParameter;
 import org.hibernate.Criteria;
+import org.hibernate.NullPrecedence;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.*;
 import org.hibernate.metadata.ClassMetadata;
@@ -209,7 +210,7 @@ public abstract class AbstractQueryGrid {
             if (projectionAliases.contains(sortParameter.getProperty())) {
                 criteria.addOrder(sortParameter.isAscending()
                         ? Order.asc(sortParameter.getProperty())
-                        : Order.desc(sortParameter.getProperty()));
+                        : Order.desc(sortParameter.getProperty()).nulls(NullPrecedence.LAST));
             }
         }
     }
