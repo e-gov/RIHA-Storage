@@ -5,6 +5,8 @@ import ee.eesti.riha.rest.model.CommentTypeIssueViewModel;
 import ee.eesti.riha.rest.model.readonly.Comment_type_issue_view;
 import ee.eesti.riha.rest.util.FilterParameter;
 import ee.eesti.riha.rest.util.PagedRequest;
+import ee.eesti.riha.rest.util.SortParameter;
+import org.hibernate.NullPrecedence;
 import org.hibernate.criterion.*;
 import org.hibernate.transform.AliasToBeanResultTransformer;
 import org.hibernate.type.StringType;
@@ -118,6 +120,11 @@ public class CommentGrid extends AbstractQueryGrid {
     private boolean isPropagatedProperty(String property) {
         return PROPERTY_AUTHOR_PERSONAL_CODE.equalsIgnoreCase(property)
                 || PROPERTY_ORGANIZATION_CODE.equalsIgnoreCase(property);
+    }
+
+    @Override
+    protected Order createSortParameterOrder(SortParameter sortParameter) {
+        return super.createSortParameterOrder(sortParameter).nulls(NullPrecedence.LAST);
     }
 
     @Override
