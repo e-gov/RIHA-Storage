@@ -41,16 +41,12 @@ public class CommentGrid extends AbstractQueryGrid {
 
         if (request.containsFilter(ACTION_AUTHOR_OR_ORGANIZATION_CODE)) {
             restrictForAuthorOrOrganizationCode(criteria, request);
-        } else if (request.containsFilter(ACTION_ORGANIZATION_INFOSYSTEMS_RELATED_ISSUES)) {
-            restrictForOrganizationInfoSystemsRelatedIssues(criteria, request);
         } else {
             super.setRestrictions(criteria, request);
+            if (request.containsFilter(ACTION_ORGANIZATION_INFOSYSTEMS_RELATED_ISSUES)) {
+                restrictForOrganizationInfoSystemsRelatedIssues(criteria, request);
+            }
         }
-    }
-
-    @Override
-    protected void setTransformation(DetachedCriteria criteria, PagedRequest request) {
-        criteria.setResultTransformer(new AliasToBeanResultTransformer(CommentTypeIssueViewModel.class));
     }
 
     /**
@@ -79,14 +75,16 @@ public class CommentGrid extends AbstractQueryGrid {
     }
 
     private void restrictForOrganizationInfoSystemsRelatedIssues(DetachedCriteria criteria, PagedRequest request) {
-        Criterion mainCriterion = getMainCriterion(request);
-        if (mainCriterion != null) {
-            criteria.add(mainCriterion);
+        FilterParameter organizationCodeFilter = request.getFirstFilter(ACTION_ORGANIZATION_INFOSYSTEMS_RELATED_ISSUES);
+        if (organizationCodeFilter.getValue() == null) {
+            return;
         }
 
         criteria.add(Restrictions.sqlRestriction("{alias}.infosystem_uuid :: TEXT IN (" +
-                "SELECT json_content ->> 'uuid' uuid FROM main_resource_view WHERE json_content #>> '{owner,code}' = ?)",
-                request.getFilter(PROPERTY_ORGANIZATION_CODE).get(0).getValue(), StringType.INSTANCE));
+                        "SELECT json_content ->> 'uuid' uuid" +
+                        " FROM riha.main_resource_view" +
+                        " WHERE json_content #>> '{owner,code}' = ?)",
+                organizationCodeFilter.getValue(), StringType.INSTANCE));
     }
 
     private Criterion getMainCriterion(PagedRequest request) {
@@ -128,10 +126,16 @@ public class CommentGrid extends AbstractQueryGrid {
     }
 
     @Override
+    protected void setTransformation(DetachedCriteria criteria, PagedRequest request) {
+        criteria.setResultTransformer(new AliasToBeanResultTransformer(CommentTypeIssueViewModel.class));
+    }
+
+    @Override
     protected Criterion createPropertyFilterRestriction(FilterParameter filter) {
         if (PROPERTY_AUTHOR_PERSONAL_CODE.equalsIgnoreCase(filter.getProperty())) {
             return Restrictions.ilike(PROPERTY_AUTHOR_PERSONAL_CODE, filter.getValue());
         }
+
         return super.createPropertyFilterRestriction(filter);
     }
 }
