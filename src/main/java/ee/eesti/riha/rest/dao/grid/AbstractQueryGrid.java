@@ -206,12 +206,27 @@ public abstract class AbstractQueryGrid {
      */
     protected void setOrder(DetachedCriteria criteria, PagedRequest request) {
         for (SortParameter sortParameter : request.getSort()) {
-            if (projectionAliases.contains(sortParameter.getProperty())) {
-                criteria.addOrder(sortParameter.isAscending()
-                        ? Order.asc(sortParameter.getProperty())
-                        : Order.desc(sortParameter.getProperty()));
+            Order order = createSortParameterOrder(sortParameter);
+            if (order != null) {
+                criteria.addOrder(order);
             }
         }
+    }
+
+    /**
+     * Creates single {@link Order} for specified {@link SortParameter}.
+     *
+     * @param sortParameter sort parameter
+     * @return order or null if property is not within alias list
+     */
+    protected Order createSortParameterOrder(SortParameter sortParameter) {
+        if (!projectionAliases.contains(sortParameter.getProperty())) {
+            return null;
+        }
+
+        return sortParameter.isAscending()
+                ? Order.asc(sortParameter.getProperty())
+                : Order.desc(sortParameter.getProperty());
     }
 
     private void setProjections(DetachedCriteria criteria) {

@@ -32,8 +32,13 @@ public class CommentTypeIssueViewModel {
     private String infosystem_full_name;
     @JsonRawValue
     private String events;
-    @JsonRawValue
-    private String last_comment;
+    private Integer last_comment_id;
+    private Integer last_comment_parent_id;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
+    private Date last_comment_creation_date;
+    private String last_comment_author_name;
+    private String last_comment_organization_name;
+    private String last_comment_organization_code;
 
     public Integer getComment_id() {
         return comment_id;
@@ -179,11 +184,51 @@ public class CommentTypeIssueViewModel {
         this.events = events;
     }
 
-    public String getLast_comment() {
-        return last_comment;
+    public Integer getLast_comment_id() {
+        return last_comment_id;
     }
 
-    public void setLast_comment(String last_comment) {
-        this.last_comment = last_comment;
+    public void setLast_comment_id(Integer last_comment_id) {
+        this.last_comment_id = last_comment_id;
+    }
+
+    public Integer getLast_comment_parent_id() {
+        return last_comment_parent_id;
+    }
+
+    public void setLast_comment_parent_id(Integer last_comment_parent_id) {
+        this.last_comment_parent_id = last_comment_parent_id;
+    }
+
+    public Date getLast_comment_creation_date() {
+        return last_comment_creation_date;
+    }
+
+    public void setLast_comment_creation_date(Date last_comment_creation_date) {
+        this.last_comment_creation_date = last_comment_creation_date;
+    }
+
+    public String getLast_comment_author_name() {
+        return last_comment_author_name;
+    }
+
+    public void setLast_comment_author_name(String last_comment_author_name) {
+        this.last_comment_author_name = last_comment_author_name;
+    }
+
+    public String getLast_comment_organization_name() {
+        return last_comment_organization_name;
+    }
+
+    public void setLast_comment_organization_name(String last_comment_organization_name) {
+        this.last_comment_organization_name = last_comment_organization_name;
+    }
+
+    public String getLast_comment_organization_code() {
+        return last_comment_organization_code;
+    }
+
+    public void setLast_comment_organization_code(String last_comment_organization_code) {
+        this.last_comment_organization_code = last_comment_organization_code;
     }
 }
