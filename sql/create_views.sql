@@ -112,6 +112,7 @@ CREATE OR REPLACE VIEW riha.registered_file_view AS
     f.uuid            AS file_resource_uuid,
     f.name            AS file_resource_name,
     f.large_object_id AS file_resource_large_object_id,
+    i.uuid            AS info_system_uuid,
     i.short_name      AS info_system_short_name,
     i.name            AS info_system_name,
     i.owner_name      AS info_system_owner_name,

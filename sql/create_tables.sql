@@ -470,3 +470,20 @@ CREATE INDEX idx_main_resource_relation_infosystem_uuid
 -- DROP INDEX riha.idx_main_resource_relation_related_infosystem_uuid;
 CREATE INDEX idx_main_resource_relation_related_infosystem_uuid
   ON riha.main_resource_relation (related_infosystem_uuid);
+
+-- Table: riha.registered_file
+
+-- DROP TABLE IF EXISTS riha.registered_file;
+
+CREATE TABLE riha.registered_file
+(
+  file_resource_uuid UUID,
+  main_resource_uuid UUID,
+  section            VARCHAR(150),
+  CONSTRAINT registered_file_file_resource_uuid_main_resource_uuid_pk UNIQUE (file_resource_uuid, main_resource_uuid),
+  CONSTRAINT registered_file_file_resource_uuid_fk FOREIGN KEY (file_resource_uuid) REFERENCES riha.file_resource (uuid) ON DELETE CASCADE
+);
+COMMENT ON COLUMN riha.registered_file.section
+IS 'Main resource section that contains this file';
+COMMENT ON TABLE riha.registered_file
+IS 'File resources that appear in main_resource json description';
