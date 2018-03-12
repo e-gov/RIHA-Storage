@@ -4,8 +4,10 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 /**
  * File resource controller interface. Provides endpoint for document and file resource uploads and downloads
@@ -19,9 +21,9 @@ public interface FileService {
      * @param token      the token
      * @return the file
      */
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/api/document/{documentId}")
     @GET
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     Response getDocument(@PathParam(value = "documentId") Integer documentId,
                          @QueryParam(value = "token") String token);
 
@@ -32,10 +34,10 @@ public interface FileService {
      * @param infoSystemUuidStr optional info system UUID
      * @return uploaded file UUID
      */
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
     @Path("/api/file")
     @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
     Response upload(@Multipart("file") Attachment attachment,
                     @DefaultValue("") @QueryParam(value = "infoSystemUuid") String infoSystemUuidStr);
 
@@ -50,5 +52,15 @@ public interface FileService {
     @GET
     Response download(@PathParam("fileUuid") String fileUuidStr,
                       @DefaultValue("") @QueryParam(value = "infoSystemUuid") String infoSystemUuidStr);
+
+    /**
+     * Provides file resource grid with filtering, pagination and sorting.
+     * @param uriInfo request URI
+     * @return page of filtered and sorted file resource information
+     */
+    @Path(value = "/api/file")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
+    Response list(@Context UriInfo uriInfo);
 
 }

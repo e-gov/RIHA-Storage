@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -56,5 +57,18 @@ public class FileResourceDAO {
         }
 
         return ((FileResource) criteria.uniqueResult());
+    }
+
+    /**
+     * Retrieves list of {@link FileResource} which were not indexed yet.
+     *
+     * @return list of file resources that need to be indexed
+     */
+    public List<FileResource> getUnindexedFiles() {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FileResource.class, "f")
+                .createAlias("f.largeObject", "lo")
+                .add(Restrictions.eq("lo.indexed", false));
+
+        return ((List<FileResource>) criteria.list());
     }
 }

@@ -13,10 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Abstract class providing convenient way of producing {@link PagedResponse} using {@link PagedRequest}. Implementors
@@ -28,8 +25,9 @@ public abstract class AbstractQueryGrid {
     private final Class entityType;
     private final String entityAlias;
 
-    private Projection projection;
-    private List<String> projectionAliases;
+    private Map<String, String> projectionAliases = new HashMap<>();
+
+    private boolean initialized = false;
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -92,38 +90,33 @@ public abstract class AbstractQueryGrid {
      * Initialization method. By default sets default projections using entity metadata property names.
      */
     @PostConstruct
-    protected void init() {
-        setProjection(getDefaultProjection());
+    private void init() {
+        setProjections();
+        this.initialized = true;
     }
 
     /**
      * Defines projection that will be used when populating criteria. Called with default projection list after
      * dependency injection is complete.
-     *
-     * @param projection projection
      */
-    protected void setProjection(Projection projection) {
-        Assert.notNull(projection, "projection must be provided");
-
-        this.projection = projection;
-        this.projectionAliases = Arrays.asList(projection.getAliases());
-    }
-
-    private Projection getDefaultProjection() {
-        ProjectionList projectionList = Projections.projectionList();
-
+    protected void setProjections() {
         ClassMetadata metadata = sessionFactory.getClassMetadata(entityType);
 
         String idPropertyName = metadata.getIdentifierPropertyName();
         if (idPropertyName != null) {
-            projectionList.add(Projections.property(idPropertyName).as(idPropertyName));
+            addProjection(idPropertyName, idPropertyName);
         }
 
-        for (String property : metadata.getPropertyNames()) {
-            projectionList.add(Projections.property(property).as(property));
+        for (String propertyName : metadata.getPropertyNames()) {
+            addProjection(propertyName, propertyName);
         }
+    }
 
-        return projectionList;
+    public void addProjection(String propertyName, String alias) {
+        Assert.isTrue(!initialized,
+                "Already initialized. Override setProjections() method in order to set projections");
+
+        projectionAliases.put(alias, propertyName);
     }
 
     /**
@@ -220,17 +213,26 @@ public abstract class AbstractQueryGrid {
      * @return order or null if property is not within alias list
      */
     protected Order createSortParameterOrder(SortParameter sortParameter) {
-        if (!projectionAliases.contains(sortParameter.getProperty())) {
+        if (!projectionAliases.containsKey(sortParameter.getProperty())) {
             return null;
         }
 
+		String propertyName = projectionAliases.get(sortParameter.getProperty());
         return sortParameter.isAscending()
-                ? Order.asc(sortParameter.getProperty())
-                : Order.desc(sortParameter.getProperty());
+                ? Order.asc(propertyName)
+                : Order.desc(propertyName);
     }
 
     private void setProjections(DetachedCriteria criteria) {
-        criteria.setProjection(projection);
+        if (projectionAliases.isEmpty()) {
+            return;
+        }
+
+        ProjectionList projectionList = Projections.projectionList();
+        for (Map.Entry<String, String> projectionAliasEntry : projectionAliases.entrySet()) {
+            projectionList.add(Projections.property(projectionAliasEntry.getValue()), projectionAliasEntry.getKey());
+        }
+        criteria.setProjection(projectionList);
     }
 
     /**
@@ -299,14 +301,15 @@ public abstract class AbstractQueryGrid {
      * @return created criterion
      */
     protected Criterion createPropertyFilterRestriction(FilterParameter filter) {
-        if (!projectionAliases.contains(filter.getProperty())) {
+        if (!projectionAliases.containsKey(filter.getProperty())) {
             return null;
         }
 
+        String propertyName = projectionAliases.get(filter.getProperty());
         if (filter.getValue() != null) {
-            return Restrictions.eq(filter.getProperty(), filter.getValue());
+            return Restrictions.eq(propertyName, filter.getValue());
         } else {
-            return Restrictions.isNull(filter.getProperty());
+            return Restrictions.isNull(propertyName);
         }
     }
 
