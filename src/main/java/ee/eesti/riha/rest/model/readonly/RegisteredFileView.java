@@ -24,16 +24,16 @@ public class RegisteredFileView {
     @Column(name = "file_resource_large_object_id")
     private Integer fileResourceLargeObjectId;
 
-    @Column(name = "info_system_short_name")
+    @Column(name = "infosystem_short_name")
     private String infoSystemShortName;
 
-    @Column(name = "info_system_name")
+    @Column(name = "infosystem_name")
     private String infoSystemName;
 
-    @Column(name = "info_system_owner_name")
+    @Column(name = "infosystem_owner_name")
     private String infoSystemOwnerName;
 
-    @Column(name = "info_system_owner_code")
+    @Column(name = "infosystem_owner_code")
     private String infoSystemOwnerCode;
 
     public RegisteredFilePK getRegisteredFilePK() {
@@ -99,7 +99,7 @@ public class RegisteredFileView {
         @Type(type = "pg-uuid")
         private UUID fileResourceUuid;
 
-        @Column(name = "info_system_uuid")
+        @Column(name = "infosystem_uuid")
         @Type(type = "pg-uuid")
         private UUID infoSystemUuid;
 

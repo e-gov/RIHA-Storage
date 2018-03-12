@@ -100,7 +100,7 @@ public class CsvToGsonConverter {
         metadata.addProperty("uuid", fileResource.getUuid().toString());
         metadata.addProperty("file_name", fileResource.getName());
         metadata.addProperty("content_type", fileResource.getContentType());
-        metadata.addProperty("info_system_uuid", fileResource.getInfoSystemUuid().toString());
+        metadata.addProperty("infosystem_uuid", fileResource.getInfoSystemUuid().toString());
         if (fileResource.getCreationDate() != null) {
             metadata.addProperty("creation_date", DateHelper.FORMATTER.format(fileResource.getCreationDate()));
         }
