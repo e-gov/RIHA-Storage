@@ -5,6 +5,7 @@ CREATE TABLE riha.registered_file
   file_resource_uuid UUID,
   main_resource_uuid UUID,
   section            VARCHAR(150),
+  CONSTRAINT registered_file_file_resource_uuid_main_resource_uuid_pk UNIQUE (file_resource_uuid, main_resource_uuid),
   CONSTRAINT registered_file_file_resource_uuid_fk FOREIGN KEY (file_resource_uuid) REFERENCES riha.file_resource (uuid) ON DELETE CASCADE
 );
 COMMENT ON COLUMN riha.registered_file.section
