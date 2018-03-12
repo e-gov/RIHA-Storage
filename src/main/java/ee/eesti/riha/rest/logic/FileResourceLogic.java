@@ -2,8 +2,11 @@ package ee.eesti.riha.rest.logic;
 
 import ee.eesti.riha.rest.dao.FileResourceDAO;
 import ee.eesti.riha.rest.dao.LargeObjectDAO;
+import ee.eesti.riha.rest.dao.grid.RegisteredFileGrid;
 import ee.eesti.riha.rest.model.FileResource;
 import ee.eesti.riha.rest.model.LargeObject;
+import ee.eesti.riha.rest.util.PagedRequest;
+import ee.eesti.riha.rest.util.PagedResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,9 @@ public class FileResourceLogic {
 
     @Autowired
     private FileResourceDAO fileResourceDAO;
+
+    @Autowired
+    private RegisteredFileGrid registeredFileGrid;
 
     @Autowired
     private FileResourceIndexingService fileResourceIndexingService;
@@ -122,4 +128,8 @@ public class FileResourceLogic {
         return fileResourceDAO.get(fileUuid);
     }
 
+    @Transactional
+    public PagedResponse list(PagedRequest request) {
+        return registeredFileGrid.query(request);
+    }
 }
