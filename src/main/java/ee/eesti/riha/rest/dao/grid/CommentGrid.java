@@ -5,8 +5,11 @@ import ee.eesti.riha.rest.model.CommentTypeIssueViewModel;
 import ee.eesti.riha.rest.model.readonly.Comment_type_issue_view;
 import ee.eesti.riha.rest.util.FilterParameter;
 import ee.eesti.riha.rest.util.PagedRequest;
+import ee.eesti.riha.rest.util.SortParameter;
+import org.hibernate.NullPrecedence;
 import org.hibernate.criterion.*;
 import org.hibernate.transform.AliasToBeanResultTransformer;
+import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class CommentGrid extends AbstractQueryGrid {
     private static final String PROPERTY_AUTHOR_PERSONAL_CODE = "author_personal_code";
     private static final String PROPERTY_ORGANIZATION_CODE = "organization_code";
     private static final String ACTION_AUTHOR_OR_ORGANIZATION_CODE = "author-or-organization-code";
+    private static final String ACTION_ORGANIZATION_INFOSYSTEMS_RELATED_ISSUES = "organization-infosystems-issues";
 
     public CommentGrid() {
         super(Comment_type_issue_view.class, "comment");
@@ -39,12 +43,10 @@ public class CommentGrid extends AbstractQueryGrid {
             restrictForAuthorOrOrganizationCode(criteria, request);
         } else {
             super.setRestrictions(criteria, request);
+            if (request.containsFilter(ACTION_ORGANIZATION_INFOSYSTEMS_RELATED_ISSUES)) {
+                restrictForOrganizationInfoSystemsRelatedIssues(criteria, request);
+            }
         }
-    }
-
-    @Override
-    protected void setTransformation(DetachedCriteria criteria, PagedRequest request) {
-        criteria.setResultTransformer(new AliasToBeanResultTransformer(CommentTypeIssueViewModel.class));
     }
 
     /**
@@ -70,6 +72,19 @@ public class CommentGrid extends AbstractQueryGrid {
 
             criteria.add(Restrictions.disjunction(propagatedCriterion, Subqueries.exists(subCriteria)));
         }
+    }
+
+    private void restrictForOrganizationInfoSystemsRelatedIssues(DetachedCriteria criteria, PagedRequest request) {
+        FilterParameter organizationCodeFilter = request.getFirstFilter(ACTION_ORGANIZATION_INFOSYSTEMS_RELATED_ISSUES);
+        if (organizationCodeFilter.getValue() == null) {
+            return;
+        }
+
+        criteria.add(Restrictions.sqlRestriction("{alias}.infosystem_uuid :: TEXT IN (" +
+                        "SELECT json_content ->> 'uuid' uuid" +
+                        " FROM riha.main_resource_view" +
+                        " WHERE json_content #>> '{owner,code}' = ?)",
+                organizationCodeFilter.getValue(), StringType.INSTANCE));
     }
 
     private Criterion getMainCriterion(PagedRequest request) {
@@ -106,10 +121,21 @@ public class CommentGrid extends AbstractQueryGrid {
     }
 
     @Override
+    protected Order createSortParameterOrder(SortParameter sortParameter) {
+        return super.createSortParameterOrder(sortParameter).nulls(NullPrecedence.LAST);
+    }
+
+    @Override
+    protected void setTransformation(DetachedCriteria criteria, PagedRequest request) {
+        criteria.setResultTransformer(new AliasToBeanResultTransformer(CommentTypeIssueViewModel.class));
+    }
+
+    @Override
     protected Criterion createPropertyFilterRestriction(FilterParameter filter) {
         if (PROPERTY_AUTHOR_PERSONAL_CODE.equalsIgnoreCase(filter.getProperty())) {
             return Restrictions.ilike(PROPERTY_AUTHOR_PERSONAL_CODE, filter.getValue());
         }
+
         return super.createPropertyFilterRestriction(filter);
     }
 }

@@ -2,8 +2,13 @@ package ee.eesti.riha.rest.logic;
 
 import ee.eesti.riha.rest.dao.FileResourceDAO;
 import ee.eesti.riha.rest.dao.LargeObjectDAO;
+import ee.eesti.riha.rest.dao.grid.RegisteredFileGrid;
 import ee.eesti.riha.rest.model.FileResource;
 import ee.eesti.riha.rest.model.LargeObject;
+import ee.eesti.riha.rest.util.PagedRequest;
+import ee.eesti.riha.rest.util.PagedResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +23,19 @@ import java.util.UUID;
 @Component
 public class FileResourceLogic {
 
+    private static final Logger logger = LoggerFactory.getLogger(FileResourceLogic.class);
+
     @Autowired
     private LargeObjectDAO largeObjectDAO;
 
     @Autowired
     private FileResourceDAO fileResourceDAO;
+
+    @Autowired
+    private RegisteredFileGrid registeredFileGrid;
+
+    @Autowired
+    private FileResourceIndexingService fileResourceIndexingService;
 
     /**
      * Creates {@link FileResource} from provided {@link InputStream} with file name and content.
@@ -32,9 +45,20 @@ public class FileResourceLogic {
      * @param contentType resource content type
      * @return UUID of created file resource
      */
-    @Transactional
     public UUID create(InputStream inputStream, UUID infoSystemUuid, String name, String contentType) {
+        UUID uuid = createFileResource(inputStream, infoSystemUuid, name, contentType);
+        indexFileResource(uuid);
+        return uuid;
+    }
+
+    @Transactional
+    protected UUID createFileResource(InputStream inputStream, UUID infoSystemUuid, String name, String contentType) {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Creating file resource for name: '{}' and content type: '{}'", name, contentType);
+        }
         int largeObjectId = largeObjectDAO.create(inputStream);
+        logger.info("Created large object id: {}", largeObjectId);
+
         LargeObject largeObject = largeObjectDAO.get(largeObjectId);
         if (largeObject == null) {
             throw new IllegalStateException("LargeObject with id " + largeObjectId + " is not found");
@@ -46,19 +70,19 @@ public class FileResourceLogic {
         entity.setContentType(contentType);
         entity.setLargeObject(largeObject);
 
-        return fileResourceDAO.create(entity);
+        UUID uuid = fileResourceDAO.create(entity);
+        logger.info("Created file resource '{}'", uuid);
+
+        return uuid;
     }
 
-    /**
-     * Retrieves single {@link FileResource} by its UUID.
-     *
-     * @param fileUuid file resource UUID
-     * @return file resource or null
-     * @see FileResourceDAO#get(UUID)
-     */
     @Transactional
-    public FileResource get(UUID fileUuid) {
-        return fileResourceDAO.get(fileUuid);
+    protected void indexFileResource(UUID uuid) {
+        try {
+            fileResourceIndexingService.indexAsynchronously(uuid);
+        } catch (IOException | SQLException e) {
+            logger.info("Error indexing file resource '" + uuid + "'", e);
+        }
     }
 
     /**
@@ -90,5 +114,22 @@ public class FileResourceLogic {
         }
 
         StreamUtils.copy(fileResource.getLargeObject().getData().getBinaryStream(), output);
+    }
+
+    /**
+     * Retrieves single {@link FileResource} by its UUID.
+     *
+     * @param fileUuid file resource UUID
+     * @return file resource or null
+     * @see FileResourceDAO#get(UUID)
+     */
+    @Transactional
+    public FileResource get(UUID fileUuid) {
+        return fileResourceDAO.get(fileUuid);
+    }
+
+    @Transactional
+    public PagedResponse list(PagedRequest request) {
+        return registeredFileGrid.query(request);
     }
 }

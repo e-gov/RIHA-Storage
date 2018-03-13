@@ -11,6 +11,8 @@ import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.FileResource;
 import ee.eesti.riha.rest.service.FileService;
+import ee.eesti.riha.rest.util.PagedRequest;
+import ee.eesti.riha.rest.util.PagedRequestArgumentResolver;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,6 +42,9 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private FileResourceLogic fileResourceLogic;
+
+    @Autowired
+    private PagedRequestArgumentResolver pagedRequestArgumentResolver;
 
     /*
      * (non-Javadoc)
@@ -136,6 +138,12 @@ public class FileServiceImpl implements FileService {
         }
 
         return response.entity(streamingOutput).build();
+    }
+
+    @Override
+    public Response list(UriInfo uriInfo) {
+        PagedRequest request = pagedRequestArgumentResolver.resolve(uriInfo.getQueryParameters());
+        return Response.ok(fileResourceLogic.list(request)).build();
     }
 
 }
