@@ -82,7 +82,7 @@ public class RegisteredFileGrid extends AbstractQueryGrid {
             return restrictions.get(0);
         }
 
-        return Restrictions.conjunction(restrictions.toArray(new Criterion[0]));
+        return Restrictions.disjunction(restrictions.toArray(new Criterion[0]));
     }
 
     @Override
