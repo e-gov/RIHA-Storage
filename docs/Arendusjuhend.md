@@ -95,11 +95,12 @@ teha rakendusserverile restart.
 ### Andmebaasiühenduse häälestamine
 
 Komponent eeldab, et RIHA andmebaasiühenduse info on kirjeldatud JNDI ressursina. Selleks tuleb Tomcati konfiguratsioonifaili
-`content.xml` lisada read:
+`context.xml` lisada read:
 
 ```xml
 <Resource name="jdbc/riharest/datasource"
       auth="Container"
+      factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
       type="javax.sql.DataSource"
       username="{username}"
       password="{password}"
