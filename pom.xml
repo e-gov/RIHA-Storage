@@ -93,6 +93,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+			<version>3.5.3</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
 			<version>${CXF.VERSION}</version>
@@ -609,25 +614,6 @@
 				</executions>
 			</plugin>
 
-				<plugin>
-					<groupId>org.liquibase</groupId>
-					<artifactId>liquibase-maven-plugin</artifactId>
-					<version>3.5.3</version>
-					<configuration>
-						<url>${riharest.jdbc.url}</url>
-						<username>${riharest.jdbc.user}</username>
-						<password>${riharest.jdbc.password}</password>
-						<changeLogFile>./sql/db.changelog.xml</changeLogFile>
-					</configuration>
-					<executions>
-						<execution>
-							<phase>process-resources</phase>
-							<goals>
-								<goal>update</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
 		</plugins>
 	</build>
 
