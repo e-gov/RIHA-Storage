@@ -33,7 +33,7 @@ BEGIN
                (SELECT json_content -> 'data_files'
                 FROM riha.main_resource_view
                 WHERE
-                  json_content ->> 'uuid' = updated_infosystem_uuid :: TEXT)) AS data_file
+                  json_content ->> 'uuid' = updated_infosystem_uuid :: TEXT AND json_content #> '{data_files,0}' IS NOT NULL)) AS data_file
       WHERE data_file ->> 'url' ~* 'file://[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
     LOOP
       IF exists(SELECT 1
