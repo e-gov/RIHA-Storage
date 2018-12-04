@@ -63,7 +63,7 @@
 
 	<profiles>
 		<profile>
-			<id>${project.groupId}-${project.artifactId}}</id>
+			<id>${project.groupId}-${project.artifactId}</id>
 			
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -85,7 +85,7 @@
 				<riharest.authService>http://localhost:8080/riha/sessionManagementServlet</riharest.authService>
 				
 				<!-- Note the trailing slash! -->
-				<riharest.pathRootWindows>C:\\Users\\Praktikant\\test_folder\\</riharest.pathRootWindows>
+				<riharest.pathRootWindows>C:\\test_folder\\</riharest.pathRootWindows>
 				
 			</properties>
 		</profile>
@@ -241,6 +241,14 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- embedded postgres -->
+		<dependency>
+			<groupId>ru.yandex.qatools.embed</groupId>
+			<artifactId>postgresql-embedded</artifactId>
+			<version>2.10</version>
 			<scope>test</scope>
 		</dependency>
 
