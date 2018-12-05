@@ -29,8 +29,7 @@ import static org.junit.Assert.*;
 public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   @Test
   public void testFindAll() throws RihaRestException {
-    List<Main_resource> main_resources;
-    main_resources = mainResourceDao.find(Main_resource.class, null, null, null, null);
+    List<Main_resource> main_resources = mainResourceDao.find(Main_resource.class, null, null, null, null);
 
     assertNotNull(main_resources);
     assertFalse(main_resources.isEmpty());

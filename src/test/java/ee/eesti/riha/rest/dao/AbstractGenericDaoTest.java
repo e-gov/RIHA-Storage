@@ -3,6 +3,7 @@ package ee.eesti.riha.rest.dao;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Main_resource;
 import ee.eesti.riha.rest.model.readonly.Kind;
 import org.junit.After;
@@ -18,26 +19,26 @@ public abstract class AbstractGenericDaoTest {
     static final String INFOSYSTEM_KIND_NAME = "infosystem";
     static final Integer INFOSYSTEM_KIND_ID = 389;
 
-    private static final String EXAMPLE_NAME = "Resource 1X";
-    private static final String EXAMPLE_SHORT_NAME = "r1Y";
-    private static final int EXAMPLE_OLD_ID = 222222;
+    protected static final String EXAMPLE_NAME = "Resource 1X";
+    protected static final String EXAMPLE_SHORT_NAME = "r1Y";
+    protected static final int EXAMPLE_OLD_ID = 222222;
 
-    @Resource(name = "apiGenericDAOImpl")
-    ApiGenericDAO<Main_resource, Integer> mainResourceDao;
+    @Resource
+    protected ApiGenericDAO<Main_resource, Integer> mainResourceDao;
 
-    @Resource(name = "apiGenericDAOImpl")
-    ApiGenericDAO<Kind, Integer> kindDao;
+    @Resource
+    protected ApiGenericDAO<Kind, Integer> kindDao;
 
-    @Resource(name = "utilitiesDAOImpl")
-    UtilitiesDAO<Main_resource> utilitiesDAO;
+    @Resource
+    protected UtilitiesDAO<Main_resource> mainResourceUtilitiesDAO;
 
     // before every test this item will be created in db and would be accessible
     // for test; after test it would be deleted
-    Main_resource mrAsPrimeTestEntry;
+    protected Main_resource mrAsPrimeTestEntry;
     // some tests require more than one item, these can be placed here inside
     // the test; items in this list will be deleted from db after test
-    List<Main_resource> additionalMrTestEntries = new ArrayList<>();
-    Kind kind;
+    protected List<Main_resource> additionalMrTestEntries = new ArrayList<>();
+    private Kind kind;
 
     @Before
     public void beforeTest() {
@@ -50,7 +51,6 @@ public abstract class AbstractGenericDaoTest {
     @After
     public void afterTest() {
         kindDao.delete(kind);
-        // clean up always
         mainResourceDao.delete(mrAsPrimeTestEntry);
         mainResourceDao.delete(additionalMrTestEntries);
         additionalMrTestEntries.clear();
@@ -59,7 +59,7 @@ public abstract class AbstractGenericDaoTest {
     Main_resource createMain_resource() {
         Main_resource main_resource = new Main_resource();
         // required fields
-        main_resource.setMain_resource_id(utilitiesDAO.getNextSeqValForPKForTable(Main_resource.class));
+        main_resource.setMain_resource_id(mainResourceUtilitiesDAO.getNextSeqValForPKForTable(Main_resource.class));
         main_resource.setUri("uri");
         main_resource.setName(EXAMPLE_NAME);
         main_resource.setVersion("1.1");
@@ -75,7 +75,7 @@ public abstract class AbstractGenericDaoTest {
         main_resource.setField_name("testTEST01");
 
         // it is expected to have json_content
-        main_resource.setJson_content(new JsonObject());
+        main_resource.setJson_content(JsonHelper.getFromJson(JsonHelper.GSON.toJson(main_resource)));
         return main_resource;
     }
 
