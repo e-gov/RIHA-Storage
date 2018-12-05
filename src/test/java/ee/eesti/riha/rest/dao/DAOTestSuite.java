@@ -15,10 +15,8 @@ import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.V9_6;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         TestApiGenericDAOMain_resource.class,
-        TestApiGenericDAONames.class,
         TestDatabase.class,
         TestKindRepository.class,
-        TestNamesDAO.class,
         TestSecureApiGenericDAO.class
 })
 public class DAOTestSuite {
