@@ -4,7 +4,6 @@ import org.junit.ClassRule;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.springframework.beans.factory.annotation.Value;
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres;
 
 import java.sql.Connection;
@@ -21,7 +20,6 @@ import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.V9_6;
 })
 public class DAOTestSuite {
     private static final EmbeddedPostgres POSTGRES = new EmbeddedPostgres(V9_6);
-    ;
 
     @ClassRule
     public static final ExternalResource resource = new ExternalResource() {
