@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,45 +27,29 @@ import java.util.Map;
  * Converts CSV content from {@link LargeObject} of {@link FileResource} to {@link JsonNode}.
  */
 @Component
-public class CsvToGsonConverter {
+public class CsvToGsonConverter implements ToGsonConverter {
+    public static final char DELIMITER = ';';
 
-    private static final Logger logger = LoggerFactory.getLogger(CsvToGsonConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvToGsonConverter.class);
 
     private static final String CSV_FILE_SUFFIX = ".csv";
     private static final CSVFormat DEFAULT_WITH_HEADERS = CSVFormat.DEFAULT
-            .withDelimiter(';')
+            .withDelimiter(DELIMITER)
             .withFirstRecordAsHeader()
             .withIgnoreEmptyLines()
             .withIgnoreSurroundingSpaces();
 
-    private static List<MediaType> supportedMediaTypes = Arrays.asList(MediaType.valueOf("text/csv"));
+    private static final List<MediaType> SUPPORTED_MEDIA_TYPES = Collections.singletonList(MediaType.valueOf("text/csv"));
 
+    @Override
     public boolean supports(FileResource fileResource) {
-        return supportedMediaTypes.contains(MediaType.valueOf(fileResource.getContentType()))
+        return SUPPORTED_MEDIA_TYPES.contains(MediaType.valueOf(fileResource.getContentType()))
                 || StringUtils.endsWithIgnoreCase(fileResource.getName(), CSV_FILE_SUFFIX);
     }
 
-    /**
-     * Converts {@link FileResource} input stream to {@link JsonNode} form
-     * <pre>
-     * {
-     *     "meta": {&lt;used FileResource metadata&gt;}
-     *     "headers": [&lt;CSV headers&gt;],
-     *     "records": [
-     *          {
-     *             "header-name": "value",
-     *              ...
-     *          }
-     *     ]
-     * }
-     * </pre>
-     *
-     * @param fileResource converted file resource
-     * @return created JsonNode
-     * @throws IOException in case of parsing errors
-     */
+    @Override
     public JsonObject convert(FileResource fileResource) throws IOException, SQLException {
-        logger.debug("Starting file resource '{}' CSV to JSON conversion", fileResource.getUuid());
+        LOGGER.debug("Starting file resource '{}' CSV to JSON conversion", fileResource.getUuid());
 
         CSVParser parser = getFormat(fileResource)
                 .parse(new InputStreamReader(
