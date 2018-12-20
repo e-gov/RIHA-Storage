@@ -45,7 +45,7 @@ public class RegisteredFileGrid extends AbstractQueryGrid {
             Criterion dataCriterion = createFileDataSearchRestriction(dataFilterParameters);
             if (dataCriterion != null) {
                 DetachedCriteria dataSubQueryCriteria = DetachedCriteria.forClass(
-                        RegisteredFileView.LargeObjectCsvRecord.class, "csv")
+                        RegisteredFileView.LargeObjectRecord.class, "csv")
                         .setProjection(Projections.id())
                         .add(dataCriterion);
 

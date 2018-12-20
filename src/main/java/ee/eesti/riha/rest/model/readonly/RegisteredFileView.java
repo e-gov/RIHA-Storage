@@ -134,11 +134,11 @@ public class RegisteredFileView {
             " file_resource_large_object_id AS large_object_id," +
             " record.value AS value" +
             " FROM jsonb_array_elements(" +
-            "  (SELECT csv_search_content -> 'records'" +
+            "  (SELECT search_content -> 'records'" +
             "   FROM large_object" +
             "   WHERE id = file_resource_large_object_id)) AS record")
     @TypeDefs({@TypeDef(name = "JsonObject", typeClass = JsonObjectUserType.class)})
-    public static class LargeObjectCsvRecord {
+    public static class LargeObjectRecord {
 
         @Id
         @Column(name = "large_object_id")
