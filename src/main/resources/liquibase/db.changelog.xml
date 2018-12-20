@@ -22,4 +22,12 @@
                  relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="2" author="vadim">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/update_20181220_rename_json_content_column_of_large_object_table.sql"
+                 splitStatements="false"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

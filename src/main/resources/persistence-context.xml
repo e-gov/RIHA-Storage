@@ -43,7 +43,7 @@
 				<value>ee.eesti.riha.rest.model.readonly.Main_resource_relation_view</value>
 				<value>ee.eesti.riha.rest.model.readonly.Comment_type_issue_view</value>
 				<value>ee.eesti.riha.rest.model.readonly.RegisteredFileView</value>
-				<value>ee.eesti.riha.rest.model.readonly.RegisteredFileView.LargeObjectCsvRecord</value>
+				<value>ee.eesti.riha.rest.model.readonly.RegisteredFileView.LargeObjectRecord</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">

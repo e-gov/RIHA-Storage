@@ -1,7 +1,7 @@
 package ee.eesti.riha.rest.logic;
 
 import ee.eesti.riha.rest.dao.FileResourceDAO;
-import ee.eesti.riha.rest.dao.util.CsvToGsonConverter;
+import ee.eesti.riha.rest.dao.util.ToGsonConverter;
 import ee.eesti.riha.rest.model.FileResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -24,7 +25,7 @@ public class FileResourceIndexingService {
     private static final Logger logger = LoggerFactory.getLogger(FileResourceIndexingService.class);
 
     @Autowired
-    private CsvToGsonConverter csvToGsonConverter;
+    private List<ToGsonConverter> toGsonConverters;
 
     @Autowired
     private FileResourceDAO fileResourceDAO;
@@ -70,22 +71,26 @@ public class FileResourceIndexingService {
         }
 
         logger.info("Starting file resource '{}' indexing", fileResource.getUuid());
-        createCsvIndex(fileResource);
+        createIndex(fileResource);
 
         fileResource.getLargeObject().setIndexed(true);
         logger.info("File resource '{}' indexing is complete", fileResource.getUuid());
     }
 
-    private void createCsvIndex(FileResource fileResource) throws IOException, SQLException {
+    private void createIndex(FileResource fileResource) throws IOException, SQLException {
         UUID uuid = fileResource.getUuid();
-        if (!csvToGsonConverter.supports(fileResource)) {
-            logger.debug("CSV to JSON conversion of file resource '{}' is not supported", uuid);
-            return;
+
+        for (ToGsonConverter converter : toGsonConverters) {
+            if (converter.supports(fileResource)) {
+                logger.debug("Starting file resource '{}' index creation", uuid);
+
+                fileResource.getLargeObject().setSearchContent(converter.convert(fileResource));
+
+                logger.debug("Index creation for file resource '{}' is complete", uuid);
+                return;
+            }
         }
 
-        logger.debug("Starting file resource '{}' CSV index creation", uuid);
-        fileResource.getLargeObject().setCsvSearchContent(csvToGsonConverter.convert(fileResource));
-
-        logger.debug("CSV index creation for file resource '{}' is complete", uuid);
+        logger.debug("To JSON conversion of file resource '{}' is not supported", uuid);
     }
 }

@@ -47,9 +47,9 @@ public class LargeObject {
     private Blob data;
 
     @JsonIgnore
-    @Column(name = "csv_search_content")
+    @Column(name = "search_content")
     @Type(type = "JsonObject")
-    private JsonObject csvSearchContent;
+    private JsonObject searchContent;
 
     @JsonIgnore
     @Column(name = "indexed")
@@ -95,12 +95,12 @@ public class LargeObject {
         this.data = data;
     }
 
-    public JsonObject getCsvSearchContent() {
-        return csvSearchContent;
+    public JsonObject getSearchContent() {
+        return searchContent;
     }
 
-    public void setCsvSearchContent(JsonObject csvSearchContent) {
-        this.csvSearchContent = csvSearchContent;
+    public void setSearchContent(JsonObject searchContent) {
+        this.searchContent = searchContent;
     }
 
     public boolean isIndexed() {
