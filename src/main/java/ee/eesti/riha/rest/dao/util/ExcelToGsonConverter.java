@@ -45,47 +45,64 @@ public class ExcelToGsonConverter implements ToGsonConverter {
 
     @Override
     public JsonObject convert(FileResource fileResource) throws IOException, SQLException {
-        Blob blob = fileResource.getLargeObject().getData();
-        Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(blob.getBytes(1, ((int) blob.length()))));
-        FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+        ByteArrayInputStream inputStream = null;
+        ByteArrayOutputStream byteArrayOutputStream = null;
+        PrintStream printStream = null;
 
-        DataFormatter formatter = new DataFormatter();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        PrintStream printStream = new PrintStream(byteArrayOutputStream, true, "UTF-8");
+        try {
+            Blob blob = fileResource.getLargeObject().getData();
+            inputStream = new ByteArrayInputStream(blob.getBytes(1, ((int) blob.length())));
+            Workbook workbook = new XSSFWorkbook(inputStream);
+            FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
-        byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
-        printStream.write(bom);
+            DataFormatter formatter = new DataFormatter();
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            printStream = new PrintStream(byteArrayOutputStream, true, "UTF-8");
 
-        for (int sheetNumber = 0; sheetNumber < workbook.getNumberOfSheets(); sheetNumber++) {
-            Sheet sheet = workbook.getSheetAt(sheetNumber);
+            byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
+            printStream.write(bom);
 
-            for (int rowNumber = 0; rowNumber <= sheet.getLastRowNum(); rowNumber++) {
-                Row row = sheet.getRow(rowNumber);
-                if (row == null) {
-                    printStream.println(CsvToGsonConverter.DELIMITER);
-                    continue;
-                }
+            for (int sheetNumber = 0; sheetNumber < workbook.getNumberOfSheets(); sheetNumber++) {
+                Sheet sheet = workbook.getSheetAt(sheetNumber);
 
-                boolean firstCell = true;
-                for (int cellNUmber = 0; cellNUmber < row.getLastCellNum(); cellNUmber++) {
-                    Cell cell = row.getCell(cellNUmber, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                    if (!firstCell) printStream.print(CsvToGsonConverter.DELIMITER);
-
-                    if (cell != null) {
-                        cell = formulaEvaluator.evaluateInCell(cell);
-                        String value = formatter.formatCellValue(cell);
-                        if (cell.getCellType() == CellType.FORMULA) {
-                            value = "=" + value;
-                        }
-                        printStream.print(encodeValue(value));
+                for (int rowNumber = 0; rowNumber <= sheet.getLastRowNum(); rowNumber++) {
+                    Row row = sheet.getRow(rowNumber);
+                    if (row == null) {
+                        printStream.println(CsvToGsonConverter.DELIMITER);
+                        continue;
                     }
-                    firstCell = false;
+
+                    boolean firstCell = true;
+                    for (int cellNUmber = 0; cellNUmber < row.getLastCellNum(); cellNUmber++) {
+                        Cell cell = row.getCell(cellNUmber, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                        if (!firstCell) printStream.print(CsvToGsonConverter.DELIMITER);
+
+                        if (cell != null) {
+                            cell = formulaEvaluator.evaluateInCell(cell);
+                            String value = formatter.formatCellValue(cell);
+                            if (cell.getCellType() == CellType.FORMULA) {
+                                value = "=" + value;
+                            }
+                            printStream.print(encodeValue(value));
+                        }
+                        firstCell = false;
+                    }
+                    printStream.println();
                 }
-                printStream.println();
+            }
+
+            fileResource.getLargeObject().setData(new SerialBlob(byteArrayOutputStream.toByteArray()));
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (byteArrayOutputStream != null) {
+                byteArrayOutputStream.close();
+            }
+            if (printStream != null) {
+                printStream.close();
             }
         }
-
-        fileResource.getLargeObject().setData(new SerialBlob(byteArrayOutputStream.toByteArray()));
 
         return csvToGsonConverter.convert(fileResource);
     }
