@@ -1,3 +1,10 @@
+CREATE OR REPLACE FUNCTION riha.is_set(val jsonb)
+  RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN NOT (val ISNULL OR val :: text = 'null');
+END $$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION riha.set_creation_and_update_time_for_infosystem(infosystem_uuid UUID)
   RETURNS VOID AS $$
 DECLARE
@@ -7,6 +14,7 @@ DECLARE
   updated_docs jsonb;
   is_row_updated boolean;
 BEGIN
+  RAISE NOTICE 'Processing infosystem with uuid %', infosystem_uuid;
   FOR current_row IN (SELECT *
                       FROM riha.main_resource as main_resource
                       WHERE json_content ->> 'uuid' = infosystem_uuid :: TEXT
@@ -16,7 +24,8 @@ BEGIN
 
     IF NOT prev_row ISNULL
     THEN
-      IF (current_row.json_content ? 'documents') AND (jsonb_array_length(current_row.json_content -> 'documents') > 0)
+      IF (current_row.json_content ? 'documents') AND riha.is_set(current_row.json_content -> 'documents')
+         AND (jsonb_array_length(current_row.json_content -> 'documents') > 0)
       THEN
         updated_docs := riha.set_creation_and_update_time_for_docs(prev_row.json_content -> 'documents',
                                                                    current_row.json_content -> 'documents',
@@ -26,7 +35,8 @@ BEGIN
         is_row_updated := true;
       END IF;
 
-      IF (current_row.json_content ? 'data_files') AND (jsonb_array_length(current_row.json_content -> 'data_files') > 0)
+      IF (current_row.json_content ? 'data_files') AND riha.is_set(current_row.json_content -> 'data_files')
+         AND (jsonb_array_length(current_row.json_content -> 'data_files') > 0)
       THEN
         updated_docs := riha.set_creation_and_update_time_for_docs(prev_row.json_content -> 'data_files',
                                                                    current_row.json_content -> 'data_files',
@@ -36,7 +46,8 @@ BEGIN
         is_row_updated := true;
       END IF;
 
-      IF (current_row.json_content ? 'legislations') AND (jsonb_array_length(current_row.json_content -> 'legislations') > 0)
+      IF (current_row.json_content ? 'legislations') AND riha.is_set(current_row.json_content -> 'legislations')
+         AND (jsonb_array_length(current_row.json_content -> 'legislations') > 0)
       THEN
         updated_docs := riha.set_creation_and_update_time_for_docs(prev_row.json_content -> 'legislations',
                                                                    current_row.json_content -> 'legislations',
@@ -48,14 +59,21 @@ BEGIN
     END IF;
 
     IF is_row_updated
-      THEN
-        UPDATE riha.main_resource
-        SET json_content = current_row.json_content
-        WHERE main_resource_id = current_row.main_resource_id;
+    THEN
+      UPDATE riha.main_resource
+      SET json_content = current_row.json_content
+      WHERE main_resource_id = current_row.main_resource_id;
     END IF;
 
     prev_row := current_row;
   END LOOP;
+
+  EXCEPTION
+    WHEN OTHERS  THEN
+      RAISE NOTICE 'Error while processing following row:';
+      RAISE NOTICE 'Current version %', current_row;
+      RAISE NOTICE 'Previous version %', prev_row;
+
 END $$
 LANGUAGE plpgsql;
 
@@ -69,7 +87,6 @@ DECLARE
 
   updated_docs jsonb [] := '{}';
 BEGIN
---   RAISE NOTICE 'Before  update %', new_list;
   FOR j_new_doc IN SELECT * FROM jsonb_array_elements(new_list)
   LOOP
     is_new_doc := true;
@@ -111,15 +128,8 @@ BEGIN
     updated_docs := array_append(updated_docs, j_new_doc);
   END LOOP;
 
---   RAISE NOTICE 'After update %', array_to_json(updated_docs);
+  --   RAISE NOTICE 'After update %', array_to_json(updated_docs);
   RETURN array_to_json(updated_docs);
-END $$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION riha.is_set(val jsonb)
-  RETURNS BOOLEAN AS $$
-BEGIN
-  RETURN NOT (val ISNULL OR val :: text = 'null');
 END $$
 LANGUAGE plpgsql;
 
