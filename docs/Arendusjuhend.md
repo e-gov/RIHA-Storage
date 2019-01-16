@@ -11,7 +11,7 @@
 ## Andmebaasi paigaldamine
 
 1. Paigaldada PostgreSQL versioonil 9.6 töötav andmebaas
-2. Andmebaasi vajalikud tabelid tekitatakse Liquibase'iga, mis on lisatud rakendusele kaasa Maveni pluginana, mis käivitatakse ehitusprotsessi käigus. Ehitusprotsessi käigus peab Liquibase saama ligi paigaldatud andmebaasile. Paigaldatud andmebaasi konfiguratsioon tuleb lisada siia: [riharest.project.properties konfiguratsioonifaili](https://github.com/e-gov/RIHA-Storage/blob/develop/src/main/resources/riharest.project.properties)
+2. Andmebaasi vajalikud tabelid tekitatakse Liquibase'iga, mis käivitatakse rakendust käivitades _runtime_ ajal. _Runtime_ jooksul peab Liquibase saama ligi paigaldatud andmebaasile. Paigaldatud andmebaasi konfiguratsioon tuleb lisada siia: [riharest.project.properties konfiguratsioonifaili](https://github.com/e-gov/RIHA-Storage/blob/develop/src/main/resources/riharest.project.properties)
 3. Andmebaasiühenduse konfigureeritavate parameetrite kohta leiab infot peatükist ["Paigalduse häälestamine"](#konfiguratsioon)
 4. Andmebaasis peab leiduma skeem nimega **_riha_** ning see peab olema antud kasutaja
 vaikimisi skeemiks. Vajalikul kujul andmebaas ja kasutajatunnus tuleb tekitada eraldi käsitsi 
