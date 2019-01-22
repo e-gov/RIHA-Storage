@@ -1,13 +1,6 @@
 package ee.eesti.riha.rest.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-
+import ee.eesti.riha.rest.model.readonly.Kind;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,50 +11,33 @@ import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import ee.eesti.riha.rest.model.readonly.Kind;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath*: **/test-applicationContext.xml")
-public class TestKindRepository {
+public class TestKindRepository extends AbstractGenericDaoTest {
+  @Autowired
+  private CacheManager cacheManager;
 
   @Autowired
-  GenericDAO<Kind> noLogicDAO;
+  private KindRepository kindRepository;
 
-  @Autowired
-  CacheManager cacheManager;
-
-  @Autowired
-  KindRepository kindRepository;
-
-  Cache kindsCache;
-
-  private static final String INFOSYSTEM = "infosystem";
-  static Integer infosystemId = null;
+  private Cache kindsCache;
 
   @Before
   public void beforeTest() {
+    super.beforeTest();
     kindsCache = cacheManager.getCache("kinds");
-
-    // find infosystemId
-    if (infosystemId == null) {
-      List<Kind> kinds = noLogicDAO.findAll(Kind.class);
-      for (Kind kind : kinds) {
-        if (kind.getName().equals(INFOSYSTEM)) {
-          infosystemId = kind.getKind_id();
-          break;
-        }
-      }
-    }
   }
 
   @After
   public void afterTest() {
+    super.afterTest();
     kindsCache.clear();
   }
 
   @Test
   public void testCacheGetByWrongId() throws Exception {
-
     int id = 555;
 
     assertNull(kindsCache.get(id, Kind.class));
@@ -77,23 +53,18 @@ public class TestKindRepository {
 
   @Test
   public void testCacheGetByInfosystemId() throws Exception {
+    assertNull(kindsCache.get(INFOSYSTEM_KIND_ID, Kind.class));
+    Kind kind = kindRepository.getById(INFOSYSTEM_KIND_ID);
 
-    int id = infosystemId;
-
-    assertNull(kindsCache.get(id, Kind.class));
-    Kind kind = kindRepository.getById(id);
-
-    Kind kindFromCache = kindsCache.get(id, Kind.class);
+    Kind kindFromCache = kindsCache.get(INFOSYSTEM_KIND_ID, Kind.class);
     assertNotNull(kind);
     assertNotNull(kindFromCache);
     assertEquals(kind.getKind_id(), kindFromCache.getKind_id());
     assertEquals(kind.getName(), kindFromCache.getName());
-
   }
 
   @Test
   public void testCacheGetByWrongName() throws Exception {
-
     String name = "badNameForKind123";
 
     assertNull(kindsCache.get(name, Kind.class));
@@ -104,13 +75,11 @@ public class TestKindRepository {
     System.out.println(kindsCache.getNativeCache());
     assertNotEquals("{}", kindsCache.getNativeCache().toString());
     assertTrue(kindsCache.getNativeCache().toString().contains("NullValue"));
-
   }
 
   @Test
   public void testCacheGetByName() throws Exception {
-
-    String name = INFOSYSTEM;
+    String name = INFOSYSTEM_KIND_NAME;
 
     assertNull(kindsCache.get(name, Kind.class));
     Kind kind = kindRepository.getByName(name);
@@ -120,7 +89,5 @@ public class TestKindRepository {
     assertNotNull(kindFromCache);
     assertEquals(kind.getKind_id(), kindFromCache.getKind_id());
     assertEquals(kind.getName(), kindFromCache.getName());
-
   }
-
 }

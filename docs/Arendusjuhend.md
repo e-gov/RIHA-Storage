@@ -1,33 +1,23 @@
-Märkus. Ümber nimetatud repo `kirjeldusmoodul-rest-api` failist README.md - Priit P 27.04.2017
-
 # Arendusjuhend
 
 ## Eeldused
 
 - PostgreSQL 9.6 andmebaas
 - Tomcat 8
-- Ubuntu 16.04
+- Ubuntu 18.04
 - OpenJDK 1.8
-- Maven
+- Maven (testitud 3.3.9 peal) 
 
 ## Andmebaasi paigaldamine
 
 1. Paigaldada PostgreSQL versioonil 9.6 töötav andmebaas
-2. Tekitada andmebaasi vajalikud tabelid, kasutades RIHA-Storage komponendi [dbcreate.sh](https://github.com/e-gov/RIHA-Storage/blob/master/dbcreate.sh) skripti:
-Andmebaasitabelite tekitamiseks tuleb anda selle repositooriumi juurkataloogist käsk:
-```bash
-PGPASSWORD={password} sh ./dbcreate.sh [-n] {hostname} {dbport} {dbname} {username}
-```
-Käsus tuleb näidata järgmine info:
-- **-n** – Andmebaas tekitatakse ilma vana RIHA andmebaasiga sidumata (st –tegemist on vana RIHA lahendusest sõltumatu paigaldusega)
-- **hostname** - Andmebaasiserveri IP aadress või DNS nimi
-- **dbport** - Andmebaasiserveri poolt kasutatav port
-- **dbname** - andmebaasitabeleid sisaldava andmebaasi nimi.
-- **username** - andmebaasi administreerimise õiguseid omava andmebaasikasutaja nimi
-- **password** - Andmebaasikasutaja parool
-3. Andmebaasis peab leiduma skeem nimega **_riha_** ning see peab olema antud kasutaja
+2. Andmebaasi vajalikud tabelid tekitatakse Liquibase'iga, mis käivitatakse rakendust käivitades _runtime_ ajal. _Runtime_ jooksul peab Liquibase saama ligi paigaldatud andmebaasile. Paigaldatud andmebaasi konfiguratsioon tuleb lisada siia: [riharest.project.properties konfiguratsioonifaili](https://github.com/e-gov/RIHA-Storage/blob/develop/src/main/resources/riharest.project.properties)
+3. Andmebaasiühenduse konfigureeritavate parameetrite kohta leiab infot peatükist ["Paigalduse häälestamine"](#konfiguratsioon)
+4. Andmebaasis peab leiduma skeem nimega **_riha_** ning see peab olema antud kasutaja
 vaikimisi skeemiks. Vajalikul kujul andmebaas ja kasutajatunnus tuleb tekitada eraldi käsitsi 
 andmebaasihalduse tarkvara abil. Muud täiendavad nõudeid tekitatud andmebaasile puuduvad.
+
+## Andmebaasi uuendamine
 
 ## Lahenduse kompileerimine
 
@@ -39,6 +29,7 @@ mvn package
 
 Kompileeritud WAR paketi leiab `target/` kataloogist.
 
+<a name="konfiguratsioon"></a>
 ## Paigalduse häälestamine
 
 ### Kompileerimise käigus
