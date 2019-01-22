@@ -5,21 +5,49 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="1" author="aleksandr">
-        <comment>Database creation.
-            Please note that database schema and roles should be created manually</comment>
+        <comment>sync Live state with Develop</comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./create/create_tables.sql"
-                 relativeToChangelogFile="true"/>
-        <sqlFile dbms="postgresql"
-                 encoding="utf8"
-                 path="./create/create_views.sql"
-                 relativeToChangelogFile="true"/>
-        <sqlFile dbms="postgresql"
-                 encoding="utf8"
-                 path="./create/create_triggers.sql"
+                 path="./update/update_20180301_add_json_content_to_large_object_table.sql"
+                 relativeToChangelogFile="true"
                  splitStatements="false"
-                 relativeToChangelogFile="true"/>
+        />
+
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/update_20180306_add_registered_file_table.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/update_20180307_create_registered_file_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+
+        />
+
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/update_20180307_extract_last_comment_as_flat_structure.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/update_20180307_maintenance.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/update_20181220_rename_json_content_column_of_large_object_table.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
     </changeSet>
 
 </databaseChangeLog>

@@ -63,7 +63,7 @@
 
 	<profiles>
 		<profile>
-			<id>${project.groupId}-${project.artifactId}}</id>
+			<id>${project.groupId}-${project.artifactId}</id>
 			
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -85,7 +85,7 @@
 				<riharest.authService>http://localhost:8080/riha/sessionManagementServlet</riharest.authService>
 				
 				<!-- Note the trailing slash! -->
-				<riharest.pathRootWindows>C:\\Users\\Praktikant\\test_folder\\</riharest.pathRootWindows>
+				<riharest.pathRootWindows>C:\\test_folder\\</riharest.pathRootWindows>
 				
 			</properties>
 		</profile>
@@ -244,6 +244,14 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- embedded postgres -->
+		<dependency>
+			<groupId>ru.yandex.qatools.embed</groupId>
+			<artifactId>postgresql-embedded</artifactId>
+			<version>2.10</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- other -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -259,6 +267,11 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>4.0.1</version>
 		</dependency>
 
 	</dependencies>
@@ -423,16 +436,40 @@
 		</pluginManagement>
 		<plugins>
 
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.2</version>
+				<executions>
+					<execution>
+						<id>jacoco-initialize</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 
 				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader>
 					<excludes>
 						<exclude>**/integration/**.java</exclude>
 						<exclude>**/integration/*/**.java</exclude>
 					</excludes>
+					<includes>
+						<include>DAOTestSuite.java</include>
+					</includes>
 				</configuration>
 
 			</plugin>
@@ -458,161 +495,161 @@
 
 
 
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.2</version>
+			<!--<plugin>-->
+				<!--<groupId>org.apache.tomcat.maven</groupId>-->
+				<!--<artifactId>tomcat7-maven-plugin</artifactId>-->
+				<!--<version>2.2</version>-->
 
-				<dependencies>
-					<dependency>
-						<groupId>org.postgresql</groupId>
-						<artifactId>postgresql</artifactId>
-						<version>${POSTGRESQL.VERSION}</version>
-					</dependency>
-				</dependencies>
+				<!--<dependencies>-->
+					<!--<dependency>-->
+						<!--<groupId>org.postgresql</groupId>-->
+						<!--<artifactId>postgresql</artifactId>-->
+						<!--<version>${POSTGRESQL.VERSION}</version>-->
+					<!--</dependency>-->
+				<!--</dependencies>-->
 
-				<executions>
-					<execution>
-						<id>start-tomcat</id>
+				<!--<executions>-->
+					<!--<execution>-->
+						<!--<id>start-tomcat</id>-->
 
-						<goals>
-							<!-- <goal>run-war</goal> -->
-							<goal>run</goal>
-						</goals>
+						<!--<goals>-->
+							<!--&lt;!&ndash; <goal>run-war</goal> &ndash;&gt;-->
+							<!--<goal>run</goal>-->
+						<!--</goals>-->
 
-						<phase>pre-integration-test</phase>
+						<!--<phase>pre-integration-test</phase>-->
 
-						<configuration>
-							<port>${test.server.port}</port>
-							<fork>true</fork>
-						</configuration>
-					</execution>
+						<!--<configuration>-->
+							<!--<port>${test.server.port}</port>-->
+							<!--<fork>true</fork>-->
+						<!--</configuration>-->
+					<!--</execution>-->
 
-					<execution>
-						<id>stop-tomcat</id>
+					<!--<execution>-->
+						<!--<id>stop-tomcat</id>-->
 
-						<goals>
-							<goal>shutdown</goal>
-						</goals>
+						<!--<goals>-->
+							<!--<goal>shutdown</goal>-->
+						<!--</goals>-->
 
-						<phase>post-integration-test</phase>
+						<!--<phase>post-integration-test</phase>-->
 
-					</execution>
+					<!--</execution>-->
 
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.18.1</version>
+				<!--</executions>-->
+			<!--</plugin>-->
+			<!--<plugin>-->
+				<!--<groupId>org.apache.maven.plugins</groupId>-->
+				<!--<artifactId>maven-failsafe-plugin</artifactId>-->
+				<!--<version>2.18.1</version>-->
 
-				<configuration>
-					<argLine>-Xmx2048m -XX:MaxPermSize=1024m</argLine>
-					<environmentVariables>
-						<serviceurl>http://localhost:${test.server.port}/rest</serviceurl>
-					</environmentVariables>
+				<!--<configuration>-->
+					<!--<argLine>-Xmx2048m -XX:MaxPermSize=1024m</argLine>-->
+					<!--<environmentVariables>-->
+						<!--<serviceurl>http://localhost:${test.server.port}/rest</serviceurl>-->
+					<!--</environmentVariables>-->
 
-					<includes>
-						<include>**/integration/**.java</include>
-						<include>**/integration/*/**.java</include>
-					</includes>
+					<!--<includes>-->
+						<!--<include>**/integration/**.java</include>-->
+						<!--<include>**/integration/*/**.java</include>-->
+					<!--</includes>-->
 
-					<encoding>UTF-8</encoding>
+					<!--<encoding>UTF-8</encoding>-->
 
-				</configuration>
+				<!--</configuration>-->
 
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
+				<!--<executions>-->
+					<!--<execution>-->
+						<!--<goals>-->
+							<!--<goal>integration-test</goal>-->
+							<!--<goal>verify</goal>-->
+						<!--</goals>-->
+					<!--</execution>-->
+				<!--</executions>-->
 
-			</plugin>
+			<!--</plugin>-->
 
-			<plugin>
-				<groupId>com.lazerycode.jmeter</groupId>
-				<artifactId>jmeter-maven-plugin</artifactId>
-				<version>2.0.3</version>
-				<configuration>
-					<propertiesJMeter>
-						<log_level.jmeter>DEBUG</log_level.jmeter>
-					</propertiesJMeter>
-					<testFilesIncluded>
-						<jMeterTestFile>${jmeter.test}.jmx</jMeterTestFile>
-					</testFilesIncluded>
-					<testResultsTimestamp>false</testResultsTimestamp>
-					<overrideRootLogLevel>DEBUG</overrideRootLogLevel>
-					<suppressJMeterOutput>${jmeter.suppressOutput}</suppressJMeterOutput>
-					<ignoreResultFailures>${jmeter.ignoreFailures}</ignoreResultFailures>
+			<!--<plugin>-->
+				<!--<groupId>com.lazerycode.jmeter</groupId>-->
+				<!--<artifactId>jmeter-maven-plugin</artifactId>-->
+				<!--<version>2.0.3</version>-->
+				<!--<configuration>-->
+					<!--<propertiesJMeter>-->
+						<!--<log_level.jmeter>DEBUG</log_level.jmeter>-->
+					<!--</propertiesJMeter>-->
+					<!--<testFilesIncluded>-->
+						<!--<jMeterTestFile>${jmeter.test}.jmx</jMeterTestFile>-->
+					<!--</testFilesIncluded>-->
+					<!--<testResultsTimestamp>false</testResultsTimestamp>-->
+					<!--<overrideRootLogLevel>DEBUG</overrideRootLogLevel>-->
+					<!--<suppressJMeterOutput>${jmeter.suppressOutput}</suppressJMeterOutput>-->
+					<!--<ignoreResultFailures>${jmeter.ignoreFailures}</ignoreResultFailures>-->
 
-					<skipTests>${jmeter.skip}</skipTests>
-					<propertiesUser>
-						<restApiHost>${jmeter.host}</restApiHost>
-						<restApiPort>${jmeter.port}</restApiPort>
-						<parallelRequests>${jmeter.parallelRequests}</parallelRequests>
-						<rampUpPeriod>${jmeter.rampUpPeriod}</rampUpPeriod>
-						<loopCount>${jmeter.loopCount}</loopCount>
-					</propertiesUser>
-					<!-- propertiesJMeter> <jmeter.save.saveservice.thread_counts>true</jmeter.save.saveservice.thread_counts> 
-						</propertiesJMeter -->
-					<jmeterExtensions>
-						<artifact>kg.apc:jmeter-plugins-json:jar:2.3</artifact>
-					</jmeterExtensions>
-				</configuration>
-			</plugin>
+					<!--<skipTests>${jmeter.skip}</skipTests>-->
+					<!--<propertiesUser>-->
+						<!--<restApiHost>${jmeter.host}</restApiHost>-->
+						<!--<restApiPort>${jmeter.port}</restApiPort>-->
+						<!--<parallelRequests>${jmeter.parallelRequests}</parallelRequests>-->
+						<!--<rampUpPeriod>${jmeter.rampUpPeriod}</rampUpPeriod>-->
+						<!--<loopCount>${jmeter.loopCount}</loopCount>-->
+					<!--</propertiesUser>-->
+					<!--&lt;!&ndash; propertiesJMeter> <jmeter.save.saveservice.thread_counts>true</jmeter.save.saveservice.thread_counts> -->
+						<!--</propertiesJMeter &ndash;&gt;-->
+					<!--<jmeterExtensions>-->
+						<!--<artifact>kg.apc:jmeter-plugins-json:jar:2.3</artifact>-->
+					<!--</jmeterExtensions>-->
+				<!--</configuration>-->
+			<!--</plugin>-->
 
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-		
-				<executions>
-					<!-- use real PATH_ROOT in integration tests -->
-					<execution>
-		
-						<id>set_actual.riharest.path_root</id>
-		
-						<phase>pre-integration-test</phase>
-		
-						<goals>
-							<goal>run</goal>
-						</goals>
-		
-						<configuration>
-							<target>
-								<propertyfile
-									file="${project.build.testOutputDirectory}/riharest.project.properties">
-									<entry key="PATH_ROOT" value="${riharest.pathRoot}" />
-								</propertyfile>
-							</target>
-						</configuration>
-					</execution>
-					
-					<!-- change PATH_ROOT back to test value after integration tests-->
-					<execution>
-		
-						<id>set_test.riharest.path_root</id>
-		
-						<phase>post-integration-test</phase>
-		
-						<goals>
-							<goal>run</goal>
-						</goals>
-		
-						<configuration>
-							<target>
-								<propertyfile
-									file="${project.build.testOutputDirectory}/riharest.project.properties">
-									<entry key="PATH_ROOT" value="${riharest.test.pathRoot}" />
-								</propertyfile>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+			<!--<plugin>-->
+				<!--<groupId>org.apache.maven.plugins</groupId>-->
+				<!--<artifactId>maven-antrun-plugin</artifactId>-->
+		<!---->
+				<!--<executions>-->
+					<!--&lt;!&ndash; use real PATH_ROOT in integration tests &ndash;&gt;-->
+					<!--<execution>-->
+		<!---->
+						<!--<id>set_actual.riharest.path_root</id>-->
+		<!---->
+						<!--<phase>pre-integration-test</phase>-->
+		<!---->
+						<!--<goals>-->
+							<!--<goal>run</goal>-->
+						<!--</goals>-->
+		<!---->
+						<!--<configuration>-->
+							<!--<target>-->
+								<!--<propertyfile-->
+									<!--file="${project.build.testOutputDirectory}/riharest.project.properties">-->
+									<!--<entry key="PATH_ROOT" value="${riharest.pathRoot}" />-->
+								<!--</propertyfile>-->
+							<!--</target>-->
+						<!--</configuration>-->
+					<!--</execution>-->
+					<!---->
+					<!--&lt;!&ndash; change PATH_ROOT back to test value after integration tests&ndash;&gt;-->
+					<!--<execution>-->
+		<!---->
+						<!--<id>set_test.riharest.path_root</id>-->
+		<!---->
+						<!--<phase>post-integration-test</phase>-->
+		<!---->
+						<!--<goals>-->
+							<!--<goal>run</goal>-->
+						<!--</goals>-->
+		<!---->
+						<!--<configuration>-->
+							<!--<target>-->
+								<!--<propertyfile-->
+									<!--file="${project.build.testOutputDirectory}/riharest.project.properties">-->
+									<!--<entry key="PATH_ROOT" value="${riharest.test.pathRoot}" />-->
+								<!--</propertyfile>-->
+							<!--</target>-->
+						<!--</configuration>-->
+					<!--</execution>-->
+				<!--</executions>-->
+			<!--</plugin>-->
 
 		</plugins>
 	</build>
