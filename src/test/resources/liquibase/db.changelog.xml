@@ -30,4 +30,13 @@
                  relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="RIHAKB-656" author="aleksandr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190124_add_used_type_relations_info_to_main_resource_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+
 </databaseChangeLog>
