@@ -83,6 +83,9 @@ public class Main_resource_view implements BaseModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date last_positive_finalization_request_date;
 
+    @Column(name = "has_used_system_type_relations")
+    private boolean hasUsedSystemTypeRelations;
+
     public Integer getMain_resource_id() {
         return main_resource_id;
     }
@@ -165,6 +168,14 @@ public class Main_resource_view implements BaseModel {
     @Override
     public void setKind(String kind) {
         throw new UnsupportedOperationException();
+    }
+
+    public boolean isHasUsedSystemTypeRelations() {
+        return hasUsedSystemTypeRelations;
+    }
+
+    public void setHasUsedSystemTypeRelations(boolean hasUsedSystemTypeRelations) {
+        this.hasUsedSystemTypeRelations = hasUsedSystemTypeRelations;
     }
 
     public String getLast_positive_approval_request_type() {
