@@ -48,17 +48,14 @@ public class SqlFilter {
           throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, ParseException {
     String opRight = "fcOpr";
 
-    // detect type of field (map parameter name to field of
-    // given class)
-    FieldTypeHolder fieldHolder = FieldTypeHolder.construct(clazz, filterComponent.getOperandLeft());
     // fc.getOperandLeft() is already checked before this method call
     // it is certain that it is a field in sql table
 
-    String filterExpr = null;
+    String filterExpr;
     String itemPrefix = ITEM_PREFIX;
 
     filterComponent = replaceKindWithKindId(filterComponent, clazz);
-    fieldHolder = FieldTypeHolder.construct(clazz, filterComponent.getOperandLeft());
+    FieldTypeHolder fieldHolder = FieldTypeHolder.construct(clazz, filterComponent.getOperandLeft());
 
     if (filterComponent.getOperator().equals("isnull")) {
       filterExpr = itemPrefix + filterComponent.getOperandLeft() + " IS NULL";
@@ -72,7 +69,7 @@ public class SqlFilter {
           + filterComponent.getOperandLeft() + " IS NULL )";
       params.put(opRight + index, Double.valueOf(filterComponent.getOperandRight()).intValue());
 
-    } else if (fieldHolder.getType().getName().equals(Integer.class.getName())) {
+    } else if (fieldHolder.getType().isAssignableFrom(Integer.class)) {
       // get Double value because may contain decimal point then get intValue
       filterExpr = itemPrefix + filterComponent.getOperandLeft() + filterComponent.getOperator()
           + Double.valueOf(filterComponent.getOperandRight()).intValue();
@@ -80,7 +77,7 @@ public class SqlFilter {
 
       filterExpr = "(" + itemPrefix + filterComponent.getOperandLeft() + " > :" + (opRight + index) + " OR " + itemPrefix
           + filterComponent.getOperandLeft() + " IS NULL )";
-      if (fieldHolder.getType().getName().equals(Date.class.getName())) {
+      if (fieldHolder.getType().isAssignableFrom(Date.class)) {
         params.put(opRight + index, DateHelper.fromString(filterComponent.getOperandRight()));
       } else {
         throw new IllegalArgumentException("This operator (null_or_>) is meant for end_date");
@@ -91,7 +88,7 @@ public class SqlFilter {
     } else {
       // by default treat as string (also applies to date)
       filterExpr = itemPrefix + filterComponent.getOperandLeft() + " " + filterComponent.getOperator() + " :" + (opRight + index);
-      if (fieldHolder.getType().getName().equals(Date.class.getName())) {
+      if (fieldHolder.getType().isAssignableFrom(Date.class)) {
         params.put(opRight + index, DateHelper.fromString(filterComponent.getOperandRight()));
       } else {
         params.put(opRight + index, filterComponent.getOperandRight());

@@ -44,6 +44,7 @@ import ee.eesti.riha.rest.model.Main_resource;
  */
 @Component
 public class ServiceLogic<T, K> {
+  private static final Logger LOG = LoggerFactory.getLogger(ServiceLogic.class);
 
   // object responsible for actual processing
   @Autowired
@@ -51,8 +52,6 @@ public class ServiceLogic<T, K> {
 
   @Autowired
   NewVersionLogic<T, K> newVersionLogic;
-
-  private static final Logger LOG = LoggerFactory.getLogger(ServiceLogic.class);
 
   private ObjectMapper mapper = new ObjectMapper();
 
@@ -610,8 +609,7 @@ public class ServiceLogic<T, K> {
    * @return the response
    */
   private Response handleUnspecifiedError(String anyAdditionalHint, Exception e) {
-    // one for log
-    e.printStackTrace();
+    LOG.error("Unspecified error", e);
 
     // and one for client
     RihaRestError error = MyExceptionHandler.unmapped(e, anyAdditionalHint);
@@ -699,7 +697,6 @@ public class ServiceLogic<T, K> {
    * @throws RihaRestException the riha rest exception
    */
   private List<FilterComponent> extractFilterComponents(String[] filterItems) throws RihaRestException {
-
     List<FilterComponent> filterComponents = new ArrayList<>();
     for (int i = 0; i < filterItems.length; i += Finals.NUM_OF_FILTER_ITEMS) {
       String field = filterItems[i];
@@ -710,7 +707,6 @@ public class ServiceLogic<T, K> {
     }
 
     return filterComponents;
-
   }
 
 }
