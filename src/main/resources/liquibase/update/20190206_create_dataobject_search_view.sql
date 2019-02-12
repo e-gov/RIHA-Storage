@@ -28,8 +28,4 @@ create or replace view riha.data_object_search_view as
 
          inner join riha.file_resource f on f.large_object_id = lo_id
          inner join riha.registered_file rf on rf.file_resource_uuid = f.uuid
-         inner join riha.main_resource mr on rf.main_resource_uuid :: TEXT = mr.json_content #>> '{uuid}'
-
-
-
-select * from riha.data_object_search_view
+         inner join riha.main_resource mr on rf.main_resource_uuid :: TEXT = mr.json_content #>> '{uuid}';
