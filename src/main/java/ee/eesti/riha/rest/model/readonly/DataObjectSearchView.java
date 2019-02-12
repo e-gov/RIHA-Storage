@@ -2,6 +2,7 @@ package ee.eesti.riha.rest.model.readonly;
 
 
 import ee.eesti.riha.rest.model.util.FieldIsPK;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +32,8 @@ public class DataObjectSearchView {
     private String shortName;
 
     @Column(name = "file_uuid")
-    @Id
+    @Type(type = "pg-uuid")
+    @Id  // this is not a real ID field, but otherwise the search logic does not work
     @FieldIsPK // this is not a real ID field, but otherwise the search logic does not work
     private UUID fileUuid;
 
@@ -47,6 +49,8 @@ public class DataObjectSearchView {
     @Column(name = "PA")
     private Boolean paFlag;
 
+    @Column(name = "personal_data")
+    private String personalData;
 
 
 
@@ -128,5 +132,13 @@ public class DataObjectSearchView {
 
     public void setPaFlag(Boolean paFlag) {
         this.paFlag = paFlag;
+    }
+
+    public String getPersonalData() {
+        return personalData;
+    }
+
+    public void setPersonalData(String personalData) {
+        this.personalData = personalData;
     }
 }
