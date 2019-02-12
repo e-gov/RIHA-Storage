@@ -1,5 +1,6 @@
 package ee.eesti.riha.rest.dao.util;
 
+import javax.persistence.Column;
 import java.lang.reflect.Field;
 
 // TODO: Auto-generated Javadoc
@@ -14,6 +15,8 @@ public final class FieldTypeHolder<T> {
 
   private final Object value;
 
+  private final String columnNameFromAnnotation;
+
   private final Class<?> type;
 
   /**
@@ -22,9 +25,10 @@ public final class FieldTypeHolder<T> {
    * @param value the value
    * @param type the type
    */
-  private FieldTypeHolder(Object value, Class<?> type) {
+  private FieldTypeHolder(Object value, Class<?> type, String columnNameFromAnnotation) {
     this.value = value;
     this.type = type;
+    this.columnNameFromAnnotation = columnNameFromAnnotation;
   }
 
   /**
@@ -40,11 +44,7 @@ public final class FieldTypeHolder<T> {
    */
   public static FieldTypeHolder construct(Object obj, String fieldName) throws NoSuchFieldException, SecurityException,
       IllegalArgumentException, IllegalAccessException {
-
-    Field field = obj.getClass().getDeclaredField(fieldName);
-    field.setAccessible(true);
-    return new FieldTypeHolder(field.get(obj), field.getType());
-
+    return construct(obj.getClass(), fieldName);
   }
 
   /**
@@ -63,9 +63,22 @@ public final class FieldTypeHolder<T> {
 
     Field field = clazz.getDeclaredField(fieldName);
     field.setAccessible(true);
-    return new FieldTypeHolder(new String(fieldName), field.getType());
 
+    String columnNameFromAnnotation = null;
+    if(field.isAnnotationPresent(Column.class)) {
+      Column annotation = field.getAnnotation(Column.class);
+      columnNameFromAnnotation = annotation.name();
+    }
+    return new FieldTypeHolder(fieldName, field.getType(), columnNameFromAnnotation);
   }
+
+  public String getDatabaseColumnName() {
+
+    return columnNameFromAnnotation != null
+            ? columnNameFromAnnotation
+            : (String) value;
+  }
+
 
   /**
    * Gets the value.

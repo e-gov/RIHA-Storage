@@ -52,6 +52,9 @@ public class DataObjectSearchView {
     @Column(name = "personal_data")
     private String personalData;
 
+    @Column(name = "search_name")
+    private String searchName;
+
 
 
     public String getInfosystem() {
@@ -140,5 +143,13 @@ public class DataObjectSearchView {
 
     public void setPersonalData(String personalData) {
         this.personalData = personalData;
+    }
+
+    public String getSearchName() {
+        return searchName;
+    }
+
+    public void setSearchName(String searchName) {
+        this.searchName = searchName;
     }
 }
