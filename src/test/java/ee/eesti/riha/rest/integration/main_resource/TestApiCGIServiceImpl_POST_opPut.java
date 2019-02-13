@@ -1,5 +1,6 @@
 package ee.eesti.riha.rest.integration.main_resource;
 
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -8,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.io.ObjectInputStream.GetField;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -178,7 +180,7 @@ public class TestApiCGIServiceImpl_POST_opPut<T> {
   @Test
   public void testUpdate_whenArchived_thenError() throws Exception {
     //
-    String dateJson = DateHelper.FORMATTER.format(new Date());
+    String dateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(new Date());
     JsonObject jsonObject = JsonHelper
         .getFromJson(TestFinals.JSON_CONTENT_FOR_MAIN_RESOURCE_CORRECT_SAMPLE_AS_JSON_STRING);
     jsonObject.addProperty("end_date", dateJson);
@@ -367,7 +369,7 @@ public class TestApiCGIServiceImpl_POST_opPut<T> {
 
     assertEquals(mrUpdated.getModifier(), json_contentStored.get(Finals.MODIFIER).getAsString());
 
-    Date modifiedDateJson = DateHelper.FORMATTER.parse(json_contentStored.get(Finals.MODIFIED_DATE).getAsString());
+    Date modifiedDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(json_contentStored.get(Finals.MODIFIED_DATE).getAsString());
 
     assertEquals(mrUpdated.getModified_date().getTime(), modifiedDateJson.getTime());
 
@@ -430,7 +432,7 @@ public class TestApiCGIServiceImpl_POST_opPut<T> {
 
     assertEquals(mrUpdated.getModifier(), json_contentStored.get(Finals.MODIFIER).getAsString());
 
-    Date modifiedDateJson = DateHelper.FORMATTER.parse(json_contentStored.get(Finals.MODIFIED_DATE).getAsString());
+    Date modifiedDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(json_contentStored.get(Finals.MODIFIED_DATE).getAsString());
 
     assertEquals(mrUpdated.getModified_date().getTime(), modifiedDateJson.getTime());
 
@@ -493,7 +495,7 @@ public class TestApiCGIServiceImpl_POST_opPut<T> {
 
     assertEquals(mrUpdated.getModifier(), json_contentStored.get(Finals.MODIFIER).getAsString());
 
-    Date modifiedDateJson = DateHelper.FORMATTER.parse(json_contentStored.get(Finals.MODIFIED_DATE).getAsString());
+    Date modifiedDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(json_contentStored.get(Finals.MODIFIED_DATE).getAsString());
 
     assertEquals(mrUpdated.getModified_date().getTime(), modifiedDateJson.getTime());
 
@@ -535,7 +537,7 @@ public class TestApiCGIServiceImpl_POST_opPut<T> {
   @Test
   public void testUpdateList_whenArchived_thenError() throws Exception {
 
-    String dateJson = DateHelper.FORMATTER.format(new Date());
+    String dateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(new Date());
     JsonObject jsonObject = JsonHelper
         .getFromJson(TestFinals.JSON_CONTENT_FOR_MAIN_RESOURCE_CORRECT_SAMPLE_AS_JSON_STRING);
     jsonObject.addProperty("end_date", dateJson);

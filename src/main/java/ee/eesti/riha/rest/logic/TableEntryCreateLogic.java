@@ -1,5 +1,6 @@
 package ee.eesti.riha.rest.logic;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,8 @@ import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Comment;
 import ee.eesti.riha.rest.model.readonly.Kind;
+
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -186,7 +189,7 @@ public class TableEntryCreateLogic<T extends BaseModel> {
     Gson gson = JsonHelper.GSON;
 
     Date dt = new Date();
-    String dtJsonFormat = DateHelper.FORMATTER.format(dt);
+    String dtJsonFormat = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(dt);
     LOG.info(dtJsonFormat);
 
     if (classRepresentingTable != Main_resource.class) {
