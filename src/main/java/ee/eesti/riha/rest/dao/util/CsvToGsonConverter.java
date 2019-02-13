@@ -19,9 +19,12 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 
 /**
  * Converts CSV content from {@link LargeObject} of {@link FileResource} to {@link JsonNode}.
@@ -53,7 +56,7 @@ public class CsvToGsonConverter implements ToGsonConverter {
 
         CSVParser parser = getFormat(fileResource)
                 .parse(new InputStreamReader(
-                        new BOMInputStream(fileResource.getLargeObject().getData().getBinaryStream()), "UTF-8"));
+                        new BOMInputStream(fileResource.getLargeObject().getData().getBinaryStream()), "ISO-8859-1"));
 
         JsonObject rootNode = new JsonObject();
         rootNode.add("metadata", getMetadata(fileResource));
@@ -86,7 +89,7 @@ public class CsvToGsonConverter implements ToGsonConverter {
         metadata.addProperty("content_type", fileResource.getContentType());
         metadata.addProperty("infosystem_uuid", fileResource.getInfoSystemUuid().toString());
         if (fileResource.getCreationDate() != null) {
-            metadata.addProperty("creation_date", DateHelper.FORMATTER.format(fileResource.getCreationDate()));
+            metadata.addProperty("creation_date", new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(fileResource.getCreationDate()));
         }
 
         return metadata;
