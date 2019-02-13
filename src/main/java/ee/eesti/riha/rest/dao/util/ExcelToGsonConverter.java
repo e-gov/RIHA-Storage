@@ -57,7 +57,7 @@ public class ExcelToGsonConverter implements ToGsonConverter {
 
             DataFormatter formatter = new DataFormatter();
             byteArrayOutputStream = new ByteArrayOutputStream();
-            printStream = new PrintStream(byteArrayOutputStream, true, "UTF-8");
+            printStream = new PrintStream(byteArrayOutputStream, true, "ISO-8859-1");
 
             byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
             printStream.write(bom);
