@@ -1,8 +1,10 @@
 package ee.eesti.riha.rest.integration.main_resource;
 
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 import static org.junit.Assert.*;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -900,9 +902,7 @@ public class TestApiCGIServiceImpl_POST_opGet_FILTER<T> {
 
   @Test
   public void testGetList_filter_nullOrGreater_thenCorrectResult() throws Exception {
-
-    Date date = new Date();
-    String dateJson = DateHelper.FORMATTER.format(date);
+    String dateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(new Date());
     String filterToTest = "[[\"end_date\",\"null_or_>\",\"" + dateJson + "\"]]";
 
     String json = "{\"op\":\"get\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\",	\"filter\": "
@@ -922,9 +922,7 @@ public class TestApiCGIServiceImpl_POST_opGet_FILTER<T> {
 
   @Test
   public void testGetList_filter_nullOrGreaterInJson_thenCorrectResult() throws Exception {
-
-    Date date = new Date();
-    String dateJson = DateHelper.FORMATTER.format(date);
+    String dateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(new Date());
     String filterToTest = "[[\"end_date\",\"null_or_>\",\"" + dateJson + "\"], [\"uses_ads\", \"=\",true]]";
 
     String json = "{\"op\":\"get\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\",	\"filter\": "
@@ -966,8 +964,7 @@ public class TestApiCGIServiceImpl_POST_opGet_FILTER<T> {
     assertNotNull(justArchived.getEnd_date());
 
     // test
-    Date date = new Date();
-    String dateJson = DateHelper.FORMATTER.format(date);
+    String dateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(new Date());
     String filterToTest = "[[\"end_date\",\"null_or_>\",\"" + dateJson + "\",\"uri\",\"=\",\"" + mr.getUri() + "\"]]";
 
     String json = "{\"op\":\"get\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\",	\"filter\": "
