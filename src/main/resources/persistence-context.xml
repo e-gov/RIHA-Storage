@@ -44,6 +44,7 @@
 				<value>ee.eesti.riha.rest.model.readonly.Comment_type_issue_view</value>
 				<value>ee.eesti.riha.rest.model.readonly.RegisteredFileView</value>
 				<value>ee.eesti.riha.rest.model.readonly.RegisteredFileView.LargeObjectRecord</value>
+				<value>ee.eesti.riha.rest.model.readonly.DataObjectSearchView</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">
