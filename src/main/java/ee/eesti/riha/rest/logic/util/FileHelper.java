@@ -1,6 +1,19 @@
 package ee.eesti.riha.rest.logic.util;
 
-import java.io.File;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import ee.eesti.riha.rest.error.ErrorCodes;
+import ee.eesti.riha.rest.error.RihaRestError;
+import ee.eesti.riha.rest.error.RihaRestException;
+import ee.eesti.riha.rest.model.BaseModel;
+import ee.eesti.riha.rest.model.Document;
+import ee.eesti.riha.rest.util.PropsReader;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.cxf.common.util.Base64Exception;
+import org.apache.cxf.common.util.Base64Utility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -10,31 +23,11 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.cxf.common.util.Base64Exception;
-import org.apache.cxf.common.util.Base64Utility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import ee.eesti.riha.rest.error.ErrorCodes;
-import ee.eesti.riha.rest.error.RihaRestError;
-import ee.eesti.riha.rest.error.RihaRestException;
-import ee.eesti.riha.rest.model.BaseModel;
-import ee.eesti.riha.rest.model.Document;
-import ee.eesti.riha.rest.util.PropsReader;
-
-// TODO: Auto-generated Javadoc
 /**
  * The Class FileHelper.
  */
 public final class FileHelper {
-
-  private FileHelper() {
-
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(FileHelper.class);
 
   private static final String TEN_ZEROS = "0000000000";
   private static final int TEN = 10;
@@ -48,8 +41,6 @@ public final class FileHelper {
   // project folder
   // private static final String PATH_ROOT_WINDOWS = "C:\\Users\\Praktikant\\test_folder\\";
   private static final String PATH_ROOT_WINDOWS = PropsReader.get("PATH_ROOT_WINDOWS");
-
-  private static final Logger LOG = LoggerFactory.getLogger(FileHelper.class);
 
   // FIXME everything related to this is unnecessary - use maven profile + PATH_ROOT
   static {
@@ -218,11 +209,11 @@ public final class FileHelper {
       }
 
       if (data != null) {
-        byte[] fileData = null;
+        byte[] fileData;
         try {
           fileData = Base64Utility.decode(data);
         } catch (Base64Exception e) {
-          e.printStackTrace();
+          LOG.error("Error decoding data", e);
           throw new IOException("Base64 error", e);
         }
         // FileHelper.writeFile(FileHelper.PATH_ROOT + pathToFile, data);
