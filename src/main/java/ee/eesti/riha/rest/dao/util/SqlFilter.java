@@ -123,15 +123,8 @@ public class SqlFilter {
     // change kind to kind_id
     filterComponent = replaceKindWithKindId(filterComponent, clazz);
 
-    FieldTypeHolder fieldHolder = null;
-    try {
-      fieldHolder = FieldTypeHolder.construct(clazz, filterComponent.getOperandLeft());
-    } catch (NoSuchFieldException | IllegalAccessException e) {
-      LOG.error("Exception in SQL construction, cannot determine field for " +  filterComponent.getOperandLeft(), e);
-    }
-
     // if (org.apache.commons.lang3.StringUtils.isNumeric(fc.getOperandRight())) {
-    String updatedOperandLeft = fieldHolder.getDatabaseColumnName().replaceAll("\\.", ",");
+    String updatedOperandLeft = filterComponent.getOperandLeft().replaceAll("\\.", ",");
     String jsonTextFieldName = "{" + updatedOperandLeft + "}";
     String jsonFieldNameParameter = "jField" + index;
 

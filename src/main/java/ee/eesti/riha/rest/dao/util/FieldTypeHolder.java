@@ -44,7 +44,17 @@ public final class FieldTypeHolder<T> {
    */
   public static FieldTypeHolder construct(Object obj, String fieldName) throws NoSuchFieldException, SecurityException,
       IllegalArgumentException, IllegalAccessException {
-    return construct(obj.getClass(), fieldName);
+
+    Field field = obj.getClass().getDeclaredField(fieldName);
+    field.setAccessible(true);
+
+    String columnNameFromAnnotation = null;
+    if(field.isAnnotationPresent(Column.class)) {
+      Column annotation = field.getAnnotation(Column.class);
+      columnNameFromAnnotation = annotation.name();
+    }
+    return new FieldTypeHolder(field.get(obj), field.getType(), columnNameFromAnnotation);
+
   }
 
   /**
