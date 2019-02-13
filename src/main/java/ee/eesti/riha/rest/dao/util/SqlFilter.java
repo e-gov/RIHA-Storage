@@ -61,36 +61,36 @@ public class SqlFilter {
     fieldHolder = FieldTypeHolder.construct(clazz, filterComponent.getOperandLeft());
 
     if (filterComponent.getOperator().equals("isnull")) {
-      filterExpr = itemPrefix + filterComponent.getOperandLeft() + " IS NULL";
+      filterExpr = itemPrefix + fieldHolder.getDatabaseColumnName() + " IS NULL";
 
     } else if (filterComponent.getOperator().equals("isnotnull")) {
-      filterExpr = itemPrefix + filterComponent.getOperandLeft() + " IS NOT NULL";
+      filterExpr = itemPrefix + fieldHolder.getDatabaseColumnName() + " IS NOT NULL";
 
     } else if (filterComponent.getOperator().equals("null_or_<=")) {
 
-      filterExpr = "(" + itemPrefix + filterComponent.getOperandLeft() + " <= :" + (opRight + index) + " OR " + itemPrefix
-          + filterComponent.getOperandLeft() + " IS NULL )";
+      filterExpr = "(" + itemPrefix + fieldHolder.getDatabaseColumnName() + " <= :" + (opRight + index) + " OR " + itemPrefix
+          + fieldHolder.getDatabaseColumnName() + " IS NULL )";
       params.put(opRight + index, Double.valueOf(filterComponent.getOperandRight()).intValue());
 
     } else if (fieldHolder.getType().getName().equals(Integer.class.getName())) {
       // get Double value because may contain decimal point then get intValue
-      filterExpr = itemPrefix + filterComponent.getOperandLeft() + filterComponent.getOperator()
+      filterExpr = itemPrefix + fieldHolder.getDatabaseColumnName() + filterComponent.getOperator()
           + Double.valueOf(filterComponent.getOperandRight()).intValue();
     } else if (filterComponent.getOperator().equals("null_or_>")) {
 
-      filterExpr = "(" + itemPrefix + filterComponent.getOperandLeft() + " > :" + (opRight + index) + " OR " + itemPrefix
-          + filterComponent.getOperandLeft() + " IS NULL )";
+      filterExpr = "(" + itemPrefix + fieldHolder.getDatabaseColumnName() + " > :" + (opRight + index) + " OR " + itemPrefix
+          + fieldHolder.getDatabaseColumnName() + " IS NULL )";
       if (fieldHolder.getType().getName().equals(Date.class.getName())) {
         params.put(opRight + index, DateHelper.fromString(filterComponent.getOperandRight()));
       } else {
         throw new IllegalArgumentException("This operator (null_or_>) is meant for end_date");
       }
     } else if (fieldHolder.getType().equals(UUID.class)) {
-      filterExpr = itemPrefix + filterComponent.getOperandLeft() + " = " + (":" + (opRight + index) + "\\:\\:uuid");
+      filterExpr = itemPrefix + fieldHolder.getDatabaseColumnName() + " = " + (":" + (opRight + index) + "\\:\\:uuid");
       params.put(opRight + index, filterComponent.getOperandRight());
     } else {
       // by default treat as string (also applies to date)
-      filterExpr = itemPrefix + filterComponent.getOperandLeft() + " " + filterComponent.getOperator() + " :" + (opRight + index);
+      filterExpr = itemPrefix + fieldHolder.getDatabaseColumnName() + " " + filterComponent.getOperator() + " :" + (opRight + index);
       if (fieldHolder.getType().getName().equals(Date.class.getName())) {
         params.put(opRight + index, DateHelper.fromString(filterComponent.getOperandRight()));
       } else {
