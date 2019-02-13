@@ -29,10 +29,13 @@ public final class DaoHelper {
       if (field.getAnnotation(FieldIsPK.class) != null) {
         pkField = field;
         break;
-      } else {
-        throw new IllegalStateException("data class must have primary key marked!");
       }
     }
+
+    if (pkField == null) {
+      throw new IllegalStateException("data class must have primary key marked!");
+    }
+
     return pkField;
 
   }

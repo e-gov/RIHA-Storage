@@ -49,6 +49,24 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-615" author="aleksandr">
+        <comment>DataObjectSearch view creation</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190206_create_dataobject_search_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-616" author="aleksandr">
+        <comment>DataObjectSearch view creation</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190212_create_dataobject_search_view_with_search_name.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
     <changeSet id="RIHAKB-656" author="aleksandr">
         <sqlFile dbms="postgresql"
