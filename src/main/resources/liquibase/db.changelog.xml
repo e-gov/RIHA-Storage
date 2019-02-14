@@ -67,5 +67,14 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-615-1" author="aleksandr">
+        <comment>DataObjectSearch view refactoring</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190213_create_dataobject_search_view_with_search_name.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
 </databaseChangeLog>

@@ -4,10 +4,7 @@ package ee.eesti.riha.rest.model.readonly;
 import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
@@ -15,6 +12,10 @@ import java.util.UUID;
 public class DataObjectSearchView {
 
     public static final String TABLE_NAME = "data_object_search_view";
+
+    @Id  // this is not a real ID field, but otherwise the search logic does not work
+    @FieldIsPK // this is not a real ID field, but otherwise the search logic does not work
+    private String id;
 
     @Column(name = "infosystem")
     private String infosystem;
@@ -33,8 +34,6 @@ public class DataObjectSearchView {
 
     @Column(name = "file_uuid")
     @Type(type = "pg-uuid")
-    @Id  // this is not a real ID field, but otherwise the search logic does not work
-    @FieldIsPK // this is not a real ID field, but otherwise the search logic does not work
     private UUID fileUuid;
 
     @Column(name = "DIA")
@@ -56,6 +55,13 @@ public class DataObjectSearchView {
     private String searchName;
 
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getInfosystem() {
         return infosystem;
