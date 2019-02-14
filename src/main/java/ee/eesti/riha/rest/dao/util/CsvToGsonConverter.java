@@ -56,7 +56,7 @@ public class CsvToGsonConverter implements ToGsonConverter {
 
         CSVParser parser = getFormat(fileResource)
                 .parse(new InputStreamReader(
-                        new BOMInputStream(fileResource.getLargeObject().getData().getBinaryStream()), "ISO-8859-1"));
+                        new BOMInputStream(fileResource.getLargeObject().getData().getBinaryStream()), "windows-1252"));
 
         JsonObject rootNode = new JsonObject();
         rootNode.add("metadata", getMetadata(fileResource));
