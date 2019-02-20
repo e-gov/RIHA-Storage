@@ -6,6 +6,7 @@ import ee.eesti.riha.rest.model.FileResource;
 import ee.eesti.riha.rest.model.LargeObject;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -45,6 +46,9 @@ public class ExcelToGsonConverter implements ToGsonConverter {
 
     @Override
     public JsonObject convert(FileResource fileResource) throws IOException, SQLException {
+        FileResource csvFileResource = new FileResource();
+        LargeObject csvLargeObject = new LargeObject();
+
         ByteArrayInputStream inputStream = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
         PrintStream printStream = null;
@@ -57,7 +61,7 @@ public class ExcelToGsonConverter implements ToGsonConverter {
 
             DataFormatter formatter = new DataFormatter();
             byteArrayOutputStream = new ByteArrayOutputStream();
-            printStream = new PrintStream(byteArrayOutputStream, true, "windows-1252");
+            printStream = new PrintStream(byteArrayOutputStream, true, "windows-1257");
 
             byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
             printStream.write(bom);
@@ -91,7 +95,9 @@ public class ExcelToGsonConverter implements ToGsonConverter {
                 }
             }
 
-            fileResource.getLargeObject().setData(new SerialBlob(byteArrayOutputStream.toByteArray()));
+            BeanUtils.copyProperties(fileResource, csvFileResource);
+            csvLargeObject.setData(new SerialBlob(byteArrayOutputStream.toByteArray()));
+            csvFileResource.setLargeObject(csvLargeObject);
         } finally {
             if (inputStream != null) {
                 inputStream.close();
@@ -104,7 +110,7 @@ public class ExcelToGsonConverter implements ToGsonConverter {
             }
         }
 
-        return csvToGsonConverter.convert(fileResource);
+        return csvToGsonConverter.convert(csvFileResource);
     }
 
     static private String encodeValue(String value) {
