@@ -86,4 +86,13 @@
         />
     </changeSet>
 
+    <changeSet id="RIHAKB-761" author="vadim">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190220_create_classifier_table_and_content.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+
 </databaseChangeLog>

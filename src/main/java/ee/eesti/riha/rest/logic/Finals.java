@@ -31,6 +31,7 @@ public final class Finals {
     addClassRepresentingTable(Data_object.class);
     addClassRepresentingTable(Comment.class);
     addClassRepresentingTable(Main_resource_relation.class);
+    addClassRepresentingTable(Classifier.class);
     TABLE_CLASS_MAP.put(DataObjectSearchView.TABLE_NAME, DataObjectSearchView.class);
 
     // read only
