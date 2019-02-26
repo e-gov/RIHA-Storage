@@ -53,6 +53,7 @@ INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextv
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'ESTABLISHMENT_REQUEST', 'ESTABLISHMENT_REQUEST', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'TAKE_INTO_USE_REQUEST', 'TAKE_INTO_USE_REQUEST', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'MODIFICATION_REQUEST', 'MODIFICATION_REQUEST', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'FINALIZATION_REQUEST', 'FINALIZATION_REQUEST', 'TEXT');
 
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_resolution_type', 'POSITIVE', 'POSITIVE', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_resolution_type', 'NEGATIVE', 'NEGATIVE', 'TEXT');
@@ -86,20 +87,20 @@ INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextv
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'INTERNAL_USAGE', 'asutusesiseseks kasutamiseks', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'DOCUMENT_MANAGEMENT_SYSTEM', 'dokumendihaldussüsteem', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'END_USER_VIEW_REFERENCE', 'Viide lõppkasutaja vaatele', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DATA_REFERENCE', 'Viide (ava)andmetele', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'USER_DOCUMENTATION', 'Kasutaja dokumentatsioon', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'ARCHITECTURE_DOCUMENT', 'Arhitektuuridokument', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'AVAILABLE_CLASSIFIER', 'Kasutatav klassifikaator', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'SOURCE_CODE', 'Lähtekood', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'ISKE_SECURITY_CLASS_ASSIGNMENT_ACT', 'ISKE turbeosaklasside määramise akt', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'ISKE_AUDIT_SUMMARY', 'ISKE auditi kokkuvõte', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DATA_PROTECTION_IMPACT_ASSESSMENT', 'Andmekaitseline mõjuhinnang', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'OTHER_TECHNICAL_DOCUMENTATION', 'Muu tehniline dokumentatsioon', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_USER_VIEW', 'Viide lõppkasutaja vaatele', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_OPEN_DATA', 'Viide (ava)andmetele', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_USER_GUIDE', 'Kasutaja dokumentatsioon', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_ARCHITECTURE', 'Arhitektuuridokument', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_CLASSIFICATOR', 'Kasutatav klassifikaator', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_SOURCE_CODE', 'Lähtekood', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_ISKE_ACT', 'ISKE turbeosaklasside määramise akt', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_ISKE_SUMMARY', 'ISKE auditi kokkuvõte', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_GDPR_IMPACT_ASSESSMENT', 'Andmekaitseline mõjuhinnang', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_OTHER', 'Muu tehniline dokumentatsioon', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'INFO_SYSTEM_STATUTE_DRAFT', 'Infosüsteemi põhimääruse kavand/eelnõu', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'INFO_SYSTEM_STATUTE_DRAFT_HEADNOTE', 'Infosüsteemi põhimääruse kavandi/eelnõu seletuskiri', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'INFO_SYSTEM_STATUTE', 'Infosüsteemi põhimäärus', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'INFO_SYSTEM_STATUTE_HEADNOTE', 'Infosüsteemi põhimääruse seletuskiri', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'OTHER_INFO_SYSTEM_REGULATORY_LEGAL_ACT', 'Infosüsteemi reguleeriv muu õigusakt', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'OTHER_LEGAL_HEADNOTE', 'Muu õiguslik seletuskiri', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'LEGAL_TYPE_DRAFT_STATUTE', 'Infosüsteemi põhimääruse kavand/eelnõu', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'LEGAL_TYPE_DRAFT_STATUTE_NOTE', 'Infosüsteemi põhimääruse kavandi/eelnõu seletuskiri', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'LEGAL_TYPE_STATUTE', 'Infosüsteemi põhimäärus', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'LEGAL_TYPE_STATUTE_NOTE', 'Infosüsteemi põhimääruse seletuskiri', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'LEGAL_TYPE_OTHER_REGULATION', 'Infosüsteemi reguleeriv muu õigusakt', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'legislation_types', 'LEGAL_TYPE_OTHER', 'Muu õiguslik seletuskiri', 'TEXT');
