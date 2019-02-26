@@ -76,6 +76,15 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-615-2" author="aleksandr">
+        <comment>Added system short name as part of the surrogate ID field</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190219_create_dataobject_search_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
     <changeSet id="RIHAKB-656" author="aleksandr">
         <sqlFile dbms="postgresql"
