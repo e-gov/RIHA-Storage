@@ -94,6 +94,15 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-615-4" author="aleksandr">
+        <comment>bugfixing riha.main_resource_current_version </comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190226_main_resource_current_version.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
     <changeSet id="RIHAKB-656" author="aleksandr">
         <sqlFile dbms="postgresql"
