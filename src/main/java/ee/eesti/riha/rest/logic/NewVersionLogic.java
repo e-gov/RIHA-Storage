@@ -1,28 +1,13 @@
 package ee.eesti.riha.rest.logic;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonObject;
-
 import ee.eesti.riha.rest.dao.GenericDAO;
 import ee.eesti.riha.rest.dao.SecureApiGenericDAO;
 import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.error.ErrorCodes;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.error.RihaRestException;
-import ee.eesti.riha.rest.logic.util.DateHelper;
 import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.logic.util.PathHolder;
@@ -31,6 +16,17 @@ import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Data_object;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 
 /**
  * Handles the creation of new versions of Main_resource and of items that are connected to it. Does not modify data
@@ -118,7 +114,7 @@ public class NewVersionLogic<T, K> {
     id = tempJson.get(pkField).asInt();
     tempJson.remove(pkField);
     // 3. set end_date to temp
-    String dateJson = DateHelper.FORMATTER.format(new Date());
+    String dateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(new Date());
     tempJson.put("end_date", dateJson);
     tempJson.put("modified_date", dateJson);
 
@@ -298,7 +294,7 @@ public class NewVersionLogic<T, K> {
         LOG.info("IDs current -> archived " + currentDocId + " -> " + archivedDocId);
         FileHelper.copyFile(currentDocPath, archivedDocPath);
       } catch (IOException e) {
-        e.printStackTrace();
+        LOG.error("Error creating helper", e);
         throw new RuntimeException(e);
       }
 

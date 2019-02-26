@@ -1,9 +1,11 @@
 package ee.eesti.riha.rest.integration.special;
 
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -128,9 +130,9 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     assertEquals(uri, jsonContent.get("uri").getAsString());
     assertEquals((int) old.getMain_resource_id(), jsonContent.get("main_resource_id").getAsInt());
 
-    Date modifiedDateJson = DateHelper.FORMATTER.parse(jsonContent.get(Finals.MODIFIED_DATE).getAsString());
-    Date createdDateJson = DateHelper.FORMATTER.parse(jsonContent.get("creation_date").getAsString());
-    Date startDateJson = DateHelper.FORMATTER.parse(jsonContent.get("start_date").getAsString());
+    Date modifiedDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get(Finals.MODIFIED_DATE).getAsString());
+    Date createdDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get("creation_date").getAsString());
+    Date startDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get("start_date").getAsString());
 
     assertEquals(modifiedDateJson.getTime(), createdDateJson.getTime());
     assertEquals(modifiedDateJson.getTime(), startDateJson.getTime());
@@ -237,9 +239,9 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     assertEquals(uri, jsonContent.get("uri").getAsString());
     assertEquals((int) old.getMain_resource_id(), jsonContent.get("main_resource_id").getAsInt());
 
-    Date modifiedDateJson = DateHelper.FORMATTER.parse(jsonContent.get(Finals.MODIFIED_DATE).getAsString());
-    Date createdDateJson = DateHelper.FORMATTER.parse(jsonContent.get("creation_date").getAsString());
-    Date startDateJson = DateHelper.FORMATTER.parse(jsonContent.get("start_date").getAsString());
+    Date modifiedDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get(Finals.MODIFIED_DATE).getAsString());
+    Date createdDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get("creation_date").getAsString());
+    Date startDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get("start_date").getAsString());
 
     assertEquals(modifiedDateJson.getTime(), createdDateJson.getTime());
     assertEquals(modifiedDateJson.getTime(), startDateJson.getTime());
@@ -316,9 +318,9 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     assertEquals(uri, jsonContent.get("uri").getAsString());
     assertEquals((int) old.getMain_resource_id(), jsonContent.get("main_resource_id").getAsInt());
 
-    Date modifiedDateJson = DateHelper.FORMATTER.parse(jsonContent.get(Finals.MODIFIED_DATE).getAsString());
-    Date createdDateJson = DateHelper.FORMATTER.parse(jsonContent.get("creation_date").getAsString());
-    Date startDateJson = DateHelper.FORMATTER.parse(jsonContent.get("start_date").getAsString());
+    Date modifiedDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get(Finals.MODIFIED_DATE).getAsString());
+    Date createdDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get("creation_date").getAsString());
+    Date startDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get("start_date").getAsString());
 
     assertEquals(modifiedDateJson.getTime(), createdDateJson.getTime());
     assertEquals(modifiedDateJson.getTime(), startDateJson.getTime());
@@ -397,9 +399,9 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     assertEquals(uri, jsonContent.get("uri").getAsString());
     assertEquals((int) old.getMain_resource_id(), jsonContent.get("main_resource_id").getAsInt());
 
-    Date modifiedDateJson = DateHelper.FORMATTER.parse(jsonContent.get(Finals.MODIFIED_DATE).getAsString());
-    Date createdDateJson = DateHelper.FORMATTER.parse(jsonContent.get("creation_date").getAsString());
-    Date startDateJson = DateHelper.FORMATTER.parse(jsonContent.get("start_date").getAsString());
+    Date modifiedDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get(Finals.MODIFIED_DATE).getAsString());
+    Date createdDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get("creation_date").getAsString());
+    Date startDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(jsonContent.get("start_date").getAsString());
 
     assertEquals(modifiedDateJson.getTime(), createdDateJson.getTime());
     assertEquals(modifiedDateJson.getTime(), startDateJson.getTime());
