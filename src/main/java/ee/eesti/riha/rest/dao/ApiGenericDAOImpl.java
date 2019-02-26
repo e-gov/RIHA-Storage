@@ -285,7 +285,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
       if (DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz)) {
         queryString.append(" ORDER BY item.")
-                .append(orderData.getOrderByField())
+                .append(orderData.getDatabaseColumnName())
                 .append((orderData.isAsc() ? " ASC " : " DESC "));
       } else {
         if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
@@ -733,7 +733,6 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
             | IntrospectionException | IOException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
-
           LOG.info("ROLLING BACK UPDATES");
           return 0;
         }
