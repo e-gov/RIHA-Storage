@@ -85,6 +85,15 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-615-3" author="aleksandr">
+        <comment>Added search_text field, minor refactoring</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190224_create_dataobject_search_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
     <changeSet id="RIHAKB-656" author="aleksandr">
         <sqlFile dbms="postgresql"
