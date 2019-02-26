@@ -1,6 +1,6 @@
 
-drop view riha.data_object_search_view
-drop view riha.main_resource_current_version
+drop view riha.data_object_search_view;
+drop view riha.main_resource_current_version;
 
 -- added commonly used json fields as a separate fields for convenience
 create or replace view riha.main_resource_current_version as
@@ -51,3 +51,4 @@ create or replace view riha.data_object_search_view as
          inner join riha.file_resource f on f.large_object_id = lo_id
          inner join riha.registered_file rf on rf.file_resource_uuid = f.uuid
          inner join riha.main_resource_current_version mr on rf.main_resource_uuid :: TEXT = mr.json_uuid
+;
