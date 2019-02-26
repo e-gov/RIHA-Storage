@@ -52,7 +52,7 @@ public class FileResourceLogic {
     }
 
     @Transactional
-    protected UUID createFileResource(InputStream inputStream, UUID infoSystemUuid, String name, String contentType) {
+    public UUID createFileResource(InputStream inputStream, UUID infoSystemUuid, String name, String contentType) {
         if (logger.isTraceEnabled()) {
             logger.trace("Creating file resource for name: '{}' and content type: '{}'", name, contentType);
         }
@@ -77,7 +77,7 @@ public class FileResourceLogic {
     }
 
     @Transactional
-    protected void indexFileResource(UUID uuid) {
+    public void indexFileResource(UUID uuid) {
         try {
             fileResourceIndexingService.indexAsynchronously(uuid);
         } catch (IOException | SQLException e) {

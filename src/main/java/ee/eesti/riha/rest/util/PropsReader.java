@@ -3,15 +3,19 @@ package ee.eesti.riha.rest.util;
 import java.io.IOException;
 import java.util.Properties;
 
+import ee.eesti.riha.rest.logic.util.FileHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PropsReader.
  */
 public final class PropsReader {
+  private static final Logger LOG = LoggerFactory.getLogger(PropsReader.class);
+
   // this where external riharest.project.properties should be
   // so that properties could be changed without recompiling
   // if you change it you must change it in src/main/resources/persistence-context.xml as well
@@ -21,15 +25,6 @@ public final class PropsReader {
 
   private static Properties props;
 
-  private PropsReader() {
-
-  }
-
-  /**
-   * Load.
-   *
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
   private static void load() throws IOException {
     try {
 //      props = PropertiesLoaderUtils.loadProperties(new ClassPathResource(FILE_NAME));
@@ -42,12 +37,6 @@ public final class PropsReader {
     }
   }
 
-  /**
-   * Gets the.
-   *
-   * @return the properties
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
   public static Properties get() throws IOException {
     if (props == null) {
       load();
@@ -55,19 +44,12 @@ public final class PropsReader {
     return props;
   }
 
-  /**
-   * Gets the.
-   *
-   * @param property the property
-   * @return the string
-   */
   public static String get(String property) {
     try {
       return get().getProperty(property);
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG.error("Error reading property", e);
       throw new RuntimeException(e);
     }
   }
-
 }

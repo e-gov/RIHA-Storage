@@ -47,10 +47,8 @@ import java.util.*;
 @Transactional
 @Component
 public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
-
+  private static final Logger LOG = LoggerFactory.getLogger(ApiGenericDAOImpl.class);
   public static final int NOT_PART_OF_MODEL_OR_JSON = -1001;
-
-  public static final String ITEM_PREFIX = "item.";
 
   @Autowired
   SessionFactory sessionFactory;
@@ -60,8 +58,6 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   @Autowired
   SqlFilter sqlFilter;
-
-  private static final Logger LOG = LoggerFactory.getLogger(ApiGenericDAOImpl.class);
 
   /**
    * Gets the table name.
@@ -259,7 +255,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
             // this should never happen, because allFieldsExistInModel
             // already tested whether field exists or not
-            e.printStackTrace();
+            LOG.error("Error while constructing query", e);
             throw new RuntimeException(e);
           }
         } else {
@@ -530,8 +526,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
         | IntrospectionException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+     LOG.error("Error while updating JSON content", e);
 
       // no update
       return 0;
@@ -731,9 +726,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           numOfChanged++;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
             | IntrospectionException | IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-          LOG.info("ROLLING BACK UPDATES");
+          LOG.error("Error updating, ROLLING BACK UPDATES", e);
           return 0;
         }
       }
@@ -922,7 +915,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     try {
       deleteDocumentFiles(tableName, documentIds);
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG.error("Error while deleting", e);
       throw new RuntimeException(e);
     }
 

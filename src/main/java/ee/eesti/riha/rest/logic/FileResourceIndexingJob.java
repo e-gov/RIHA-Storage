@@ -47,8 +47,10 @@ public class FileResourceIndexingJob {
         for (FileResource fileResource : unindexedFileResources) {
             try {
                 fileResourceIndexingService.index(fileResource.getUuid(), false);
-            } catch (IOException | SQLException e) {
-                logger.info("Error indexing file resource '" + fileResource.getUuid() + "'", e);
+            } catch (Exception e) {
+                logger.info("Error indexing file resource [uuid:'" + fileResource.getUuid() + "', name: '" + fileResource.getName() + "']", e);
+                //mark file as indexed to avoid endless attempts to index wrong file format
+                fileResourceIndexingService.markAsIndexed(fileResource.getUuid());
             }
         }
 
