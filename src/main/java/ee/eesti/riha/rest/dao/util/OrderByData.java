@@ -8,6 +8,7 @@ public final class OrderByData {
 
   private String orderByField;
   private boolean isAsc;
+  private FieldTypeHolder fieldTypeHolder;
 
   /**
    * Constructs data for: order by {data}. If field parsing fails, then returned data remains with default values.
@@ -23,10 +24,16 @@ public final class OrderByData {
       String defaultOrderByField, boolean defaultIsAscVal) {
 
     OrderByData orderByData = new OrderByData(defaultOrderByField, defaultIsAscVal);
+
     if (sortStringToParse != null) {
       if (sortStringToParse.trim().startsWith("-")) {
         orderByData.setAsc(false);
         sortStringToParse = sortStringToParse.replaceFirst("-", "");
+      }
+      try {
+        orderByData.fieldTypeHolder = FieldTypeHolder.construct(classRepresentingTable, sortStringToParse);
+      } catch (Exception ignored) {
+        //this can happen if sorting is based on json property
       }
       orderByData.setOrderByField(sortStringToParse);
     }
@@ -59,6 +66,16 @@ public final class OrderByData {
    */
   public String getOrderByField() {
     return orderByField;
+  }
+
+  /**
+   *
+   * @return SQL column name
+   */
+  public String getDatabaseColumnName() {
+    return fieldTypeHolder == null
+        ? orderByField
+        : fieldTypeHolder.getDatabaseColumnName();
   }
 
   /**
