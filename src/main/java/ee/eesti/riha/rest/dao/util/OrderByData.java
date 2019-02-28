@@ -73,7 +73,7 @@ public final class OrderByData {
    * @return SQL column name
    */
   public String getDatabaseColumnName() {
-    return fieldTypeHolder == null
+    return fieldTypeHolder == null ||  fieldTypeHolder.getDatabaseColumnName() == null || fieldTypeHolder.getDatabaseColumnName().trim().length() == 0
         ? orderByField
         : fieldTypeHolder.getDatabaseColumnName();
   }
