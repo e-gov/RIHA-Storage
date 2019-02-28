@@ -281,7 +281,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
       if (DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz)) {
         queryString.append(" ORDER BY item.")
-                .append(orderData.getOrderByField())
+                .append(orderData.getDatabaseColumnName())
                 .append((orderData.isAsc() ? " ASC " : " DESC "));
       } else {
         if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
