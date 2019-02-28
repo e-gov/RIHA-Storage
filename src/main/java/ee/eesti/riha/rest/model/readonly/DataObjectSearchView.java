@@ -54,6 +54,9 @@ public class DataObjectSearchView {
     @Column(name = "search_name")
     private String searchName;
 
+    @Column(name = "search_text")
+    private String searchText;
+
 
     public String getId() {
         return id;
@@ -157,5 +160,13 @@ public class DataObjectSearchView {
 
     public void setSearchName(String searchName) {
         this.searchName = searchName;
+    }
+
+    public String getSearchText() {
+        return searchText;
+    }
+
+    public void setSearchText(String searchText) {
+        this.searchText = searchText;
     }
 }
