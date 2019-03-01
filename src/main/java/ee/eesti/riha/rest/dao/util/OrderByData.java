@@ -1,6 +1,10 @@
 package ee.eesti.riha.rest.dao.util;
 
 // TODO: Auto-generated Javadoc
+
+
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * The Class OrderByData.
  */
@@ -73,7 +77,7 @@ public final class OrderByData {
    * @return SQL column name
    */
   public String getDatabaseColumnName() {
-    return fieldTypeHolder == null ||  fieldTypeHolder.getDatabaseColumnName() == null || fieldTypeHolder.getDatabaseColumnName().trim().length() == 0
+    return fieldTypeHolder == null || StringUtils.isBlank(fieldTypeHolder.getDatabaseColumnName())
         ? orderByField
         : fieldTypeHolder.getDatabaseColumnName();
   }
