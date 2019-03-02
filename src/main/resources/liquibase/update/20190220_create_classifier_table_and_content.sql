@@ -32,42 +32,42 @@ CREATE SEQUENCE riha.classifier_seq
 CACHE 1;
 GRANT SELECT, USAGE ON SEQUENCE riha.classifier_seq TO riha;
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_status', 'IN_USE', 'IN_USE', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_status', 'ESTABLISHING', 'ESTABLISHING', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_status', 'FINISHED', 'FINISHED', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_status', 'IN_USE', 'kasutusel', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_status', 'ESTABLISHING', 'asutamisel', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_status', 'FINISHED', 'lõpetatud', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'development_status', 'IN_DEVELOPMENT', 'IN_DEVELOPMENT', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'development_status', 'NOT_IN_DEVELOPMENT', 'NOT_IN_DEVELOPMENT', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'development_status', 'IN_DEVELOPMENT', 'aktiivses arenduses', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'development_status', 'NOT_IN_DEVELOPMENT', 'ei ole arenduses', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'x_road_status', 'JOINED', 'JOINED', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'x_road_status', 'NOT_JOINED', 'NOT_JOINED', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'x_road_status', 'JOINED', 'liidestatud', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'x_road_status', 'NOT_JOINED', 'ei ole liidestatud', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'relation_type', 'SUB_SYSTEM', 'SUB_SYSTEM', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'relation_type', 'SUPER_SYSTEM', 'SUPER_SYSTEM', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'relation_type', 'USED_SYSTEM', 'USED_SYSTEM', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'relation_type', 'USER_SYSTEM', 'USER_SYSTEM', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'relation_type', 'SUB_SYSTEM', 'alaminfosüsteem', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'relation_type', 'SUPER_SYSTEM', 'üleminfosüsteem', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'relation_type', 'USED_SYSTEM', 'kasutatav standardlahendus', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'relation_type', 'USER_SYSTEM', 'standardlahenduse kasutaja', 'TEXT');
 
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'event_type', 'CLOSED', 'CLOSED', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'event_type', 'DECISION', 'DECISION', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'ESTABLISHMENT_REQUEST', 'ESTABLISHMENT_REQUEST', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'TAKE_INTO_USE_REQUEST', 'TAKE_INTO_USE_REQUEST', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'MODIFICATION_REQUEST', 'MODIFICATION_REQUEST', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'FINALIZATION_REQUEST', 'FINALIZATION_REQUEST', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'ESTABLISHMENT_REQUEST', 'Infosüsteemi asutamine', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'TAKE_INTO_USE_REQUEST', 'Infosüsteemi kasutusele võtmine', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'MODIFICATION_REQUEST', 'Andmekoosseisu muutmine', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_type', 'FINALIZATION_REQUEST', 'Infosüsteemi lõpetamine', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_resolution_type', 'POSITIVE', 'POSITIVE', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_resolution_type', 'NEGATIVE', 'NEGATIVE', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_resolution_type', 'DISMISSED', 'DISMISSED', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_resolution_type', 'POSITIVE', 'Kooskõlastan', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_resolution_type', 'NEGATIVE', 'Ei kooskõlasta', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'issue_resolution_type', 'DISMISSED', 'Jätan läbi vaatamata', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'audit_resolution_type', 'PASSED_WITHOUT_REMARKS', 'PASSED_WITHOUT_REMARKS', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'audit_resolution_type', 'PASSED_WITH_REMARKS', 'PASSED_WITH_REMARKS', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'audit_resolution_type', 'DID_NOT_PASS', 'DID_NOT_PASS', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'audit_resolution_type', 'PASSED_WITHOUT_REMARKS', 'Auditeeritud märkusteta ja soovitusteta', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'audit_resolution_type', 'PASSED_WITH_REMARKS', 'Auditeeritud märkuste või soovitustega', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'audit_resolution_type', 'DID_NOT_PASS', 'Ei läbinud auditit', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'security_standard', 'iske', 'ISKE', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'security_standard', 'ISKE', 'ISKE', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'security_level', 'high', 'H', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'security_level', 'medium', 'M', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'security_level', 'low', 'L', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'security_level', 'H', 'Kõrge', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'security_level', 'M', 'Keskmine', 'TEXT');
+INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'security_level', 'L', 'Madal', 'TEXT');
 
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_check_status', 'CANCELLED', 'CANCELLED', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_check_status', 'PENDING', 'PENDING', 'TEXT');
@@ -75,15 +75,14 @@ INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextv
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_check_status', 'FAILED', 'FAILED', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'system_check_status', 'PASSED', 'PASSED', 'TEXT');
 
-INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', 'CODE_18', '{"code": 18, "legislation": "AvTS § 35 lg 1 p 9", "description": "Teave turvasüsteemide, turvaorganisatsiooni või turvameetmete kirjelduse kohta"}', 'JSON');
-INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', 'CODE_19', '{"code": 19, "legislation": "AvTS § 35 lg 1 p 10", "description": "Tehnoloogilisi lahendusi sisaldav teave"}', 'JSON');
-INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', 'CODE_36', '{"code": 36, "legislation": "AvTS § 35 lg 1 p 17", "description": "Ärisaladus"}', 'JSON');
-INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', 'CODE_38', '{"code": 38, "legislation": "AvTS § 35 lg 1 p 18 (1)", "description": "Elutähtsa teenuse riskianalüüsi ja toimepidevuse plaani puudutav teave"}', 'JSON');
-INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', 'CODE_39', '{"code": 39, "legislation": "AvTS § 35 lg 2 p", "description": "Õigusaktide eelnõud enne nende kooskõlastamiseks saatmist või vastuvõtmiseks esitamist"}', 'JSON');
-INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', 'CODE_40', '{"code": 40, "legislation": "AvTS § 35 lg 2 p 2", "description": "Dokumendi kavand ja selle juurde kuuluvad dokumendid"}', 'JSON');
+INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', '18', '{"code": 18, "legislation": "AvTS § 35 lg 1 p 9", "description": "Teave turvasüsteemide, turvaorganisatsiooni või turvameetmete kirjelduse kohta"}', 'JSON');
+INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', '19', '{"code": 19, "legislation": "AvTS § 35 lg 1 p 10", "description": "Tehnoloogilisi lahendusi sisaldav teave"}', 'JSON');
+INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', '36', '{"code": 36, "legislation": "AvTS § 35 lg 1 p 17", "description": "Ärisaladus"}', 'JSON');
+INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', '38', '{"code": 38, "legislation": "AvTS § 35 lg 1 p 18 (1)", "description": "Elutähtsa teenuse riskianalüüsi ja toimepidevuse plaani puudutav teave"}', 'JSON');
+INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', '39', '{"code": 39, "legislation": "AvTS § 35 lg 2 p", "description": "Õigusaktide eelnõud enne nende kooskõlastamiseks saatmist või vastuvõtmiseks esitamist"}', 'JSON');
+INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (nextval('riha.classifier_seq'), 'access_restriction_reasons', '40', '{"code": 40, "legislation": "AvTS § 35 lg 2 p 2", "description": "Dokumendi kavand ja selle juurde kuuluvad dokumendid"}', 'JSON');
 
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'X_ROAD_SUBSYSTEM', 'x-tee alamsüsteem', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'STANDARD_SOLUTION', 'standardlahendus', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'INTERNAL_USAGE', 'asutusesiseseks kasutamiseks', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'DOCUMENT_MANAGEMENT_SYSTEM', 'dokumendihaldussüsteem', 'TEXT');
 
