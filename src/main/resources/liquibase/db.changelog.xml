@@ -121,5 +121,13 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-740" author="aleksandr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190304_main_resource_view_update.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
 </databaseChangeLog>
