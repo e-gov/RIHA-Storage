@@ -85,5 +85,3 @@ case when
 
 
 
-
--- select json_content #>> '{topics}' from riha.main_resource where json_content -> 'topics' ?|  array[  'standardlahendus', 'Standardlahendus']
