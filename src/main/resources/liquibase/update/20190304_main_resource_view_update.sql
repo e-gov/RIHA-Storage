@@ -1,5 +1,3 @@
--- drop view riha.main_resource_view;
-
 create or replace view riha.main_resource_view as
   SELECT DISTINCT ON ((main_resource.json_content ->> 'uuid'::text)) main_resource.main_resource_id,
                      main_resource.uri,
