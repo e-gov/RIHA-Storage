@@ -27,7 +27,7 @@ create or replace view riha.main_resource_view as
                      ((main_resource.json_content #>> '{meta,creation_timestamp}'::text[]))::timestamp with time zone AS j_creation_timestamp,
                      ((main_resource.json_content #>> '{meta,update_timestamp}'::text[]))::timestamp with time zone AS j_update_timestamp,
 case when
-                     COALESCE(main_resource.json_content -> 'topics' ?|  array[ 'dokumendihaldussüsteem', 'x-tee alamsüsteem', 'standardlahendus'], false)
+                     COALESCE( jsonb_exists_any(main_resource.json_content -> 'topics', array[ 'dokumendihaldussüsteem', 'x-tee alamsüsteem', 'standardlahendus']), false)
                         or (select count(*) from riha.main_resource_relation where type = 'USED_SYSTEM' and main_resource_relation_id = main_resource_id) > 0
                         then 'AUTOMATICALLY_REGISTERED'::varchar (150)
                         else last_positive_approval_request.sub_type
