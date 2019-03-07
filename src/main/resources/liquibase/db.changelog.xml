@@ -129,5 +129,13 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-740-1" author="aleksandr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190306_issue_type_classifier.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
 </databaseChangeLog>
