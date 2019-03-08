@@ -1,5 +1,5 @@
 create or replace view riha.main_resource_view as
-SELECT DISTINCT ON ((main_resource.uuid)) main_resource.main_resource_id,
+SELECT DISTINCT ON ((main_resource.json_content #>> '{uuid}')) main_resource.main_resource_id,
                    main_resource.uri,
                    main_resource.name,
                    main_resource.owner,
@@ -45,7 +45,7 @@ FROM (((((riha.main_resource main_resource
                       ((comment.status) :: text = 'CLOSED' :: text) AND
                       ((comment.resolution_type) :: text = 'POSITIVE' :: text))
                ORDER BY comment.infosystem_uuid, comment.modified_date DESC) last_positive_approval_request ON ((
-  ((main_resource.uuid)) :: uuid = last_positive_approval_request.infosystem_uuid)))
+  ((main_resource.json_content #>> '{uuid}')) :: uuid = last_positive_approval_request.infosystem_uuid)))
     LEFT JOIN (SELECT DISTINCT ON (comment.infosystem_uuid) comment.infosystem_uuid, comment.modified_date
                FROM riha.comment
                WHERE (((comment.type) :: text = 'ISSUE' :: text) AND
@@ -53,7 +53,7 @@ FROM (((((riha.main_resource main_resource
                       ((comment.status) :: text = 'CLOSED' :: text) AND
                       ((comment.resolution_type) :: text = 'POSITIVE' :: text))
                ORDER BY comment.infosystem_uuid, comment.modified_date DESC) last_positive_establishment_request ON ((
-  ((main_resource.uuid)) :: uuid = last_positive_establishment_request.infosystem_uuid)))
+  ((main_resource.json_content #>> '{uuid}')) :: uuid = last_positive_establishment_request.infosystem_uuid)))
     LEFT JOIN (SELECT DISTINCT ON (comment.infosystem_uuid) comment.infosystem_uuid, comment.modified_date
                FROM riha.comment
                WHERE (((comment.type) :: text = 'ISSUE' :: text) AND
@@ -61,7 +61,7 @@ FROM (((((riha.main_resource main_resource
                       ((comment.status) :: text = 'CLOSED' :: text) AND
                       ((comment.resolution_type) :: text = 'POSITIVE' :: text))
                ORDER BY comment.infosystem_uuid, comment.modified_date DESC) last_positive_take_into_use_request ON ((
-  ((main_resource.uuid)) :: uuid = last_positive_take_into_use_request.infosystem_uuid)))
+  ((main_resource.json_content #>> '{uuid}')) :: uuid = last_positive_take_into_use_request.infosystem_uuid)))
     LEFT JOIN (SELECT DISTINCT ON (comment.infosystem_uuid) comment.infosystem_uuid, comment.modified_date
                FROM riha.comment
                WHERE (((comment.type) :: text = 'ISSUE' :: text) AND
@@ -69,11 +69,11 @@ FROM (((((riha.main_resource main_resource
                       ((comment.status) :: text = 'CLOSED' :: text) AND
                       ((comment.resolution_type) :: text = 'POSITIVE' :: text))
                ORDER BY comment.infosystem_uuid, comment.modified_date DESC) last_positive_finalization_request ON ((
-  ((main_resource.uuid)) :: uuid = last_positive_finalization_request.infosystem_uuid)))
+  ((main_resource.json_content #>> '{uuid}')) :: uuid = last_positive_finalization_request.infosystem_uuid)))
     LEFT JOIN (SELECT (count(*) > 0) AS has_used_system_type_relations, mrr.infosystem_uuid
                FROM riha.main_resource_relation mrr
                WHERE ((mrr.type) :: text = 'USED_SYSTEM' :: text)
                GROUP BY mrr.infosystem_uuid) has_used_system_types_relations ON ((
-  ((main_resource.uuid)) :: uuid = has_used_system_types_relations.infosystem_uuid)))
+  ((main_resource.json_content #>> '{uuid}')) :: uuid = has_used_system_types_relations.infosystem_uuid)))
 
-ORDER BY (main_resource.uuid), ((main_resource.json_content #>> '{meta,update_timestamp}'::text[]))::timestamp with time zone DESC NULLS LAST, main_resource.main_resource_id DESC;
+ORDER BY (main_resource.json_content #>> '{uuid}'), ((main_resource.json_content #>> '{meta,update_timestamp}'::text[]))::timestamp with time zone DESC NULLS LAST, main_resource.main_resource_id DESC;
