@@ -24,7 +24,7 @@ SELECT DISTINCT ON ((main_resource.json_content #>> '{uuid}')) main_resource.mai
                    ((main_resource.json_content #>> '{meta,creation_timestamp}'::text[]))::timestamp with time zone AS j_creation_timestamp,
                    ((main_resource.json_content #>> '{meta,update_timestamp}'::text[]))::timestamp with time zone AS j_update_timestamp,
                    case when
-                       COALESCE(jsonb_exists_any(main_resource.json_content -> 'topics', array[ 'dokumendihaldussüsteem', 'x-tee alamsüsteem', 'asutusesiseseks kasutamiseks']), false)
+                       COALESCE(jsonb_exists_any(main_resource.json_content -> 'topics', array['x-tee alamsüsteem','X-tee alamsüsteem', 'X-TEE ALAMSÜSTEEM', 'asutusesiseseks kasutamiseks']), false)
                          or COALESCE(has_used_system_types_relations.has_used_system_type_relations, false)
                              then 'AUTOMATICALLY_REGISTERED'::varchar (150)
                         else last_positive_approval_request.sub_type
