@@ -77,6 +77,17 @@ public class FileResourceIndexingService {
         logger.info("File resource '{}' indexing is complete", fileResource.getUuid());
     }
 
+    /**
+     * Mark file as indexed
+     *
+     * @param uuid file resource uuid
+     */
+    @Transactional
+    public void markAsIndexed(UUID uuid) {
+        FileResource fileResource = fileResourceDAO.get(uuid);
+        fileResource.getLargeObject().setIndexed(true);
+    }
+
     private void createIndex(FileResource fileResource) throws IOException, SQLException {
         UUID uuid = fileResource.getUuid();
 

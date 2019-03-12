@@ -31,6 +31,8 @@ public final class Finals {
     addClassRepresentingTable(Data_object.class);
     addClassRepresentingTable(Comment.class);
     addClassRepresentingTable(Main_resource_relation.class);
+    addClassRepresentingTable(Classifier.class);
+    TABLE_CLASS_MAP.put(DataObjectSearchView.TABLE_NAME, DataObjectSearchView.class);
 
     // read only
     addClassRepresentingTable(Isik.class);
@@ -43,6 +45,7 @@ public final class Finals {
     TABLE_CLASS_MAP_READONLY.put(Main_resource_view.class.getSimpleName().toLowerCase(), Main_resource_view.class);
     TABLE_CLASS_MAP_READONLY.put(Main_resource_relation_view.class.getSimpleName().toLowerCase(), Main_resource_relation_view.class);
     TABLE_CLASS_MAP_READONLY.put(Comment_type_issue_view.class.getSimpleName().toLowerCase(), Comment_type_issue_view.class);
+    TABLE_CLASS_MAP_READONLY.put(DataObjectSearchView.TABLE_NAME, DataObjectSearchView.class);
   }
 
   /**

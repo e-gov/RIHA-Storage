@@ -1,6 +1,7 @@
 package ee.eesti.riha.rest.logic;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -29,6 +30,8 @@ import ee.eesti.riha.rest.model.Comment;
 import ee.eesti.riha.rest.model.Data_object;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
+
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 
 /**
  * Handles full Main_resource (with connected items [Data_object, Document]) import.
@@ -72,7 +75,7 @@ public class ImportLogic {
 
     Map<String, JsonObject> uriToJsonObject = createUriToJsonMap(arrayFieldsWithObjects, importJson);
 
-    String dateJson = DateHelper.FORMATTER.format(new Date());
+    String dateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(new Date());
     String uri = importJson.get("uri").getAsString();
     FilterComponent fc = new FilterComponent("uri", "=", uri);
     // query active only

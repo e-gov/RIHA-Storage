@@ -1,8 +1,10 @@
 package ee.eesti.riha.rest.integration.main_resource;
 
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 import static org.junit.Assert.*;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -254,7 +256,7 @@ public class TestApiClassicServiceImpl_PUT<T> {
     assertEquals(mrUpdated.getModifier(), json_contentStored.get("modifier").getAsString());
 
     assertNotNull(mrUpdated.getModified_date());
-    Date modifiedDateJson = DateHelper.FORMATTER.parse(json_contentStored.get(Finals.MODIFIED_DATE).getAsString());
+    Date modifiedDateJson = new SimpleDateFormat(DATE_FORMAT_IN_JSON).parse(json_contentStored.get(Finals.MODIFIED_DATE).getAsString());
     assertEquals(mrUpdated.getModified_date().getTime(), modifiedDateJson.getTime());
 
   }

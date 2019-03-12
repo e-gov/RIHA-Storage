@@ -1,20 +1,18 @@
 package ee.eesti.riha.rest.logic.util;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-// TODO: Auto-generated Javadoc
+import java.io.IOException;
+
 /**
  * The Class GsonToJacksonHelper.
  */
 public final class GsonToJacksonHelper {
-
-  private GsonToJacksonHelper() {
-
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(GsonToJacksonHelper.class);
 
   // given object extract from it JsonContent field,
   // we need to have json_content JsonObject which is Gson,
@@ -38,14 +36,12 @@ public final class GsonToJacksonHelper {
     try {
       jsonContent = mapper.readTree(JsonHelper.GSON.toJson(jObj));
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG.error("Error reading JSON", e);
     }
     if (jsonContent != null) {
       return (T) jsonContent;
     } else {
       return (T) "";
     }
-
   }
-
 }
