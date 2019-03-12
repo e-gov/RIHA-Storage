@@ -49,5 +49,101 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-615" author="aleksandr">
+        <comment>DataObjectSearch view creation</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190206_create_dataobject_search_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-616" author="aleksandr">
+        <comment>DataObjectSearch view creation</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190212_create_dataobject_search_view_with_search_name.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-615-1" author="aleksandr">
+        <comment>DataObjectSearch view refactoring</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190213_create_dataobject_search_view_with_search_name.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-615-2" author="aleksandr">
+        <comment>Added system short name as part of the surrogate ID field</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190219_create_dataobject_search_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-615-3" author="aleksandr">
+        <comment>Added search_text field, minor refactoring</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190224_create_dataobject_search_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-615-4" author="aleksandr">
+        <comment>bugfixing riha.main_resource_current_version </comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190226_main_resource_current_version.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+
+    <changeSet id="RIHAKB-656" author="aleksandr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190124_add_used_type_relations_info_to_main_resource_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+
+    <changeSet id="RIHAKB-761" author="vadim">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190220_create_classifier_table_and_content.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-740" author="aleksandr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190304_main_resource_view_update.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-740-1" author="aleksandr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190306_issue_type_classifier.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-740-2" author="aleksandr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20190308_main_resource_view_corrections.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
 </databaseChangeLog>

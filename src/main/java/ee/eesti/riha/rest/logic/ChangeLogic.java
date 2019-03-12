@@ -1,6 +1,7 @@
 package ee.eesti.riha.rest.logic;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,6 +48,8 @@ import ee.eesti.riha.rest.model.Comment;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.readonly.Kind;
 
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
+
 // TODO: Auto-generated Javadoc
 /**
  * Responsible of actual processing, communicating with lower level DAO services for read/change data from/to database
@@ -57,6 +60,7 @@ import ee.eesti.riha.rest.model.readonly.Kind;
  */
 @Component
 public class ChangeLogic<T, K> {
+  private static final Logger LOG = LoggerFactory.getLogger(ChangeLogic.class);
 
   @Autowired
   SecureApiGenericDAO<T, K> secureDAO;
@@ -82,8 +86,6 @@ public class ChangeLogic<T, K> {
   @Autowired
   AppConfigURL appConfigURL;
 
-  private static final Logger LOG = LoggerFactory.getLogger(ChangeLogic.class);
-
   /**
    * Do get many.
    *
@@ -98,15 +100,11 @@ public class ChangeLogic<T, K> {
    */
   public List<T> doGetMany(Class<T> classRepresentingTable, Integer limit, Integer offset,
                            List<FilterComponent> filterComponents, String sort, String fields) throws RihaRestException {
-
-    List<T> all = new ArrayList<>();
+    List<T> all;
     try {
       addEscapedQuotesToJsonArray(filterComponents);
-      // all = genericDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
       all = secureDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
       replaceContentWithFileUrl(all, appConfigURL.getRestApiBaseUrl());
-
-      // FileHelper.readDocumentFileToContent(all, classRepresentingTable);
     } catch (RihaRestException e) {
       throw e;
     } catch (Exception e) {
@@ -114,7 +112,6 @@ public class ChangeLogic<T, K> {
     }
 
     return all;
-
   }
 
   /**
@@ -183,11 +180,7 @@ public class ChangeLogic<T, K> {
         JsonArray fieldsJson = JsonHelper.GSON.fromJson(fields, JsonArray.class);
         all = tableEntryReadLogic.getAdjustedObjsBasedOnExpectedJson(all, fieldsJson);
       } catch (IllegalArgumentException | JsonSyntaxException jse) {
-        RihaRestError error = new RihaRestError();
-        error.setErrcode(ErrorCodes.INPUT_JSON_NOT_VALID_JSON);
-        error.setErrmsg(ErrorCodes.INPUT_JSON_NOT_VALID_JSON_MSG + " fields: " + fields);
-        error.setErrtrace(jse.getMessage());
-        throw new RihaRestException(error);
+        throw new RihaRestException(createRestError(jse, fields));
       }
     }
 
@@ -211,14 +204,19 @@ public class ChangeLogic<T, K> {
         JsonArray fieldsJson = JsonHelper.GSON.fromJson(fields, JsonArray.class);
         data = (T) tableEntryReadLogic.getAdjustedObjBasedOnExpectedJson(data, fieldsJson);
       } catch (IllegalArgumentException | JsonSyntaxException jse) {
-        RihaRestError error = new RihaRestError();
-        error.setErrcode(ErrorCodes.INPUT_JSON_NOT_VALID_JSON);
-        error.setErrmsg(ErrorCodes.INPUT_JSON_NOT_VALID_JSON_MSG + " fields: " + fields);
-        error.setErrtrace(jse.getMessage());
-        throw new RihaRestException(error);
+        throw new RihaRestException(createRestError(jse, fields));
       }
     }
     return data;
+  }
+
+  private RihaRestError createRestError(Exception jse, String fields) {
+    RihaRestError error = new RihaRestError();
+    error.setErrcode(ErrorCodes.INPUT_JSON_NOT_VALID_JSON);
+    error.setErrmsg(ErrorCodes.INPUT_JSON_NOT_VALID_JSON_MSG + " fields: " + fields);
+    error.setErrtrace(jse.getMessage());
+
+    return error;
   }
 
   /**
@@ -231,15 +229,9 @@ public class ChangeLogic<T, K> {
    */
   public List<T> doGetByMainResourceId(Class<T> classRepresentingTable, Integer id)
       throws RihaRestException {
-
-    // List<T> entityList = genericDAO.findByMainResourceId(classRepresentingTable, id);
     List<T> entityList = secureDAO.findByMainResourceId(classRepresentingTable, id);
 
-    // INFO: file content inclusion
-    // FileHelper.readDocumentFileToContent(entityList, classRepresentingTable);
-
     return entityList;
-
   }
 
   /**
@@ -253,14 +245,10 @@ public class ChangeLogic<T, K> {
    */
   public T doGet(Class<T> classRepresentingTable, Integer id, String fields)
       throws RihaRestException {
-
-    // T entity = genericDAO.find(classRepresentingTable, id);
     T entity = secureDAO.find(classRepresentingTable, id);
     Validator.noSuchIdInGivenTable(entity, id);
 
     replaceContentWithFileUrl(entity, id, appConfigURL.getRestApiBaseUrl());
-
-    // FileHelper.readDocumentFileToContent(entity, classRepresentingTable);
 
     return entity;
 
@@ -268,10 +256,8 @@ public class ChangeLogic<T, K> {
 
   private void replaceContentWithFileUrl(T item, Integer id, String baseUrl) {
     if (item.getClass() == Document.class) {
-      LOG.info("IS DOCUMENT CLASS");
       Document doc = (Document) item;
       if (doc.getJson_content() != null) {
-        // http://localhost:8080/rest/api/file/167369?toke=asd
         doc.getJson_content().addProperty("content", baseUrl + "/api/file/" + id);
       }
     }
@@ -295,15 +281,9 @@ public class ChangeLogic<T, K> {
    * @throws NumberFormatException the number format exception
    */
   public Object doGet(QueryHolder queryHolder) throws RihaRestException {
-
-    LOG.info("doGet");
     PathHolder pathHolder = new PathHolder(queryHolder.getPath());
-    // LOG.info("Patholder " + pathHolder.id);
-
     Class<T> classRepresentingTable = Finals.getClassRepresentingTable(pathHolder.tableName);
     if (pathHolder.id == null) {
-      // no id means multiple
-      // LOG.info(pathHolder.tableName);
       List<T> result = doGetMany(classRepresentingTable, queryHolder.getLimit(), queryHolder.getOffset(),
           (List<FilterComponent>) queryHolder.getFilter(), queryHolder.getSort(), queryHolder.getFields());
 
@@ -311,8 +291,6 @@ public class ChangeLogic<T, K> {
     } else {
       // find by id
       T item = doGet(classRepresentingTable, Integer.valueOf(pathHolder.id), queryHolder.getFields());
-      // LOG.info("RESULT " + item);
-
       Validator.noSuchIdInGivenTable(item, Integer.valueOf(pathHolder.id));
       return item;
     }
@@ -328,7 +306,6 @@ public class ChangeLogic<T, K> {
    * @throws NumberFormatException the number format exception
    */
   public Map<String, Integer> doCount(QueryHolder queryHolder) throws RihaRestException {
-    LOG.info("doCount");
     PathHolder pathHolder = new PathHolder(queryHolder.getPath());
     Map<String, Integer> resultCount = new HashMap<>();
     Class<T> classRepresentingTable = Finals.getClassRepresentingTable(pathHolder.tableName);
@@ -475,8 +452,7 @@ public class ChangeLogic<T, K> {
     int numOfChanged = 0;
     LOG.info("JSON " + json);
 
-    Date dt = new Date();
-    String dtJsonFormat = DateHelper.FORMATTER.format(dt);
+    String dtJsonFormat = new SimpleDateFormat(DATE_FORMAT_IN_JSON).format(new Date());
 
     if (JsonHelper.isJsonArray(json)) {
 
@@ -509,7 +485,7 @@ public class ChangeLogic<T, K> {
         // throws exception if numOfChanged has error code as result
         Validator.fieldMustExistInDatabase(numOfChanged, idFieldName);
       } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-        e.printStackTrace();
+        LOG.error("Error while updating", e);
       }
 
     } else if (id != null) {
@@ -596,7 +572,6 @@ public class ChangeLogic<T, K> {
     String dataJson = queryHolder.getData().toString();
     Map<String, Integer> updatedResult = doUpdate(dataJson, classRepresentingTable, id, idFieldName);
     return updatedResult;
-
   }
 
   /**
@@ -609,7 +584,6 @@ public class ChangeLogic<T, K> {
    */
   public Map<String, Integer> doDelete(QueryHolder queryHolder) throws RihaRestException,
       IOException {
-
     LOG.info("DO DELETE QUERYHOLDER");
     PathHolder pathHolder = new PathHolder(queryHolder.getPath());
     Map<String, Integer> deletedResult = null;
@@ -629,7 +603,6 @@ public class ChangeLogic<T, K> {
     }
 
     return deletedResult;
-
   }
 
   /**
@@ -683,7 +656,6 @@ public class ChangeLogic<T, K> {
    */
   private Map<String, Integer> doDelete(String tableName, String key, JsonElement value)
       throws RihaRestException {
-
     LOG.info("DO Delete");
     LOG.info("" + value);
 
@@ -730,11 +702,8 @@ public class ChangeLogic<T, K> {
 
       deletedResult.put(Finals.OK, numOfDeleted);
       return deletedResult;
-
     } else {
-
       throw new IllegalArgumentException("parameter value must be JSONArray");
-
     }
 
   }
@@ -749,13 +718,11 @@ public class ChangeLogic<T, K> {
    */
   public Map<String, Integer> doDelete(String tableName, Integer id) throws IOException,
       RihaRestException {
-
     Class<T> clazz = Finals.getClassRepresentingTable(tableName);
     // int numOfDeleted = genericDAO.delete(clazz, id);
     int numOfDeleted = secureDAO.delete(clazz, id);
 
     if ((Class<T>) Finals.getClassRepresentingTable(tableName) == Document.class) {
-      LOG.info("IS DOCUMENT");
       String pathToFile = FileHelper.createDocumentFilePath(id);
       FileHelper.deleteFile(FileHelper.PATH_ROOT + pathToFile);
       LOG.info("DOCUMENT DELETED WITH ID: " + id);
@@ -777,8 +744,6 @@ public class ChangeLogic<T, K> {
    * @return the id field name
    */
   private String getIdFieldName(Set<Entry<String, JsonElement>> entrySet) {
-
-    // default
     String idFieldName = Finals.NAME;
     for (Entry<String, JsonElement> entry : entrySet) {
       LOG.info("" + entry);

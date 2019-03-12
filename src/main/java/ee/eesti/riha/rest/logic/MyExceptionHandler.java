@@ -29,7 +29,6 @@ import ee.eesti.riha.rest.error.RihaRestException;
  * The Class MyExceptionHandler.
  */
 public final class MyExceptionHandler {
-
   private static final Logger LOG = LoggerFactory.getLogger(MyExceptionHandler.class);
   
   private static final Integer VERSION_MAX_LENGTH = 10;
@@ -45,7 +44,7 @@ public final class MyExceptionHandler {
    */
   public static String toString(Exception e) {
     StringWriter sw = new StringWriter();
-    e.printStackTrace(new PrintWriter(sw));
+    LOG.info("", new PrintWriter(sw));
     return sw.toString();
   }
 
@@ -264,7 +263,7 @@ public final class MyExceptionHandler {
     if (error.getErrtrace().contains("Exception")) {
       error.setErrtrace("");
     }
-    e.printStackTrace();
+    LOG.error("Error", e);
     setAdditionalTrace(error, additionalMessage);
     return error;
   }
