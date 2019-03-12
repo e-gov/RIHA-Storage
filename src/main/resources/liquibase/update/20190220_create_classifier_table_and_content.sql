@@ -84,7 +84,6 @@ INSERT INTO riha.classifier (id, type, code, json_value, discriminator) VALUES (
 
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'X_ROAD_SUBSYSTEM', 'x-tee alamsüsteem', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'INTERNAL_USAGE', 'asutusesiseseks kasutamiseks', 'TEXT');
-INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'topics_that_do_not_require_feedback_on_creation', 'DOCUMENT_MANAGEMENT_SYSTEM', 'dokumendihaldussüsteem', 'TEXT');
 
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_USER_VIEW', 'Viide lõppkasutaja vaatele', 'TEXT');
 INSERT INTO riha.classifier (id, type, code, value, discriminator) VALUES (nextval('riha.classifier_seq'), 'document_types', 'DOC_TYPE_OPEN_DATA', 'Viide (ava)andmetele', 'TEXT');
