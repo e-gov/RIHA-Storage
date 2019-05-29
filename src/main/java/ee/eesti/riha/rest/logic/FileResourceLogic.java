@@ -76,6 +76,34 @@ public class FileResourceLogic {
         return uuid;
     }
 
+    /**
+     * Creates a copy of {@link FileResource} with new info system UUID
+     *
+     * @param existingFileUuid UUID of existing file resource
+     * @param existingInfoSystemUuid existing info system UUID
+     * @param newInfoSystemUuid new info system UUID
+     * @return UUID of created file resource
+     */
+    @Transactional
+    public UUID createFileResourceFromExisting(UUID existingFileUuid, UUID existingInfoSystemUuid, UUID newInfoSystemUuid) {
+        FileResource existingFileResource = fileResourceDAO.get(existingFileUuid, existingInfoSystemUuid);
+
+        if (existingFileResource == null) {
+            throw new IllegalStateException("FileResource with uuid " + existingFileUuid + " and info system uuid " + existingInfoSystemUuid + " is not found");
+        }
+
+        FileResource newFileResource = new FileResource();
+        newFileResource.setInfoSystemUuid(newInfoSystemUuid);
+        newFileResource.setName(existingFileResource.getName());
+        newFileResource.setContentType(existingFileResource.getContentType());
+        newFileResource.setLargeObject(existingFileResource.getLargeObject());
+
+        UUID uuid = fileResourceDAO.create(newFileResource);
+        logger.info("Created file resource '{}'", uuid);
+
+        return uuid;
+    }
+
     @Transactional
     public void indexFileResource(UUID uuid) {
         try {

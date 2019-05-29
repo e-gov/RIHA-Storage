@@ -146,4 +146,15 @@ public class FileServiceImpl implements FileService {
         return Response.ok(fileResourceLogic.list(request)).build();
     }
 
+    @Override
+    public Response createFileResourceFromExisting(String existingFileUuid, String existingInfoSystemUuidStr, String newInfoSystemUuidStr) {
+        final UUID fileResourceUuid = UUID.fromString(existingFileUuid);
+        final UUID existingInfoSystemUuid = UUID.fromString(existingInfoSystemUuidStr);
+        final UUID newInfoSystemUuid = UUID.fromString(newInfoSystemUuidStr);
+
+        UUID uuid = fileResourceLogic.createFileResourceFromExisting(
+                fileResourceUuid, existingInfoSystemUuid, newInfoSystemUuid);
+
+        return Response.ok(uuid.toString()).build();
+    }
 }
