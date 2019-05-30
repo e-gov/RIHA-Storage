@@ -63,4 +63,19 @@ public interface FileService {
     @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
     Response list(@Context UriInfo uriInfo);
 
+    /**
+     * Creates new file resource by copying existing one with new info system UUID
+     *
+     * @param existingFileUuid file uuid to copy from
+     * @param existingInfoSystemUuid info system uuid to copy from
+     * @param newInfoSystemUuid new info system uuid
+     * @return uuid of created file resource
+     */
+
+    @Path("/api/file/createFromExisting")
+    @POST
+    Response createFileResourceFromExisting(
+            @QueryParam(value = "existingFileUuid") String existingFileUuid,
+            @QueryParam(value = "existingInfoSystemUuid") String existingInfoSystemUuid,
+            @QueryParam(value = "newInfoSystemUuid") String newInfoSystemUuid);
 }
