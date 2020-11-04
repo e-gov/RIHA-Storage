@@ -17,7 +17,7 @@ Andmehoidja lühike kirjeldus on ka RIHA arhitektuuriteatmikus: [Andmehoidja](ht
 
 ## Senine arendustöö
 
-RIHA-Storage aluseks on eelmises arendusjärgus loodud "Kirjeldusmooduli" serveripoolne komponent. Seda komponenti nimetati ka "Kirjeldusmooduli REST API" või lihtsalt "RIHA REST API".
+RIHA-Storage aluseks on eelmises arendusjärgus loodud "Kirjeldusmooduli" serveripoolne komponent. Seda komponenti nimetati ka "Kirjeldusmooduli REST API" või lihtsalt "RIHA REST API". 
 
 Reposse `RIHA-Storage` on koondatud kood repost `kirjeldusmoodul-rest-api` ja asjassepuutuv, varem eraldiseisev dokumentatsioon. Dokumentatsiooni on toimetatud, kood on arendaja poolt üleantud kujul.
 
