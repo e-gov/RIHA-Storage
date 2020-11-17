@@ -148,7 +148,7 @@
     <changeSet id="RIHAKB-993" author="kristjankr">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20201711_update_classifier.sql"
+                 path="./update/20201117_update_classifier.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
