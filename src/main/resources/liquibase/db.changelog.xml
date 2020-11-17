@@ -145,5 +145,21 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-993" author="kristjankr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20201711_update_classifier.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="RIHAKB-975" author="kristjankr">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20201711_update_main_resource_view.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 
 </databaseChangeLog>
