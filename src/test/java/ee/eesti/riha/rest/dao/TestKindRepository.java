@@ -10,11 +10,17 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath*: **/test-applicationContext.xml")
+@WebAppConfiguration
+@ContextConfiguration("/test-applicationContext.xml")
 public class TestKindRepository extends AbstractGenericDaoTest {
   @Autowired
   private CacheManager cacheManager;
@@ -44,10 +50,9 @@ public class TestKindRepository extends AbstractGenericDaoTest {
     assertEquals("{}", kindsCache.getNativeCache().toString());
     assertNull(kindRepository.getById(id));
 
-    // expect cache to contain spring.cache.support.NullValue
     System.out.println(kindsCache.getNativeCache());
     assertNotEquals("{}", kindsCache.getNativeCache().toString());
-    assertTrue(kindsCache.getNativeCache().toString().contains("NullValue"));
+    assertTrue(kindsCache.getNativeCache().toString().contains("null"));
 
   }
 
@@ -71,10 +76,9 @@ public class TestKindRepository extends AbstractGenericDaoTest {
     assertEquals("{}", kindsCache.getNativeCache().toString());
     assertNull(kindRepository.getByName(name));
 
-    // expect cache to contain spring.cache.support.NullValue
     System.out.println(kindsCache.getNativeCache());
     assertNotEquals("{}", kindsCache.getNativeCache().toString());
-    assertTrue(kindsCache.getNativeCache().toString().contains("NullValue"));
+    assertTrue(kindsCache.getNativeCache().toString().contains("null"));
   }
 
   @Test

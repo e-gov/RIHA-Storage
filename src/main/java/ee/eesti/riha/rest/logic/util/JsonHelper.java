@@ -1,15 +1,5 @@
 package ee.eesti.riha.rest.logic.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,6 +9,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -67,9 +66,7 @@ public final class JsonHelper {
    */
   public static JsonObject toJsonObject(String json) {
 
-    JsonParser jsonParser = new JsonParser();
-    JsonObject jsonObj = (JsonObject) jsonParser.parse(json);
-    return jsonObj;
+    return (JsonObject)JsonParser.parseString(json);
 
   }
 

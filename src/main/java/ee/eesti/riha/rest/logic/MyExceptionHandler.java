@@ -1,28 +1,25 @@
 package ee.eesti.riha.rest.logic;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.gson.JsonSyntaxException;
+import ee.eesti.riha.rest.error.ErrorCodes;
+import ee.eesti.riha.rest.error.RihaRestError;
+import ee.eesti.riha.rest.error.RihaRestException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.SQLGrammarException;
-import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.hibernate4.HibernateJdbcException;
+import org.springframework.orm.hibernate5.HibernateJdbcException;
 
-import com.google.gson.JsonSyntaxException;
-
-import ee.eesti.riha.rest.error.ErrorCodes;
-import ee.eesti.riha.rest.error.RihaRestError;
-import ee.eesti.riha.rest.error.RihaRestException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // TODO: Auto-generated Javadoc
 /**

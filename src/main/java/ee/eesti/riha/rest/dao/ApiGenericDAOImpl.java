@@ -2,29 +2,39 @@ package ee.eesti.riha.rest.dao;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import ee.eesti.riha.rest.dao.util.*;
+import ee.eesti.riha.rest.dao.util.DaoHelper;
+import ee.eesti.riha.rest.dao.util.FieldTypeHolder;
+import ee.eesti.riha.rest.dao.util.FilterComponent;
+import ee.eesti.riha.rest.dao.util.OrderByData;
+import ee.eesti.riha.rest.dao.util.SqlFilter;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.MyExceptionHandler;
 import ee.eesti.riha.rest.logic.Validator;
-import ee.eesti.riha.rest.logic.util.*;
+import ee.eesti.riha.rest.logic.util.FileHelper;
+import ee.eesti.riha.rest.logic.util.JsonContentBasedTable;
+import ee.eesti.riha.rest.logic.util.JsonFieldHelper;
+import ee.eesti.riha.rest.logic.util.JsonHelper;
+import ee.eesti.riha.rest.logic.util.StringHelper;
 import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.Table;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -35,7 +45,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -140,14 +156,16 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
   @Override
   public List<T> findByMainResourceId(Class<T> clazz, Integer id) {
 
-    Session session = sessionFactory.getCurrentSession();
-
     LOG.info("FIND BY MAIN_RESOURCE_ID");
 
-    List<T> objectList = session.createCriteria(clazz).add(Restrictions.eq(Finals.MAIN_RESOURCE_ID, id)).list();
+    Session session = sessionFactory.getCurrentSession();
+    CriteriaBuilder cb = session.getCriteriaBuilder();
+    CriteriaQuery<T> criteria = cb.createQuery(clazz);
+    Root<T> root = criteria.from(clazz);
 
-    return objectList;
+    criteria.where(cb.equal(root.get(Finals.MAIN_RESOURCE_ID), id));
 
+    return session.createQuery(criteria).getResultList();
   }
 
   /**

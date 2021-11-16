@@ -1,12 +1,14 @@
 package ee.eesti.riha.rest.integration;
 
+import ee.eesti.riha.rest.MyTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
+@RunWith(MyTestRunner.class)
+@WebAppConfiguration
+@ContextConfiguration("/integration-test-applicationContext.xml")
 public class TestHello {
 
   @Test
