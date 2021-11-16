@@ -61,7 +61,7 @@ public class PathHolder {
       id = pathParts[2];
       // test 4 - expect id to be number
       try {
-        new Integer(id);
+        Integer.valueOf(id);
       } catch (NumberFormatException e) {
         // LOG.info("unexpected id value");
         throw new IllegalStateException("unexpected id value");
