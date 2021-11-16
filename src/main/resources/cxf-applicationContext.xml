@@ -34,6 +34,7 @@
 		<bean class="ee.eesti.riha.rest.service.impl.ApiTableServiceImpl" />
 		<bean class="ee.eesti.riha.rest.service.impl.ApiImportServiceImpl" />
 		<bean class="ee.eesti.riha.rest.service.impl.CommentServiceImpl" />
+		<bean class="ee.eesti.riha.rest.service.impl.HealthServiceImpl" />
 	</util:list>
 
 </beans>
