@@ -1,18 +1,16 @@
 package ee.eesti.riha.rest.model.hibernate;
 
+import com.google.gson.JsonObject;
+import ee.eesti.riha.rest.logic.util.JsonHelper;
+import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.usertype.UserType;
+
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
-import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.usertype.UserType;
-
-import com.google.gson.JsonObject;
-
-import ee.eesti.riha.rest.logic.util.JsonHelper;
 
 /**
  * This class allows to map {@link com.google.gson.JsonObject} to postgresql datatype jsonp. It is based on
@@ -83,7 +81,7 @@ public class JsonObjectUserType implements UserType {
    * @throws java.sql.SQLException
    */
   @Override
-  public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner)
+  public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
       throws HibernateException, SQLException {
     if (rs.getString(names[0]) == null) {
       return null;
@@ -105,7 +103,7 @@ public class JsonObjectUserType implements UserType {
    * @throws java.sql.SQLException
    */
   @Override
-  public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session)
+  public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
       throws HibernateException, SQLException {
     if (value == null) {
       st.setNull(index, Types.OTHER);

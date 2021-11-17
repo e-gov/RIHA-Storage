@@ -1,10 +1,14 @@
 package ee.eesti.riha.rest.dao;
 
 import ee.eesti.riha.rest.dao.util.DAOConstants;
-import ee.eesti.riha.rest.model.*;
-import org.hibernate.Query;
+import ee.eesti.riha.rest.model.Comment;
+import ee.eesti.riha.rest.model.Data_object;
+import ee.eesti.riha.rest.model.Document;
+import ee.eesti.riha.rest.model.Main_resource;
+import ee.eesti.riha.rest.model.Main_resource_relation;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,14 +1,12 @@
 package ee.eesti.riha.rest.integration;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.ws.rs.core.Response;
-
-import org.springframework.util.StringUtils;
-
 import ee.eesti.riha.rest.TestHelper;
 import ee.eesti.riha.rest.service.ApiClassicService;
+import org.springframework.util.StringUtils;
+
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class IntegrationTestHelper {
 
@@ -25,7 +23,7 @@ public class IntegrationTestHelper {
     }
     String resultKey = StringUtils.deleteAny(jsonReturned, "[]");
     System.out.println(resultKey);
-    return new Integer(resultKey.replace(".0", ""));
+    return Integer.valueOf(resultKey.replace(".0", ""));
 
   }
 
