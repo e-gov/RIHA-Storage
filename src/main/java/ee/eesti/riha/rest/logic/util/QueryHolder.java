@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import ee.eesti.riha.rest.error.ErrorCodes;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.error.RihaRestException;
@@ -48,7 +47,7 @@ public class QueryHolder {
    * @throws RihaRestException the riha rest exception
    */
   public static QueryHolder create(Gson gson, String json) throws RihaRestException {
-    JsonObject queryJson = new JsonParser().parse(json).getAsJsonObject();
+    JsonObject queryJson = JsonParser.parseString(json).getAsJsonObject();
     // remove fields because Gson doesn't allow to save json array as a string
     JsonElement fields = queryJson.get(FIELDS);
     queryJson.remove(FIELDS);

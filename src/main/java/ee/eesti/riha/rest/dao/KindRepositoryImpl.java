@@ -1,5 +1,6 @@
 package ee.eesti.riha.rest.dao;
 
+import ee.eesti.riha.rest.model.readonly.Kind;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -7,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import ee.eesti.riha.rest.model.readonly.Kind;
 
 /**
  * Simple kind repository implementation with spring cache
@@ -33,12 +32,15 @@ public class KindRepositoryImpl implements KindRepository {
 
   private Kind getByNameHelper(String name) {
     Session session = sessionFactory.openSession();
+    session.beginTransaction();
+
     try {
       Kind kind = (Kind) session.createCriteria(Kind.class).add(Restrictions.eq("name", name)).uniqueResult();
       return kind;
 
     } finally {
       session.flush();
+      session.getTransaction().commit();
       session.close();
     }
 
@@ -52,13 +54,15 @@ public class KindRepositoryImpl implements KindRepository {
 
   private Kind getByIdHelper(Integer id) {
     Session session = sessionFactory.openSession();
+    session.beginTransaction();
+
     try {
-      Kind kind = (Kind) session.get(Kind.class, id);
+      Kind kind = session.get(Kind.class, id);
       return kind;
     } finally {
       session.flush();
+      session.getTransaction().commit();
       session.close();
     }
   }
-
 }

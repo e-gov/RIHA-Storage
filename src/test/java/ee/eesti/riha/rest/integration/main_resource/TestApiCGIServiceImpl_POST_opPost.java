@@ -1,26 +1,7 @@
 package ee.eesti.riha.rest.integration.main_resource;
 
-import static org.junit.Assert.*;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.util.StringUtils;
-
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
 import ee.eesti.riha.rest.dao.KindRepository;
@@ -33,10 +14,30 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
+import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.util.StringUtils;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
+import javax.ws.rs.core.Response;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(MyTestRunner.class)
-@ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
+@WebAppConfiguration
+@ContextConfiguration("/integration-test-applicationContext.xml")
 public class TestApiCGIServiceImpl_POST_opPost<T> {
 
   // general info here
@@ -90,7 +91,7 @@ public class TestApiCGIServiceImpl_POST_opPost<T> {
     String resultKey = StringUtils.deleteAny(jsonReturned, "[]");
     String id1 = resultKey.replace(".0", "");
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(id1));
-    idUnderTestList.add(new Integer(id1));
+    idUnderTestList.add(Integer.valueOf(id1));
 
   }
 
@@ -220,7 +221,7 @@ public class TestApiCGIServiceImpl_POST_opPost<T> {
     String[] keys = resultKeys.split(",");
     assertEquals(1, keys.length);
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(keys[0]));
-    idUnderTestList.add(new Integer(keys[0]));
+    idUnderTestList.add(Integer.valueOf(keys[0]));
 
   }
 
@@ -251,8 +252,8 @@ public class TestApiCGIServiceImpl_POST_opPost<T> {
     assertEquals(2, keys.length);
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(keys[0]));
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(keys[1]));
-    idUnderTestList.add(new Integer(keys[0]));
-    idUnderTestList.add(new Integer(keys[1]));
+    idUnderTestList.add(Integer.valueOf(keys[0]));
+    idUnderTestList.add(Integer.valueOf(keys[1]));
 
   }
 
@@ -351,8 +352,8 @@ public class TestApiCGIServiceImpl_POST_opPost<T> {
     String id2 = items.get(1).toString().replace(".0", "");
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(id1));
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(id2));
-    idUnderTestList.add(new Integer(id1));
-    idUnderTestList.add(new Integer(id2));
+    idUnderTestList.add(Integer.valueOf(id1));
+    idUnderTestList.add(Integer.valueOf(id2));
     List<RihaRestError> errors = partErrData.getErrors();
     assertEquals(2, errors.size());
     assertEquals(ErrorCodes.INPUT_JSON_REQUIRED_PROPERTIES_MISSING, errors.get(0).getErrcode());
@@ -395,6 +396,6 @@ public class TestApiCGIServiceImpl_POST_opPost<T> {
     String resultKey = StringUtils.deleteAny(jsonReturned, "[]");
     String id1 = resultKey.replace(".0", "");
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(id1));
-    idUnderTestList.add(new Integer(id1));
+    idUnderTestList.add(Integer.valueOf(id1));
   }
 }

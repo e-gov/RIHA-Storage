@@ -1,27 +1,30 @@
 package ee.eesti.riha.rest.dao;
 
-import static org.junit.Assert.*;
-
-import java.util.*;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import com.google.gson.JsonObject;
-
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.integration.TestFinals;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath*: **/test-applicationContext.xml")
+@WebAppConfiguration
+@ContextConfiguration("/test-applicationContext.xml")
 public class TestSecureApiGenericDAO extends AbstractGenericDaoTest {
   @Autowired
   private SecureApiGenericDAO<Main_resource, Integer> secureMainResourceDAO;

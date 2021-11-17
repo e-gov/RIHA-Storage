@@ -1,12 +1,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="
-         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-         http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+
           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-	<import resource="classpath*:*main-applicationContext.xml" />
+	<import resource="main-applicationContext.xml" />
 
 
 	<bean id="myJsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider">

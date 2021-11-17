@@ -1,17 +1,16 @@
 package ee.eesti.riha.rest.dao;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.transaction.Transactional;
-
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * The Class NamesDAOImpl.
@@ -62,7 +61,7 @@ public class NamesDAOImpl implements NamesDAO {
     String sql = "SELECT main_resource_id, name FROM main_resource " + "WHERE main_resource_id IN (:values)";
     List<Integer> integerIds = new ArrayList<Integer>();
     for (String id : ids) {
-      integerIds.add(new Integer(id));
+      integerIds.add(Integer.valueOf(id));
     }
     return getGeneric(sql, integerIds);
   }

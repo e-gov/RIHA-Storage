@@ -1,29 +1,6 @@
 package ee.eesti.riha.rest.integration.main_resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-
 import com.google.gson.JsonObject;
-
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
 import ee.eesti.riha.rest.error.ErrorCodes;
@@ -34,10 +11,29 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
+import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 @RunWith(MyTestRunner.class)
-@ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
+@WebAppConfiguration
+@ContextConfiguration("/integration-test-applicationContext.xml")
 public class TestApiCGIServiceImpl_GET_opGet_LIMIT<T> {
 
   // general info here
