@@ -1,22 +1,22 @@
 package ee.eesti.riha.rest.dao;
 
+import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.V9_6;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
 import org.junit.ClassRule;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-
-import static ru.yandex.qatools.embed.postgresql.distribution.Version.Main.V9_6;
-
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         TestApiGenericDAOMain_resource.class,
         TestDatabase.class,
         TestKindRepository.class,
-        TestSecureApiGenericDAO.class
+        TestSecureApiGenericDAO.class,
+        FileResourceDAOTest.class
 })
 public class DAOTestSuite {
     private static final EmbeddedPostgres POSTGRES = new EmbeddedPostgres(V9_6);
