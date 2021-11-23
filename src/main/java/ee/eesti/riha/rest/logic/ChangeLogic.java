@@ -1,23 +1,5 @@
 package ee.eesti.riha.rest.logic;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.hibernate.exception.SQLGrammarException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -25,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-
 import ee.eesti.riha.rest.conf.AppConfigURL;
 import ee.eesti.riha.rest.dao.GenericDAO;
 import ee.eesti.riha.rest.dao.KindRepository;
@@ -37,7 +18,6 @@ import ee.eesti.riha.rest.error.PartialError;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.TableEntryCreateLogic.JsonParseData;
-import ee.eesti.riha.rest.logic.util.DateHelper;
 import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.logic.util.PathHolder;
@@ -47,6 +27,23 @@ import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Comment;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.readonly.Kind;
+import org.hibernate.exception.SQLGrammarException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 
@@ -457,7 +454,7 @@ public class ChangeLogic<T, K> {
     if (JsonHelper.isJsonArray(json)) {
 
       // add modifier and date to json objects
-      JsonArray jsonArray = (JsonArray) new JsonParser().parse(json);
+      JsonArray jsonArray = (JsonArray) JsonParser.parseString(json);
       for (int i = 0; i < jsonArray.size(); i++) {
         JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
         addModificationDate(jsonObject, dtJsonFormat);
