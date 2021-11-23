@@ -1,14 +1,13 @@
 package ee.eesti.riha.rest.integration.main_resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
+import com.google.gson.JsonObject;
+import ee.eesti.riha.rest.MyTestRunner;
+import ee.eesti.riha.rest.TestHelper;
+import ee.eesti.riha.rest.integration.IntegrationTestHelper;
+import ee.eesti.riha.rest.integration.TestFinals;
+import ee.eesti.riha.rest.logic.Finals;
+import ee.eesti.riha.rest.logic.util.JsonHelper;
+import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
@@ -18,21 +17,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.JsonObject;
+import javax.ws.rs.core.Response;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import ee.eesti.riha.rest.MyTestRunner;
-import ee.eesti.riha.rest.TestHelper;
-import ee.eesti.riha.rest.integration.IntegrationTestHelper;
-import ee.eesti.riha.rest.integration.TestFinals;
-import ee.eesti.riha.rest.logic.Finals;
-import ee.eesti.riha.rest.logic.util.JsonHelper;
-import ee.eesti.riha.rest.service.ApiClassicService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
 @RunWith(MyTestRunner.class)
-@ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
+@WebAppConfiguration
+@ContextConfiguration("/integration-test-applicationContext.xml")
 @Transactional
 public class TestApiClassicServiceImpl_GET_FILTER<T> {
 
