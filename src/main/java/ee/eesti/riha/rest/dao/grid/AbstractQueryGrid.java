@@ -4,16 +4,26 @@ import ee.eesti.riha.rest.util.FilterParameter;
 import ee.eesti.riha.rest.util.PagedRequest;
 import ee.eesti.riha.rest.util.PagedResponse;
 import ee.eesti.riha.rest.util.SortParameter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.PostConstruct;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.*;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.SimpleExpression;
 import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-
-import javax.annotation.PostConstruct;
-import java.util.*;
 
 /**
  * Abstract class providing convenient way of producing {@link PagedResponse} using {@link PagedRequest}. Implementors
@@ -100,7 +110,8 @@ public abstract class AbstractQueryGrid {
      * dependency injection is complete.
      */
     protected void setProjections() {
-        ClassMetadata metadata = sessionFactory.getClassMetadata(entityType);
+        MetamodelImplementor metamodel = (MetamodelImplementor) sessionFactory.getMetamodel();
+        ClassMetadata metadata = (ClassMetadata) metamodel.entityPersister(entityType.getName());
 
         String idPropertyName = metadata.getIdentifierPropertyName();
         if (idPropertyName != null) {
