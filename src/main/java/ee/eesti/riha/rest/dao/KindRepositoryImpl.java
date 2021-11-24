@@ -1,28 +1,31 @@
 package ee.eesti.riha.rest.dao;
 
 import ee.eesti.riha.rest.model.readonly.Kind;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Simple kind repository implementation with spring cache
- * 
- *
- */
-// TODO use getCurrentSession, add @Transactional, should use better cache implementation
-// to work with transactions, EhCahce maybe?
 @Component
+@Repository
+@Transactional
 public class KindRepositoryImpl implements KindRepository {
 
-  @Autowired
-  SessionFactory sessionFactory;
+  private final SessionFactory sessionFactory;
 
   private static final Logger LOG = LoggerFactory.getLogger(KindRepositoryImpl.class);
+
+  public KindRepositoryImpl(SessionFactory sessionFactory) {
+    this.sessionFactory = sessionFactory;
+  }
 
   @Override
   public Kind getByName(String name) {
@@ -31,19 +34,18 @@ public class KindRepositoryImpl implements KindRepository {
   }
 
   private Kind getByNameHelper(String name) {
-    Session session = sessionFactory.openSession();
-    session.beginTransaction();
+    Session session = sessionFactory.getCurrentSession();
 
-    try {
-      Kind kind = (Kind) session.createCriteria(Kind.class).add(Restrictions.eq("name", name)).uniqueResult();
-      return kind;
+    CriteriaBuilder cb = session.getCriteriaBuilder();
+    CriteriaQuery<Kind> cq = cb.createQuery(Kind.class);
 
-    } finally {
-      session.flush();
-      session.getTransaction().commit();
-      session.close();
-    }
+    Root<Kind> kind = cq.from(Kind.class);
+    Predicate namePredicate = cb.equal(kind.get("name"), name);
+    cq.where(namePredicate);
 
+    TypedQuery<Kind> query = session.createQuery(cq);
+
+    return query.getResultStream().findFirst().orElse(null);
   }
 
   @Override
@@ -53,16 +55,7 @@ public class KindRepositoryImpl implements KindRepository {
   }
 
   private Kind getByIdHelper(Integer id) {
-    Session session = sessionFactory.openSession();
-    session.beginTransaction();
-
-    try {
-      Kind kind = session.get(Kind.class, id);
-      return kind;
-    } finally {
-      session.flush();
-      session.getTransaction().commit();
-      session.close();
-    }
+    Session session = sessionFactory.getCurrentSession();
+    return session.get(Kind.class, id);
   }
 }

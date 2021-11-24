@@ -3,9 +3,8 @@ package ee.eesti.riha.rest.dao;
 import java.io.Serializable;
 import java.util.List;
 import java.util.logging.Logger;
-
+import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
-
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -33,14 +32,14 @@ public class GenericDAOImpl<T> implements GenericDAO<T> {
    * @see ee.eesti.riha.rest.dao.GenericDAO#findAll(java.lang.Class)
    */
   @Override
+  @SuppressWarnings("deprecation")
   public List<T> findAll(Class<T> clazz) {
     Session session = sessionFactory.getCurrentSession();
+    CriteriaQuery<T> cq = session.getCriteriaBuilder().createQuery(clazz);
 
-    List<T> objectList = session.createCriteria(clazz).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-        .list();
-
-    return objectList;
-
+    // In Hibernate 6.0, the ResultTransformer will be replaced by a @FunctionalInterface and for this reason, the setResultTransformer() method in org.hibernate.query.Query is deprecated.
+    // There is no replacement for ResultTransformer in Hibernate 5.3, therefore as recommended here, for the moment it can be used as-is.
+    return session.createQuery(cq.select(cq.from(clazz))).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).getResultList();
   }
 
   /*
