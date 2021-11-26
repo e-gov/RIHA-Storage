@@ -52,18 +52,9 @@ Võimalik on kasutada järgmisi parameetreid (vaikeväärtused defineeritud `src
 Parameeter               | Vaikeväärtus | Kirjeldus
 -------------------------|--------------|----------
 skipTests                | false        | Kui `true`, siis ühikteste ei käivitata
-riharest.pathRoot        | /home/girf/  | Failitee, kuhu alla paigaldatakse RIHA dokumentidega seotud failid.
-riharest.authService     | http://192.168.50.140:8080/riha/sessionManagementServlet | Autentimisteenuse URL, mille abil toimub sessioonitokeni valideerimine.
-riharest.isTest          | true         | Kui väärtus on `true`, siis API aktsepteerib tokenina väärtust `testToken`, ilma seda valideerimata.
-riharest.authTimeout     | 3600000      | Autentimise tokeni kehtivus millisekundites. Peale selle aja möödumist toimub REST teenuse poolt uuesti tokeni kontroll autentimisteenuse abil. 
-riharest.pathRootWindows | C:\\Users\\Praktikant\\test_folder\\ | Failitee, kuhu alla paigaldatakse RIHA dokumentidega seotud failid. Kasutatakse juhul, kui lahendus on paigaldatud Windows'i operatsioonisüsteemiga arvutisse.
-riharest.base.url *****  | http://192.168.50.106:8080/rest | URL, mille kaudu on RIHA REST API kättesaadav. Antud parameetri baasilt tekitatakse taastatavates vastustes URLid allalaaditavatele failidele.
 riharest.jdbc.url *****  | jdbc:postgresql://192.168.50.106:5432/riha | RIHA andmebaasi JDBC andmebaasiühenduse URL
 riharest.jdbc.user ***** | riha         | RIHA andmebaasi kasutajatunnus, kelle nimel peab REST API tegema andmebaasiühenduse
 riharest.jdbc.password   | riha         | RIHA andmebaasi parool, kelle nimel peab REST API tegema andmebaasiühenduse 
-jmeter.ignoreFailuers    | true         | Kui tõene, siis jMeter testskriptid ei peata tööd esimese ettetulnud vea peale, vaid töötavad lõpuni ning registreerivad kõik täitmise käigus juhtunud vead. Väära väärtuse korral registreeritakse ainult esimene juhtunud viga ning lõpetatakse töö.
-jmeter.test              | rest-get-object | jMeter testi nimi, mis testifaasis tuleb käivitada. Võimalikud variandid vt kataloogis `src/test/jmeter` olevate failide nimed.
-
 
 Märkused:
 
