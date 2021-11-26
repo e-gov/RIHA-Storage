@@ -30,17 +30,6 @@
 		<riharest.test.authService>${riharest.authService}</riharest.test.authService>
 		<riharest.test.isTest>${riharest.isTest}</riharest.test.isTest>
 		<riharest.test.authTimeout>${riharest.authTimeout}</riharest.test.authTimeout>
-
-		<!-- Performance test settings: -->
-		<jmeter.skip>false</jmeter.skip>
-		<jmeter.test>rest-get-object</jmeter.test>
-		<jmeter.host>triinu.girf.ee</jmeter.host>
-		<jmeter.port>8010</jmeter.port>
-		<jmeter.parallelRequests>1</jmeter.parallelRequests>
-		<jmeter.ignoreFailures>true</jmeter.ignoreFailures>
-		<jmeter.suppressOutput>false</jmeter.suppressOutput>
-		<jmeter.rampUpPeriod>10</jmeter.rampUpPeriod>
-		<jmeter.loopCount>1</jmeter.loopCount>
 	</properties>
 
 	<profiles>
@@ -122,7 +111,6 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 
 		<!-- embedded postgres -->
 		<dependency>
@@ -251,22 +239,17 @@
 				<!--<groupId>org.apache.maven.plugins</groupId>-->
 				<!--<artifactId>maven-failsafe-plugin</artifactId>-->
 				<!--<version>2.18.1</version>-->
-
 				<!--<configuration>-->
 					<!--<argLine>-Xmx2048m -XX:MaxPermSize=1024m</argLine>-->
 					<!--<environmentVariables>-->
 						<!--<serviceurl>http://localhost:${test.server.port}/rest</serviceurl>-->
 					<!--</environmentVariables>-->
-
 					<!--<includes>-->
 						<!--<include>**/integration/**.java</include>-->
 						<!--<include>**/integration/*/**.java</include>-->
 					<!--</includes>-->
-
 					<!--<encoding>UTF-8</encoding>-->
-
 				<!--</configuration>-->
-
 				<!--<executions>-->
 					<!--<execution>-->
 						<!--<goals>-->
@@ -275,58 +258,19 @@
 						<!--</goals>-->
 					<!--</execution>-->
 				<!--</executions>-->
-
 			<!--</plugin>-->
-
-			<!--<plugin>-->
-				<!--<groupId>com.lazerycode.jmeter</groupId>-->
-				<!--<artifactId>jmeter-maven-plugin</artifactId>-->
-				<!--<version>2.0.3</version>-->
-				<!--<configuration>-->
-					<!--<propertiesJMeter>-->
-						<!--<log_level.jmeter>DEBUG</log_level.jmeter>-->
-					<!--</propertiesJMeter>-->
-					<!--<testFilesIncluded>-->
-						<!--<jMeterTestFile>${jmeter.test}.jmx</jMeterTestFile>-->
-					<!--</testFilesIncluded>-->
-					<!--<testResultsTimestamp>false</testResultsTimestamp>-->
-					<!--<overrideRootLogLevel>DEBUG</overrideRootLogLevel>-->
-					<!--<suppressJMeterOutput>${jmeter.suppressOutput}</suppressJMeterOutput>-->
-					<!--<ignoreResultFailures>${jmeter.ignoreFailures}</ignoreResultFailures>-->
-
-					<!--<skipTests>${jmeter.skip}</skipTests>-->
-					<!--<propertiesUser>-->
-						<!--<restApiHost>${jmeter.host}</restApiHost>-->
-						<!--<restApiPort>${jmeter.port}</restApiPort>-->
-						<!--<parallelRequests>${jmeter.parallelRequests}</parallelRequests>-->
-						<!--<rampUpPeriod>${jmeter.rampUpPeriod}</rampUpPeriod>-->
-						<!--<loopCount>${jmeter.loopCount}</loopCount>-->
-					<!--</propertiesUser>-->
-					<!--&lt;!&ndash; propertiesJMeter> <jmeter.save.saveservice.thread_counts>true</jmeter.save.saveservice.thread_counts> -->
-						<!--</propertiesJMeter &ndash;&gt;-->
-					<!--<jmeterExtensions>-->
-						<!--<artifact>kg.apc:jmeter-plugins-json:jar:2.3</artifact>-->
-					<!--</jmeterExtensions>-->
-				<!--</configuration>-->
-			<!--</plugin>-->
-
 
 			<!--<plugin>-->
 				<!--<groupId>org.apache.maven.plugins</groupId>-->
 				<!--<artifactId>maven-antrun-plugin</artifactId>-->
-		<!---->
 				<!--<executions>-->
 					<!--&lt;!&ndash; use real PATH_ROOT in integration tests &ndash;&gt;-->
 					<!--<execution>-->
-		<!---->
 						<!--<id>set_actual.riharest.path_root</id>-->
-		<!---->
 						<!--<phase>pre-integration-test</phase>-->
-		<!---->
 						<!--<goals>-->
 							<!--<goal>run</goal>-->
 						<!--</goals>-->
-		<!---->
 						<!--<configuration>-->
 							<!--<target>-->
 								<!--<propertyfile-->
@@ -336,18 +280,13 @@
 							<!--</target>-->
 						<!--</configuration>-->
 					<!--</execution>-->
-					<!---->
 					<!--&lt;!&ndash; change PATH_ROOT back to test value after integration tests&ndash;&gt;-->
 					<!--<execution>-->
-		<!---->
 						<!--<id>set_test.riharest.path_root</id>-->
-		<!---->
 						<!--<phase>post-integration-test</phase>-->
-		<!---->
 						<!--<goals>-->
 							<!--<goal>run</goal>-->
 						<!--</goals>-->
-		<!---->
 						<!--<configuration>-->
 							<!--<target>-->
 								<!--<propertyfile-->
