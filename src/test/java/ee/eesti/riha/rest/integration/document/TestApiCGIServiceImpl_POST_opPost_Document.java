@@ -1,5 +1,10 @@
 package ee.eesti.riha.rest.integration.document;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
@@ -9,10 +14,13 @@ import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.integration.IntegrationTestHelper;
 import ee.eesti.riha.rest.integration.TestFinals;
 import ee.eesti.riha.rest.logic.Finals;
-import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import javax.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
@@ -24,16 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.StringUtils;
-
-import javax.ws.rs.core.Response;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -116,43 +114,6 @@ public class TestApiCGIServiceImpl_POST_opPost_Document<T> {
     String id1 = resultKey.replace(".0", "");
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(id1));
     idUnderTestList.add(Integer.valueOf(id1));
-
-  }
-
-  @Test
-  public void testCreateDocument() throws Exception {
-
-    String json = "{\r\n" + "	\"op\":\"post\", \r\n" + "	\"path\": \"" + pathToUse + "\", \r\n"
-        + "\"token\":\"testToken\",	\"data\": " + jsonToUseForCreateShorter + "}";
-
-    Response response = serviceUnderTest.postCGI(json);
-
-    assertNotNull(response.getEntity());
-
-    InputStream inpStream = (InputStream) response.getEntity();
-    String jsonReturned = TestHelper.readStream(inpStream);
-    String resultKey = StringUtils.deleteAny(jsonReturned, "[]");
-    String id1 = resultKey.replace(".0", "");
-    assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(id1));
-    idUnderTestList.add(Integer.valueOf(id1));
-    System.out.println("ID1:" + id1);
-    Response responseGet = serviceUnderTest.getCGI(Finals.GET, pathToUse + id1, "testToken", null, null, null, null,
-        null);
-
-    JsonObject createdDoc = TestHelper.getObjectFromClient((InputStream) responseGet.getEntity(), JsonObject.class);
-
-    System.out.println(createdDoc);
-
-    int documentId = createdDoc.get("document_id").getAsInt();
-    assertEquals((int) idUnderTestList.get(1), documentId);
-    String pathToFile = FileHelper.createDocumentFilePath(documentId);
-
-    System.out.println(FileHelper.PATH_ROOT + pathToFile);
-    List<String> lines = FileHelper.readFile(FileHelper.PATH_ROOT + pathToFile);
-    assertNotNull(lines);
-    assertTrue(!lines.isEmpty());
-    String testContentBeginning = "TEST FAILI";
-    assertTrue(lines.get(0).startsWith(testContentBeginning));
 
   }
 
@@ -253,41 +214,6 @@ public class TestApiCGIServiceImpl_POST_opPost_Document<T> {
     assertEquals(1, keys.length);
     assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(keys[0]));
     idUnderTestList.add(Integer.valueOf(keys[0]));
-
-  }
-
-  @Test
-  public void testCreateDocumentList() throws Exception {
-
-    String json = "{\r\n" + "	\"op\":\"post\", \r\n" + "	\"path\": \"" + pathToUse + "\", \r\n"
-        + "\"token\":\"testToken\",	\"data\": [" + jsonToUseForCreateShorter + "	]" + "}";
-
-    Response response = serviceUnderTest.postCGI(json);
-
-    assertNotNull(response.getEntity());
-
-    InputStream inpStream = (InputStream) response.getEntity();
-    String jsonReturned = TestHelper.readStream(inpStream);
-    System.out.println(jsonReturned);
-    String resultKeys = StringUtils.deleteAny(jsonReturned, "[]");
-    String[] keys = resultKeys.split(",");
-    assertEquals(1, keys.length);
-    assertTrue(org.apache.commons.lang3.StringUtils.isNumeric(keys[0]));
-    idUnderTestList.add(Integer.valueOf(keys[0]));
-
-    Response responseGet = serviceUnderTest.getCGI(Finals.GET, pathToUse + keys[0], "testToken", null, null, null,
-        null, null);
-
-    JsonObject createdDoc = TestHelper.getObjectFromClient((InputStream) responseGet.getEntity(), JsonObject.class);
-    int documentId = createdDoc.get("document_id").getAsInt();
-    assertEquals((int) idUnderTestList.get(1), documentId);
-    String pathToFile = FileHelper.createDocumentFilePath(documentId);
-
-    List<String> lines = FileHelper.readFile(FileHelper.PATH_ROOT + pathToFile);
-    assertNotNull(lines);
-    assertTrue(!lines.isEmpty());
-    String testContentBeginning = "TEST FAILI";
-    assertTrue(lines.get(0).startsWith(testContentBeginning));
 
   }
 

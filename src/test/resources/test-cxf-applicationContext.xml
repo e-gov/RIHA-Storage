@@ -1,14 +1,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
-	xsi:schemaLocation="
-         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-         http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
 	<import resource="test-applicationContext.xml" />
-
-	<!-- Override DAO with FAKE in test -->
-	<!-- <bean id="apiGenericDAOImpl" class="ee.eesti.riha.rest.dao.ApiGenericDAOImplFake" 
-		/> -->
 
 	<bean id="endpoint" class="java.lang.String">
 		<constructor-arg value="local://trivialTESTendpoint" />
@@ -26,5 +20,4 @@
 		<property name="resourceClasses" ref="serviceBeansId" />
 		<property name="endpoint" ref="endpoint" />
 	</bean>
-
 </beans>
