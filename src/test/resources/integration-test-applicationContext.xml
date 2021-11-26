@@ -23,8 +23,6 @@
 	<bean id="myWebClient" class="org.apache.cxf.jaxrs.client.WebClient"
 		factory-method="create">
 
-		<!-- <constructor-arg type="java.lang.String" -->
-		<!-- value="http://localhost:8080/rest/" /> -->
 		<constructor-arg type="java.lang.String"
 			value="${serviceurl:http://localhost:8080/rest}" />
 		<constructor-arg ref="webClientProviders" />

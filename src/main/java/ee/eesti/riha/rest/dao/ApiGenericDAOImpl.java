@@ -11,7 +11,6 @@ import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.MyExceptionHandler;
 import ee.eesti.riha.rest.logic.Validator;
-import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonContentBasedTable;
 import ee.eesti.riha.rest.logic.util.JsonFieldHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
@@ -22,7 +21,6 @@ import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -729,8 +727,6 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           Validator.cantUpdateArchivedElement(item);
           Validator.cantUpdateVersionHere(item, updateData);
 
-          FileHelper.writeDocumentContentToFile(updateData, baseModel.callGetId());
-
           JsonHelper.updateJsonObjWithValuesFromAnotherJsonObj(baseModel.getJson_content(),
               updateInfo.getJson_content(), clazz);
 
@@ -749,7 +745,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           updateInfo.setJson_content(updateInfoJsonContent);
           numOfChanged++;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-            | IntrospectionException | IOException e) {
+            | IntrospectionException e) {
           LOG.error("Error updating, ROLLING BACK UPDATES", e);
           return 0;
         }
@@ -881,22 +877,6 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     return documentIds;
   }
 
-  /**
-   * Delete document files.
-   *
-   * @param tableName the table name
-   * @param documentIds the document ids
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  // delete files on disk
-  private void deleteDocumentFiles(String tableName, List<Integer> documentIds) throws IOException {
-    if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class && documentIds != null) {
-      for (int id : documentIds) {
-        FileHelper.deleteFile(FileHelper.PATH_ROOT + FileHelper.createDocumentFilePath(id));
-      }
-    }
-  }
-
   /*
    * (non-Javadoc)
    *
@@ -936,15 +916,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     query.setParameterList("fieldValues", values);
     numOfDeleted = query.executeUpdate();
 
-    try {
-      deleteDocumentFiles(tableName, documentIds);
-    } catch (IOException e) {
-      LOG.error("Error while deleting", e);
-      throw new RuntimeException(e);
-    }
-
     return numOfDeleted;
-
   }
 
   /**

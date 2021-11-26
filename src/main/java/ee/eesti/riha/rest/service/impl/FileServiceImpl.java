@@ -1,32 +1,26 @@
 package ee.eesti.riha.rest.service.impl;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.ChangeLogic;
 import ee.eesti.riha.rest.logic.FileResourceLogic;
-import ee.eesti.riha.rest.logic.MyExceptionHandler;
-import ee.eesti.riha.rest.logic.Validator;
-import ee.eesti.riha.rest.logic.util.FileHelper;
-import ee.eesti.riha.rest.logic.util.JsonHelper;
-import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.FileResource;
 import ee.eesti.riha.rest.service.FileService;
 import ee.eesti.riha.rest.util.PagedRequest;
 import ee.eesti.riha.rest.util.PagedRequestArgumentResolver;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.SQLException;
+import java.util.UUID;
+import javax.activation.DataHandler;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.UriInfo;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-
-import javax.activation.DataHandler;
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.SQLException;
-import java.util.UUID;
 
 // TODO: Auto-generated Javadoc
 
@@ -45,38 +39,6 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private PagedRequestArgumentResolver pagedRequestArgumentResolver;
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see ee.eesti.riha.rest.service.FileService#getDocument(java.lang.Integer, java.lang.String)
-     */
-    @Override
-    public Response getDocument(Integer documentId, String token) {
-
-        try {
-            String fields = "[\"document_id\", \"filename\"]";
-            ObjectNode jsonObject = (ObjectNode) changeLogic.doGet(Document.class, documentId, fields);
-
-            return getDocumentLogic(documentId, jsonObject);
-
-        } catch (RihaRestException e) {
-            return Response.status(Status.BAD_REQUEST).entity(MyExceptionHandler.unmapped(e, "FileService error"))
-                    .type(MediaType.APPLICATION_JSON + "; charset=UTF-8").build();
-        }
-
-    }
-
-    private Response getDocumentLogic(Integer documentId, ObjectNode document) throws RihaRestException {
-        String documentFilePath = FileHelper.createDocumentFilePathWithRoot(documentId);
-        File file = new File(documentFilePath);
-
-        Validator.documentFileMustExist(file, documentId);
-
-        String fileName = JsonHelper.get(document, "filename", file.getName());
-
-        return Response.ok(file).header("content-disposition", "attachment; filename =" + fileName).build();
-    }
 
     @Override
     public Response upload(Attachment attachment, String infoSystemUuidStr) {
