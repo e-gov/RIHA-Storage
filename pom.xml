@@ -23,36 +23,7 @@
 
 		<liquibase.version>3.5.3</liquibase.version>
 		<cxf.version>3.1.6</cxf.version>
-
-		<!-- See Profile <id>${project.groupId}-${project.artifactId}}</id> below! -->
-		<riharest.test.pathRoot>target/test-files/</riharest.test.pathRoot>
-		<riharest.test.pathRootWindows>${riharest.pathRootWindows}</riharest.test.pathRootWindows>
-		<riharest.test.authService>${riharest.authService}</riharest.test.authService>
-		<riharest.test.isTest>${riharest.isTest}</riharest.test.isTest>
-		<riharest.test.authTimeout>${riharest.authTimeout}</riharest.test.authTimeout>
 	</properties>
-
-	<profiles>
-		<profile>
-			<id>${project.groupId}-${project.artifactId}</id>
-			
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			
-			<properties>
-				<!-- Properties in resource files: -->
-				<riharest.pathRoot>/opt/riha/</riharest.pathRoot>
-				<riharest.isTest>true</riharest.isTest>
-				<riharest.authTimeout>3600000</riharest.authTimeout>
-				<riharest.base.url>http://localhost:8080/rest</riharest.base.url>
-				<riharest.authService>http://localhost:8080/riha/sessionManagementServlet</riharest.authService>
-				
-				<!-- Note the trailing slash! -->
-				<riharest.pathRootWindows>C:\\test_folder\\</riharest.pathRootWindows>
-			</properties>
-		</profile>
-	</profiles>
 
 	<dependencies>
 		<dependency>
@@ -234,71 +205,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!--<plugin>-->
-				<!--<groupId>org.apache.maven.plugins</groupId>-->
-				<!--<artifactId>maven-failsafe-plugin</artifactId>-->
-				<!--<version>2.18.1</version>-->
-				<!--<configuration>-->
-					<!--<argLine>-Xmx2048m -XX:MaxPermSize=1024m</argLine>-->
-					<!--<environmentVariables>-->
-						<!--<serviceurl>http://localhost:${test.server.port}/rest</serviceurl>-->
-					<!--</environmentVariables>-->
-					<!--<includes>-->
-						<!--<include>**/integration/**.java</include>-->
-						<!--<include>**/integration/*/**.java</include>-->
-					<!--</includes>-->
-					<!--<encoding>UTF-8</encoding>-->
-				<!--</configuration>-->
-				<!--<executions>-->
-					<!--<execution>-->
-						<!--<goals>-->
-							<!--<goal>integration-test</goal>-->
-							<!--<goal>verify</goal>-->
-						<!--</goals>-->
-					<!--</execution>-->
-				<!--</executions>-->
-			<!--</plugin>-->
-
-			<!--<plugin>-->
-				<!--<groupId>org.apache.maven.plugins</groupId>-->
-				<!--<artifactId>maven-antrun-plugin</artifactId>-->
-				<!--<executions>-->
-					<!--&lt;!&ndash; use real PATH_ROOT in integration tests &ndash;&gt;-->
-					<!--<execution>-->
-						<!--<id>set_actual.riharest.path_root</id>-->
-						<!--<phase>pre-integration-test</phase>-->
-						<!--<goals>-->
-							<!--<goal>run</goal>-->
-						<!--</goals>-->
-						<!--<configuration>-->
-							<!--<target>-->
-								<!--<propertyfile-->
-									<!--file="${project.build.testOutputDirectory}/riharest.project.properties">-->
-									<!--<entry key="PATH_ROOT" value="${riharest.pathRoot}" />-->
-								<!--</propertyfile>-->
-							<!--</target>-->
-						<!--</configuration>-->
-					<!--</execution>-->
-					<!--&lt;!&ndash; change PATH_ROOT back to test value after integration tests&ndash;&gt;-->
-					<!--<execution>-->
-						<!--<id>set_test.riharest.path_root</id>-->
-						<!--<phase>post-integration-test</phase>-->
-						<!--<goals>-->
-							<!--<goal>run</goal>-->
-						<!--</goals>-->
-						<!--<configuration>-->
-							<!--<target>-->
-								<!--<propertyfile-->
-									<!--file="${project.build.testOutputDirectory}/riharest.project.properties">-->
-									<!--<entry key="PATH_ROOT" value="${riharest.test.pathRoot}" />-->
-								<!--</propertyfile>-->
-							<!--</target>-->
-						<!--</configuration>-->
-					<!--</execution>-->
-				<!--</executions>-->
-			<!--</plugin>-->
-
 		</plugins>
 	</build>
 </project>

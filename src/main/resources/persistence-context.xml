@@ -25,7 +25,6 @@
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
-		<!-- <property name="packagesToScan" value="ee.eesti.riha.rest.model" /> -->
 		<property name="annotatedClasses">
 			<list>
 				<value>ee.eesti.riha.rest.model.Main_resource</value>
