@@ -1,5 +1,9 @@
 package ee.eesti.riha.rest.integration.document;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
@@ -8,10 +12,14 @@ import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.integration.IntegrationTestHelper;
 import ee.eesti.riha.rest.integration.TestFinals;
 import ee.eesti.riha.rest.logic.Finals;
-import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
@@ -22,17 +30,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-
-import javax.ws.rs.core.Response;
-import java.io.InputStream;
-import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -111,39 +108,6 @@ public class TestApiCGIServiceImpl_POST_opDelete_Document<T> {
   }
 
   @Test
-  public void testDeleteDocument() throws Exception {
-
-    Integer expectDeleted = 1;
-    String path = pathToUse + idUnderTestList.get(0);
-    String json = "{\r\n" + "	\"op\":\"delete\", \r\n" + "\"token\":\"testToken\",	\"path\": \"" + path + "\" \r\n"
-        + "}\r\n" + "";
-
-    // assert file exists
-    String filePath = FileHelper.PATH_ROOT + FileHelper.createDocumentFilePath(idUnderTestList.get(0));
-    List<String> lines = FileHelper.readFile(filePath);
-    assertNotNull(lines);
-    assertTrue(!lines.isEmpty());
-    assertTrue(lines.get(0).startsWith(testContentBeginning));
-
-    // post delete request
-    Response response = serviceUnderTest.postCGI(json);
-    assertNotNull(response.getEntity());
-    Map<String, Integer> result = TestHelper.getResultMap(response);
-    assertNotNull(result);
-    assertEquals(expectDeleted, result.get(Finals.OK));
-
-    // assert file deleted
-    boolean isDeleted = false;
-    try {
-      FileHelper.readFile(filePath);
-    } catch (NoSuchFileException e) {
-      e.printStackTrace();
-      isDeleted = true;
-    }
-    assertTrue(isDeleted);
-  }
-
-  @Test
   public void testDelete_whenWrongTable_thenError() throws Exception {
 
     String path = "/db/" + TestFinals.NON_EXISTENT_TABLE + "/" + idUnderTestList.get(0);
@@ -208,49 +172,6 @@ public class TestApiCGIServiceImpl_POST_opDelete_Document<T> {
     assertNotNull(result);
     assertEquals(expectDeleted, result.get(Finals.OK));
 
-  }
-
-  @Test
-  public void testDeleteDocumentList() throws Exception {
-
-    idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, tableUnderTest,
-        jsonToUseForCreate));
-    Integer expectDeleted = 2;
-    // field must be existing field in matching table, or just id (will be
-    // translated to right pk)
-    String idField = "document_id";
-    String idValues = "[" + idUnderTestList.get(0) + "," + idUnderTestList.get(1) + "]";
-    String json = "{\"op\":\"delete\",\"path\": \"" + pathToUse + "\"," + "\"token\":\"testToken\", \"" + idField
-        + "\": " + idValues + "}";
-
-    // assert file exists
-    String filePath = FileHelper.PATH_ROOT + FileHelper.createDocumentFilePath(idUnderTestList.get(0));
-    List<String> lines = FileHelper.readFile(filePath);
-    assertNotNull(lines);
-    assertTrue(!lines.isEmpty());
-    assertTrue(lines.get(0).startsWith(testContentBeginning));
-
-    // post delete request
-    Response response = serviceUnderTest.postCGI(json);
-    assertNotNull(response.getEntity());
-    Map<String, Integer> result = TestHelper.getResultMap(response);
-    assertNotNull(result);
-    assertEquals(expectDeleted, result.get(Finals.OK));
-
-    // assert files deleted
-    boolean isDeleted = false;
-    try {
-      FileHelper.readFile(filePath);
-    } catch (NoSuchFileException e) {
-      isDeleted = true;
-    }
-    try {
-      FileHelper.readFile(FileHelper.PATH_ROOT + FileHelper.createDocumentFilePath(idUnderTestList.get(1)));
-    } catch (NoSuchFileException e) {
-      isDeleted = isDeleted && true;
-    }
-
-    assertTrue(isDeleted);
   }
 
   @Test

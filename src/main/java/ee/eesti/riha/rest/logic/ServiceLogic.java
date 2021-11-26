@@ -1,30 +1,12 @@
 package ee.eesti.riha.rest.logic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.error.ErrorCodes;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.error.RihaRestException;
-import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonFieldsFilterer;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.logic.util.PathHolder;
@@ -33,6 +15,19 @@ import ee.eesti.riha.rest.logic.util.StringHelper;
 import ee.eesti.riha.rest.model.Data_object;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -151,7 +146,6 @@ public class ServiceLogic<T, K> {
       Validator.noSuchIdInGivenTable(item, id);
 
       List<T> documents = changeLogic.doGetByMainResourceId((Class<T>) Document.class, id);
-      FileHelper.readDocumentFileToContent(documents, Document.class);
       Map<String, List<T>> fieldNameMap = extractItemsByFieldName(documents, Document.class);
 
       List<T> dataObjects = changeLogic.doGetByMainResourceId((Class<T>) Data_object.class, id);
@@ -211,7 +205,6 @@ public class ServiceLogic<T, K> {
       FilterComponent docHasMrId = new FilterComponent("main_resource_id", "=", objNode.get("main_resource_id").asText());
       List<T> connectedDocs = changeLogic.doGetMany((Class<T>) Document.class,
           null, null, Arrays.asList(docHasMrId), null, null);
-      FileHelper.readDocumentFileToContent(connectedDocs, Document.class);
       Map<String, List<T>> fieldNameMapDataObject = extractItemsByFieldName(connectedDocs, Document.class);
 
       addFieldMapToJson(objNode, fieldNameMapDataObject);
@@ -227,7 +220,6 @@ public class ServiceLogic<T, K> {
       FilterComponent docHasDataId = new FilterComponent("data_object_id", "=", objNode.get("data_object_id").asText());
       List<T> connectedDocs = changeLogic.doGetMany((Class<T>) Document.class,
           null, null, Arrays.asList(docHasDataId), null, null);
-      FileHelper.readDocumentFileToContent(connectedDocs, Document.class);
       Map<String, List<T>> fieldNameMapDataObject = extractItemsByFieldName(connectedDocs, Document.class);
 
       addFieldMapToJson(objNode, fieldNameMapDataObject);

@@ -14,8 +14,6 @@
 
 	<context:property-placeholder location="classpath:riharest.project.properties" order="200"/>
 
-	<import resource="persistence-context.xml"/>
-
 	<context:component-scan base-package="ee.eesti.riha.rest" />
 
 	<mvc:resources mapping="/resources/**" location="/resources/" />
@@ -37,5 +35,4 @@
 		  class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basename" value="WEB-INF/classes/messages" />
 	</bean>
-
 </beans>

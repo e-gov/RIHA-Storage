@@ -1,14 +1,21 @@
 package ee.eesti.riha.rest.logic;
 
+import ee.eesti.riha.rest.model.Classifier;
+import ee.eesti.riha.rest.model.Comment;
+import ee.eesti.riha.rest.model.Data_object;
+import ee.eesti.riha.rest.model.Document;
+import ee.eesti.riha.rest.model.Main_resource;
+import ee.eesti.riha.rest.model.Main_resource_relation;
+import ee.eesti.riha.rest.model.readonly.Asutus;
+import ee.eesti.riha.rest.model.readonly.Comment_type_issue_view;
+import ee.eesti.riha.rest.model.readonly.DataObjectSearchView;
+import ee.eesti.riha.rest.model.readonly.Isik;
+import ee.eesti.riha.rest.model.readonly.Main_resource_relation_view;
+import ee.eesti.riha.rest.model.readonly.Main_resource_view;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import ee.eesti.riha.rest.logic.util.StringHelper;
-import ee.eesti.riha.rest.model.*;
-import ee.eesti.riha.rest.model.readonly.*;
-import ee.eesti.riha.rest.util.PropsReader;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -84,7 +91,6 @@ public final class Finals {
   public static final String OK = "ok";
   public static final String KEY = "key";
   // default limit for returned items
-  // public static final int NUM_OF_ITEMS_IN_RESULT_ALLOWED = 100;
   public static final int NUM_OF_ITEMS_IN_RESULT_ALLOWED = Integer.MAX_VALUE;
 
   // if limit == -1 then ignore NUM_OF_ITEMS_IN_RESULT_ALLOWED in count
@@ -95,7 +101,6 @@ public final class Finals {
   public static final String PATH = "path";
   public static final String DATA = "data";
   public static final String TOKEN = "token";
-  public static final String FILTER = "filter";
   public static final String CALLBACK = "callback";
   public static final String[] KNOWN_PARAMETERS = {OP, PATH, TOKEN, CALLBACK };
 
@@ -115,12 +120,9 @@ public final class Finals {
 
   // Infosystem fields
   public static final String NAME = "name";
-  public static final String INFOSYSTEM = "infosystem";
 
   // main_resource fields
   public static final String MAIN_RESOURCE_CREATOR = "creator";
-  public static final String MAIN_RESOURCE_ORGANIZATION = "organization";
-  public static final String MAIN_RESOURCE_JSON_CONTENT = "json_content";
 
   // field reoccuring in different models
   public static final String JSON_CONTENT = "json_content";
@@ -139,10 +141,6 @@ public final class Finals {
   // header fields
   public static final String X_AUTH_TOKEN = "X-Auth-Token";
 
-  // for testing purposes
-  static final String DEFAULT_MODIFIER = "TEST";
-
-  public static final boolean IS_TEST = StringHelper.areEqual(PropsReader.get("IS_TEST"), "true");
   public static final String TEST_TOKEN = "testToken";
 
   /**
