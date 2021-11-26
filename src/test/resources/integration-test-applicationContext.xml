@@ -6,7 +6,7 @@
           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
 	<import resource="main-applicationContext.xml" />
-
+	<import resource="persistence-context.xml" />
 
 	<bean id="myJsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider">
 		<!-- <bean id="myJsonProvider" class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"> -->
@@ -18,8 +18,6 @@
 		<ref bean="myJsonProvider" />
 	</util:list>
 
-
-
 	<bean id="myWebClient" class="org.apache.cxf.jaxrs.client.WebClient"
 		factory-method="create">
 
@@ -27,6 +25,4 @@
 			value="${serviceurl:http://localhost:8080/rest}" />
 		<constructor-arg ref="webClientProviders" />
 	</bean>
-
-
 </beans>
