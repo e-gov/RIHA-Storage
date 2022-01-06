@@ -54,6 +54,12 @@ public class Main_resource_relation_view implements BaseModel {
     @Column(name = "related_infosystem_short_name")
     private String related_infosystem_short_name;
 
+    @Column(name = "infosystem_status")
+    private String infosystem_status;
+
+    @Column(name = "related_infosystem_status")
+    private String related_infosystem_status;
+
     @Column(name = "type")
     private String type;
 
@@ -113,6 +119,22 @@ public class Main_resource_relation_view implements BaseModel {
         throw new UnsupportedOperationException();
     }
 
+    public String getInfosystem_status() {
+        return infosystem_status;
+    }
+
+    public void setInfosystem_status(String infosystem_status) {
+        this.infosystem_status = infosystem_status;
+    }
+
+    public String getRelated_infosystem_status() {
+        return related_infosystem_status;
+    }
+
+    public void setRelated_infosystem_status(String related_infosystem_status) {
+        this.related_infosystem_status = related_infosystem_status;
+    }
+
     public String getType() {
         return type;
     }
@@ -120,6 +142,7 @@ public class Main_resource_relation_view implements BaseModel {
     public void setType(String type) {
         throw new UnsupportedOperationException();
     }
+
 
     @Override
     public int callGetId() {
