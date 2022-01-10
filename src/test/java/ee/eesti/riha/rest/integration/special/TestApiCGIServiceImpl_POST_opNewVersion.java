@@ -1,5 +1,13 @@
 package ee.eesti.riha.rest.integration.special;
 
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.MyTestRunner;
 import ee.eesti.riha.rest.TestHelper;
@@ -10,13 +18,20 @@ import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.integration.IntegrationTestHelper;
 import ee.eesti.riha.rest.integration.TestFinals;
 import ee.eesti.riha.rest.logic.Finals;
-import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Data_object;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import javax.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
@@ -26,24 +41,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -107,12 +104,6 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
       IntegrationTestHelper.removeTestDataFromDB(serviceHelpingCreateDeleteTestData, tableUnderTest, idForTestEntry);
     }
     idUnderTestList.clear();
-    // no need to delete connected Documents, because FK ON DELETE CASCADE
-    
-    for (Integer connectedDocId : connectedDocIds) {
-      String filePath = FileHelper.createDocumentFilePathWithRoot(connectedDocId);
-      FileHelper.deleteFile(filePath);
-    }
   }
 
   @Test
@@ -273,10 +264,6 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     assertEquals(startDateJson.getTime(), connectedDocs.get(0).getStart_date().getTime());
     assertNull(connectedDocs.get(0).getEnd_date());
     
-    // assert original file exists
-    byte[] bytes = FileHelper.readFileBytes(connectedDocs.get(0).getDocument_id());
-    assertTrue(bytes.length > 0);
-    
     // assert connected items of archived have end_date
     FilterComponent filterByArchivedId = new FilterComponent("main_resource_id", "=", "" + justArchived.getMain_resource_id());
     List<Document> connectedArchivedDocs = genericDAO.find(Document.class, null, null,Arrays.asList(filterByArchivedId), null);
@@ -296,10 +283,6 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     assertNotNull(connectedDocs.get(0).getJson_content().get("content"));
     assertNotEquals(connectedDocs.get(0).getJson_content().get("content").getAsString(),
         connectedArchivedDocs.get(0).getJson_content().get("content").getAsString());
-    
-    // assert archived file exists
-    byte[] bytesArchived = FileHelper.readFileBytes(connectedArchivedDocs.get(0).getDocument_id());
-    assertTrue(bytesArchived.length > 0);
   }
   
   @Test
@@ -467,10 +450,6 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     assertNull(connectedDocument.getEnd_date());
     assertEquals(startDateJson.getTime(), connectedDocument.getStart_date().getTime());
     
-    //assert file exists
-    byte[] bytesCurrent = FileHelper.readFileBytes(connectedDocument.getDocument_id());
-    assertTrue(bytesCurrent.length > 0);
-    
     // assert archived documents are different
     FilterComponent filterByArchivedDataId = new FilterComponent("data_object_id", "=", "" + archivedData.getData_object_id());
     List<Document> archivedDocuments = genericDAO.find(Document.class, null, null,Arrays.asList(filterByArchivedDataId), null);
@@ -481,12 +460,6 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     assertNull(archivedDocument.getMain_resource_id());
     assertEquals(modifiedDateJson.getTime(), archivedDocument.getEnd_date().getTime());
 
-    //assert file exists
-    byte[] bytesArchived = FileHelper.readFileBytes(archivedDocument.getDocument_id());
-    assertTrue(bytesArchived.length > 0);
-    
     assertNotEquals(connectedDocument.getData_object_id(), archivedDocument.getData_object_id());
-    // assert files are equal
-    assertArrayEquals(bytesCurrent, bytesArchived);
   }
 }

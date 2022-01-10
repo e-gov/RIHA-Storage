@@ -1,23 +1,28 @@
 package ee.eesti.riha.rest.dao;
 
 import ee.eesti.riha.rest.model.FileResource;
-import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.stereotype.Component;
 
 @Component
 @Transactional
 public class FileResourceDAO {
 
-    @Autowired
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
+
+    public FileResourceDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
 
     /**
      * Creates single {@link FileResource} entity.
@@ -49,14 +54,23 @@ public class FileResourceDAO {
      * @return loaded entity or null if not found
      */
     public FileResource get(UUID uuid, UUID infoSystemUuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FileResource.class, "f");
-        criteria.add(Restrictions.idEq(uuid));
+        Session session = sessionFactory.getCurrentSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<FileResource> cq = cb.createQuery(FileResource.class);
+
+        Root<FileResource> fileResource = cq.from(FileResource.class);
+        Predicate predicate = cb.equal(fileResource.get("uuid"), uuid);
 
         if (infoSystemUuid != null) {
-            criteria.add(Restrictions.eq("f.infoSystemUuid", infoSystemUuid));
+            predicate = cb.and(predicate, cb.equal(fileResource.get("infoSystemUuid"), infoSystemUuid));
         }
 
-        return ((FileResource) criteria.uniqueResult());
+        cq.where(predicate);
+
+        TypedQuery<FileResource> query = session.createQuery(cq);
+
+        return query.getResultStream().findFirst().orElse(null);
     }
 
     /**
@@ -65,10 +79,11 @@ public class FileResourceDAO {
      * @return list of file resources that need to be indexed
      */
     public List<FileResource> getUnindexedFiles() {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FileResource.class, "f")
-                .createAlias("f.largeObject", "lo")
-                .add(Restrictions.eq("lo.indexed", false));
+        Session session = sessionFactory.getCurrentSession();
 
-        return ((List<FileResource>) criteria.list());
+        TypedQuery<FileResource> query = session.createQuery(
+            "SELECT f FROM FileResource f JOIN f.largeObject lo WHERE lo.indexed = false", FileResource.class);
+
+        return query.getResultList();
     }
 }

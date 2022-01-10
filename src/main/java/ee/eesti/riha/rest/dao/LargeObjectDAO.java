@@ -2,25 +2,24 @@ package ee.eesti.riha.rest.dao;
 
 import ee.eesti.riha.rest.logic.util.LengthCalculatingInputStream;
 import ee.eesti.riha.rest.model.LargeObject;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.transaction.Transactional;
-import javax.xml.bind.DatatypeConverter;
 import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
+import javax.xml.bind.DatatypeConverter;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 @Transactional
@@ -89,13 +88,20 @@ public class LargeObjectDAO {
     }
 
     private List<Integer> findSameHashIds(LargeObject entity) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(LargeObject.class, "lo")
-                .setProjection(Projections.id())
-                .add(Restrictions.ne("lo.id", entity.getId()))
-                .add(Restrictions.eq("lo.hash", entity.getHash()))
-                .addOrder(Order.asc("lo.creationDate"));
+        Session session = sessionFactory.getCurrentSession();
 
-        return (List<Integer>) criteria.list();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Integer> cq = cb.createQuery(Integer.class);
+
+        Root<LargeObject> largeObject = cq.from(LargeObject.class);
+
+        cq.select(largeObject.get("id"));
+        Predicate idPredicate = cb.notEqual(largeObject.get("id"), entity.getId());
+        Predicate hashPredicate = cb.equal(largeObject.get("hash"), entity.getHash());
+        cq.where(idPredicate, hashPredicate);
+        cq.orderBy(cb.asc(largeObject.get("creationDate")));
+
+        return session.createQuery(cq).getResultList();
     }
 
     private LargeObject createEntityFromInputStream(InputStream inputStream) {
