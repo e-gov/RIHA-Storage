@@ -2,8 +2,6 @@ package ee.eesti.riha.rest.util;
 
 import java.io.IOException;
 import java.util.Properties;
-
-import ee.eesti.riha.rest.logic.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;

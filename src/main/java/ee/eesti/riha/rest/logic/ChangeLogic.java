@@ -1,5 +1,7 @@
 package ee.eesti.riha.rest.logic;
 
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -7,7 +9,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import ee.eesti.riha.rest.conf.AppConfigURL;
 import ee.eesti.riha.rest.dao.GenericDAO;
 import ee.eesti.riha.rest.dao.KindRepository;
 import ee.eesti.riha.rest.dao.NamesDAO;
@@ -18,21 +19,13 @@ import ee.eesti.riha.rest.error.PartialError;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.TableEntryCreateLogic.JsonParseData;
-import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.logic.util.PathHolder;
 import ee.eesti.riha.rest.logic.util.QueryHolder;
 import ee.eesti.riha.rest.logic.util.StringHelper;
 import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Comment;
-import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.readonly.Kind;
-import org.hibernate.exception.SQLGrammarException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,8 +37,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
+import org.hibernate.exception.SQLGrammarException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -80,9 +76,6 @@ public class ChangeLogic<T, K> {
   @Autowired
   KindRepository kindRepository;
 
-  @Autowired
-  AppConfigURL appConfigURL;
-
   /**
    * Do get many.
    *
@@ -101,7 +94,6 @@ public class ChangeLogic<T, K> {
     try {
       addEscapedQuotesToJsonArray(filterComponents);
       all = secureDAO.find(classRepresentingTable, limit, offset, filterComponents, sort);
-      replaceContentWithFileUrl(all, appConfigURL.getRestApiBaseUrl());
     } catch (RihaRestException e) {
       throw e;
     } catch (Exception e) {
@@ -245,28 +237,7 @@ public class ChangeLogic<T, K> {
     T entity = secureDAO.find(classRepresentingTable, id);
     Validator.noSuchIdInGivenTable(entity, id);
 
-    replaceContentWithFileUrl(entity, id, appConfigURL.getRestApiBaseUrl());
-
     return entity;
-
-  }
-
-  private void replaceContentWithFileUrl(T item, Integer id, String baseUrl) {
-    if (item.getClass() == Document.class) {
-      Document doc = (Document) item;
-      if (doc.getJson_content() != null) {
-        doc.getJson_content().addProperty("content", baseUrl + "/api/file/" + id);
-      }
-    }
-  }
-
-  private void replaceContentWithFileUrl(List<T> items, String baseUrl) {
-    for (T item : items) {
-      if (item.getClass() == Document.class) {
-        Document doc = (Document) item;
-        replaceContentWithFileUrl(item, doc.getDocument_id(), baseUrl);
-      }
-    }
   }
 
   /**
@@ -374,8 +345,6 @@ public class ChangeLogic<T, K> {
       for (JsonParseData parseDate : jsonToParsedOKObjList) {
         try {
           T item = (T) parseDate.getResult();
-          FileHelper.writeDocumentContentToFile(item);
-          // List<K> createdKey = genericDAO.create(item);
           List<K> createdKey = secureDAO.create(item);
           createdKeys.add(createdKey.get(0));
         } catch (Exception e) {
@@ -405,18 +374,13 @@ public class ChangeLogic<T, K> {
       return createdKeys;
 
     } else {
-
       T item = (T) tableEntryCreateLogic.jsonToObjOfType(json, classRepresentingTable);
       if (item instanceof RihaRestError) {
         throw new RihaRestException(item);
       }
 
       try {
-        FileHelper.writeDocumentContentToFile(item);
-
-        // createdKeys = genericDAO.create(item);
         createdKeys = secureDAO.create(item);
-
       } catch (RihaRestException e) {
         throw e;
       } catch (Exception e) {
@@ -427,9 +391,7 @@ public class ChangeLogic<T, K> {
       }
 
       return createdKeys;
-
     }
-
   }
 
   /**
@@ -499,23 +461,17 @@ public class ChangeLogic<T, K> {
       // id needed to create file path
       ((BaseModel) item).callSetId(id);
 
-      FileHelper.writeDocumentContentToFile(item);
-      // numOfChanged = genericDAO.update(item, id);
       numOfChanged = secureDAO.update(item, id);
-
     } else {
       RihaRestError error = new RihaRestError();
       error.setErrcode(ErrorCodes.UPDATE_ID_MISSING);
       error.setErrmsg(ErrorCodes.UPDATE_ID_MISSING_MSG);
       throw new RihaRestException(error);
-
     }
 
     Map<String, Integer> updatedResult = new HashMap<>();
-
     updatedResult.put(Finals.OK, numOfChanged);
     return updatedResult;
-
   }
 
   /**
@@ -716,20 +672,12 @@ public class ChangeLogic<T, K> {
   public Map<String, Integer> doDelete(String tableName, Integer id) throws IOException,
       RihaRestException {
     Class<T> clazz = Finals.getClassRepresentingTable(tableName);
-    // int numOfDeleted = genericDAO.delete(clazz, id);
     int numOfDeleted = secureDAO.delete(clazz, id);
-
-    if ((Class<T>) Finals.getClassRepresentingTable(tableName) == Document.class) {
-      String pathToFile = FileHelper.createDocumentFilePath(id);
-      FileHelper.deleteFile(FileHelper.PATH_ROOT + pathToFile);
-      LOG.info("DOCUMENT DELETED WITH ID: " + id);
-    }
 
     Map<String, Integer> deletedResult = new HashMap<>();
     deletedResult.put(Finals.OK, numOfDeleted);
     LOG.info("" + deletedResult);
     return deletedResult;
-
   }
 
   // ANY SUPPORTING AND HELPER METHODS BELOW

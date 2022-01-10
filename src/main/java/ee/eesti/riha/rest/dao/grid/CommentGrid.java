@@ -6,15 +6,19 @@ import ee.eesti.riha.rest.model.readonly.Comment_type_issue_view;
 import ee.eesti.riha.rest.util.FilterParameter;
 import ee.eesti.riha.rest.util.PagedRequest;
 import ee.eesti.riha.rest.util.SortParameter;
+import java.util.ArrayList;
+import java.util.List;
 import org.hibernate.NullPrecedence;
-import org.hibernate.criterion.*;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 import org.hibernate.transform.AliasToBeanResultTransformer;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Query grid to work specifically with entity of {@link Comment} type. Provides ways to query top level comments and
