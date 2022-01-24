@@ -3,7 +3,7 @@
 	<property name="LOG_DIR" value="/var/log"/>
 	<property name="appName" value="riha-storage"/>
 	<appender name="FILEJSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_DIR}/${appName}.json.log</file>
+		<file>${LOG_DIR}/${appName}/${appName}.json.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
 			<fileNamePattern>${LOG_DIR}/${appName}/${appName}.%d{yyyy-MM-dd}.%i.json.log</fileNamePattern>
 			<maxHistory>14</maxHistory>
