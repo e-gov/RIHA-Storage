@@ -51,6 +51,7 @@
 			<props>
 				<prop key="hibernate.dialect">ee.eesti.riha.rest.model.hibernate.JsonPostgreSQLDialect</prop>
 				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.id.new_generator_mappings">false</prop>
 				<!-- <prop key="hibernate.format_sql" >true</prop> -->
 				<!-- <prop key="hibernate.use_sql_comments">true</prop> -->
 				<!-- to overcome occasional http://stackoverflow.com/questions/10075081/hibernate-slow-to-acquire-postgres-connection -->
