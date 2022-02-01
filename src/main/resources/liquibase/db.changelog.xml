@@ -185,4 +185,12 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="RIHAKB-1092" author="makarsokarev">
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20220201_update_large_object_seq.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 </databaseChangeLog>
