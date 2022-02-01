@@ -117,7 +117,6 @@ public class LargeObjectDAO {
 
         // Save and flush in order to persist blob and calculate hash
         session.save(entity);
-        session.flush();
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("LargeObject with id {} is created", entity.getId());
