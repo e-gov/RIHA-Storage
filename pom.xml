@@ -1,296 +1,141 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>ee.eesti.riha</groupId>
 	<artifactId>rest</artifactId>
-	<version>0.17.5</version>
-
+	<version>0.18.0</version>
 	<packaging>war</packaging>
 
-	<name>riharest</name>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.5.8</version>
+		<relativePath/>
+	</parent>
 
-	<prerequisites>
-		<maven>3.0</maven>
-	</prerequisites>
+	<name>RIHA-Storage</name>
+	<description>Application providing REST API for RIHA database.</description>
 
 	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>11</java.version>
 
-		<scm.url>scm:git:http://git.girf.ee/ria/riha-rest.git</scm.url>
-
-		<SPRING.VERSION>4.2.5.RELEASE</SPRING.VERSION>
-		<CXF.VERSION>3.1.6</CXF.VERSION>
-
-		<HIBERNATE.VERSION>4.3.10.Final</HIBERNATE.VERSION>
-		<JACKSON.VERSION>1.9.13</JACKSON.VERSION>
-		<POSTGRESQL.VERSION>9.4.1210.jre7</POSTGRESQL.VERSION>
-
-		<skipTests>false</skipTests>
-		
-		<filterResources>true</filterResources>
-		
-		<!-- See Profile <id>${project.groupId}-${project.artifactId}}</id> below! -->
-		
-		<riharest.test.pathRoot>target/test-files/</riharest.test.pathRoot>
-		<riharest.test.pathRootWindows>${riharest.pathRootWindows}</riharest.test.pathRootWindows>
-		<riharest.test.authService>${riharest.authService}</riharest.test.authService>
-		<riharest.test.isTest>${riharest.isTest}</riharest.test.isTest>
-		<riharest.test.authTimeout>${riharest.authTimeout}</riharest.test.authTimeout>
-
-		<!-- Performance test settings: -->
-		<jmeter.skip>false</jmeter.skip>
-		<jmeter.test>rest-get-object</jmeter.test>
-		<jmeter.host>triinu.girf.ee</jmeter.host>
-		<jmeter.port>8010</jmeter.port>
-		<jmeter.parallelRequests>1</jmeter.parallelRequests>
-		<jmeter.ignoreFailures>true</jmeter.ignoreFailures>
-		<jmeter.suppressOutput>false</jmeter.suppressOutput>
-
-		<jmeter.rampUpPeriod>10</jmeter.rampUpPeriod>
-		<jmeter.loopCount>1</jmeter.loopCount>
-
+		<liquibase.version>3.5.3</liquibase.version>
+		<cxf.version>3.1.6</cxf.version>
 	</properties>
-
-	<scm>
-		<connection>${scm.url}</connection>
-		<developerConnection>${scm.url}</developerConnection>
-		<url>${scm.url}</url>
-		<tag>HEAD</tag>
-	</scm>
-
-	<profiles>
-		<profile>
-			<id>${project.groupId}-${project.artifactId}</id>
-			
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			
-			<properties>
-				
-				<!-- Properties in resource files: -->
-								
-				<riharest.pathRoot>/opt/riha/</riharest.pathRoot>
-				<riharest.isTest>true</riharest.isTest>
-				<riharest.authTimeout>3600000</riharest.authTimeout>
-				
-				<!-- FIXME No reason to hold these values here! -->
-				
-				<!-- app base url -->
-				<riharest.base.url>http://localhost:8080/rest</riharest.base.url>
-				
-				<riharest.authService>http://localhost:8080/riha/sessionManagementServlet</riharest.authService>
-				
-				<!-- Note the trailing slash! -->
-				<riharest.pathRootWindows>C:\\test_folder\\</riharest.pathRootWindows>
-				
-			</properties>
-		</profile>
-	</profiles>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-			<version>3.5.3</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-			<version>${CXF.VERSION}</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>${SPRING.VERSION}</version>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
 			<artifactId>jackson-jaxrs-json-provider</artifactId>
-			<version>2.9.8</version>
 		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.2.9</version>
-		</dependency>
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.codehaus.jackson</groupId> -->
-		<!-- <artifactId>jackson-jaxrs</artifactId> -->
-		<!-- <version>${JACKSON.VERSION}</version> -->
-		<!-- </dependency> -->
-
-
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.6.2</version>
-		</dependency>
-
-
-		<!-- Spring MVC -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${SPRING.VERSION}</version>
-		</dependency>
-
-		<!-- Spring and Transactions -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-tx</artifactId>
-			<version>${SPRING.VERSION}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-orm</artifactId>
-			<version>${SPRING.VERSION}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<version>${SPRING.VERSION}</version>
-		</dependency>
-
-		<!-- Hibernate -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<version>${HIBERNATE.VERSION}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>5.3.6.Final</version>
-		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>org.postgresql</groupId> -->
-		<!-- <artifactId>postgresql</artifactId> -->
-		<!-- <version>9.3-1100-jdbc41</version> -->
-		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>${POSTGRESQL.VERSION}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jdbc</artifactId>
-			<version>7.0.59</version>
-			<scope>provided</scope>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+			<version>${liquibase.version}</version>
 		</dependency>
 
 		<!-- rest client is needed for authentication requests -->
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-rs-client</artifactId>
-			<version>${CXF.VERSION}</version>
+			<version>${cxf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-transports-local</artifactId>
-			<version>${CXF.VERSION}</version>
+			<version>${cxf.version}</version>
 		</dependency>
-
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
-			<scope>provided</scope>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
 		</dependency>
-
-		<!-- test scope dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${SPRING.VERSION}</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.cxf</groupId> -->
-		<!-- <artifactId>cxf-rt-transports-local</artifactId> -->
-		<!-- <version>${CXF.VERSION}</version> -->
-		<!-- <scope>test</scope> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.cxf</groupId> -->
-		<!-- <artifactId>cxf-rt-rs-client</artifactId> -->
-		<!-- <version>${CXF.VERSION}</version> -->
-		<!-- <scope>test</scope> -->
-		<!-- </dependency> -->
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.10.19</version>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- investigate -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>test</scope>
-		</dependency>
-        <dependency>
-            <groupId>com.sun.activation</groupId>
-            <artifactId>javax.activation</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-        </dependency>
 
 		<!-- embedded postgres -->
-		<dependency>
-			<groupId>ru.yandex.qatools.embed</groupId>
-			<artifactId>postgresql-embedded</artifactId>
-			<version>2.10</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>ru.yandex.qatools.embed</groupId>
+            <artifactId>postgresql-embedded</artifactId>
+            <version>2.10</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>de.flapdoodle.embed</groupId>
+                    <artifactId>de.flapdoodle.embed.process</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.process</artifactId>
+            <version>2.0.5</version>
+        </dependency>
+      
 
 		<!-- other -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.4</version>
+			<artifactId>commons-compress</artifactId>
+			<version>1.21</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.5</version>
+			<version>1.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.6</version>
+			<version>2.11.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>4.0.1</version>
+			<version>4.1.2</version>
 		</dependency>
-
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+			<version>7.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
-				<filtering>${filterResources}</filtering>
+				<filtering>true</filtering>
 			</resource>
 		</resources>
 		<testResources>
@@ -303,55 +148,10 @@
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.0.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-install-plugin</artifactId>
-					<version>2.5.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>3.5.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.1</version>
 					<configuration>
 						<skipSource>true</skipSource>
 					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.5.1</version>
-					<configuration>
-						<encoding>UTF-8</encoding>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.0.1</version>
-					<configuration>
-						<encoding>UTF-8</encoding>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.4</version>
-					<configuration>
-						<encoding>UTF-8</encoding>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -363,89 +163,17 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.19.1</version>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.1.0</version>
 				</plugin>
-
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-antrun-plugin</artifactId>
-										<versionRange>[1.8,)</versionRange>
-
-										<goals>
-											<goal>run</goal>
-										</goals>
-									</pluginExecutionFilter>
-
-									<action>
-										<execute>
-											<runOnIncremental>true</runOnIncremental>
-										</execute>
-									</action>
-								</pluginExecution>
-
-								<pluginExecution>
-
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>build-helper-maven-plugin</artifactId>
-										<versionRange>[1.5,)</versionRange>
-
-										<goals>
-											<goal>reserve-network-port</goal>
-										</goals>
-									</pluginExecutionFilter>
-
-									<action>
-										<execute>
-											<runOnIncremental>false</runOnIncremental>
-										</execute>
-									</action>
-								</pluginExecution>
-
-								<pluginExecution>
-
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>aspectj-maven-plugin</artifactId>
-										<versionRange>[1.7,)</versionRange>
-
-										<goals>
-											<goal>compile</goal>
-										</goals>
-									</pluginExecutionFilter>
-
-									<action>
-										<execute>
-											<runOnIncremental>true</runOnIncremental>
-										</execute>
-									</action>
-								</pluginExecution>
-
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.8</version>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.19.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
-
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -466,11 +194,9 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-
 				<configuration>
 					<useSystemClassLoader>false</useSystemClassLoader>
 					<excludes>
@@ -481,7 +207,6 @@
 						<include>DAOTestSuite.java</include>
 					</includes>
 				</configuration>
-
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -502,170 +227,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
-
-			<!--<plugin>-->
-				<!--<groupId>org.apache.tomcat.maven</groupId>-->
-				<!--<artifactId>tomcat7-maven-plugin</artifactId>-->
-				<!--<version>2.2</version>-->
-
-				<!--<dependencies>-->
-					<!--<dependency>-->
-						<!--<groupId>org.postgresql</groupId>-->
-						<!--<artifactId>postgresql</artifactId>-->
-						<!--<version>${POSTGRESQL.VERSION}</version>-->
-					<!--</dependency>-->
-				<!--</dependencies>-->
-
-				<!--<executions>-->
-					<!--<execution>-->
-						<!--<id>start-tomcat</id>-->
-
-						<!--<goals>-->
-							<!--&lt;!&ndash; <goal>run-war</goal> &ndash;&gt;-->
-							<!--<goal>run</goal>-->
-						<!--</goals>-->
-
-						<!--<phase>pre-integration-test</phase>-->
-
-						<!--<configuration>-->
-							<!--<port>${test.server.port}</port>-->
-							<!--<fork>true</fork>-->
-						<!--</configuration>-->
-					<!--</execution>-->
-
-					<!--<execution>-->
-						<!--<id>stop-tomcat</id>-->
-
-						<!--<goals>-->
-							<!--<goal>shutdown</goal>-->
-						<!--</goals>-->
-
-						<!--<phase>post-integration-test</phase>-->
-
-					<!--</execution>-->
-
-				<!--</executions>-->
-			<!--</plugin>-->
-			<!--<plugin>-->
-				<!--<groupId>org.apache.maven.plugins</groupId>-->
-				<!--<artifactId>maven-failsafe-plugin</artifactId>-->
-				<!--<version>2.18.1</version>-->
-
-				<!--<configuration>-->
-					<!--<argLine>-Xmx2048m -XX:MaxPermSize=1024m</argLine>-->
-					<!--<environmentVariables>-->
-						<!--<serviceurl>http://localhost:${test.server.port}/rest</serviceurl>-->
-					<!--</environmentVariables>-->
-
-					<!--<includes>-->
-						<!--<include>**/integration/**.java</include>-->
-						<!--<include>**/integration/*/**.java</include>-->
-					<!--</includes>-->
-
-					<!--<encoding>UTF-8</encoding>-->
-
-				<!--</configuration>-->
-
-				<!--<executions>-->
-					<!--<execution>-->
-						<!--<goals>-->
-							<!--<goal>integration-test</goal>-->
-							<!--<goal>verify</goal>-->
-						<!--</goals>-->
-					<!--</execution>-->
-				<!--</executions>-->
-
-			<!--</plugin>-->
-
-			<!--<plugin>-->
-				<!--<groupId>com.lazerycode.jmeter</groupId>-->
-				<!--<artifactId>jmeter-maven-plugin</artifactId>-->
-				<!--<version>2.0.3</version>-->
-				<!--<configuration>-->
-					<!--<propertiesJMeter>-->
-						<!--<log_level.jmeter>DEBUG</log_level.jmeter>-->
-					<!--</propertiesJMeter>-->
-					<!--<testFilesIncluded>-->
-						<!--<jMeterTestFile>${jmeter.test}.jmx</jMeterTestFile>-->
-					<!--</testFilesIncluded>-->
-					<!--<testResultsTimestamp>false</testResultsTimestamp>-->
-					<!--<overrideRootLogLevel>DEBUG</overrideRootLogLevel>-->
-					<!--<suppressJMeterOutput>${jmeter.suppressOutput}</suppressJMeterOutput>-->
-					<!--<ignoreResultFailures>${jmeter.ignoreFailures}</ignoreResultFailures>-->
-
-					<!--<skipTests>${jmeter.skip}</skipTests>-->
-					<!--<propertiesUser>-->
-						<!--<restApiHost>${jmeter.host}</restApiHost>-->
-						<!--<restApiPort>${jmeter.port}</restApiPort>-->
-						<!--<parallelRequests>${jmeter.parallelRequests}</parallelRequests>-->
-						<!--<rampUpPeriod>${jmeter.rampUpPeriod}</rampUpPeriod>-->
-						<!--<loopCount>${jmeter.loopCount}</loopCount>-->
-					<!--</propertiesUser>-->
-					<!--&lt;!&ndash; propertiesJMeter> <jmeter.save.saveservice.thread_counts>true</jmeter.save.saveservice.thread_counts> -->
-						<!--</propertiesJMeter &ndash;&gt;-->
-					<!--<jmeterExtensions>-->
-						<!--<artifact>kg.apc:jmeter-plugins-json:jar:2.3</artifact>-->
-					<!--</jmeterExtensions>-->
-				<!--</configuration>-->
-			<!--</plugin>-->
-
-
-			<!--<plugin>-->
-				<!--<groupId>org.apache.maven.plugins</groupId>-->
-				<!--<artifactId>maven-antrun-plugin</artifactId>-->
-		<!---->
-				<!--<executions>-->
-					<!--&lt;!&ndash; use real PATH_ROOT in integration tests &ndash;&gt;-->
-					<!--<execution>-->
-		<!---->
-						<!--<id>set_actual.riharest.path_root</id>-->
-		<!---->
-						<!--<phase>pre-integration-test</phase>-->
-		<!---->
-						<!--<goals>-->
-							<!--<goal>run</goal>-->
-						<!--</goals>-->
-		<!---->
-						<!--<configuration>-->
-							<!--<target>-->
-								<!--<propertyfile-->
-									<!--file="${project.build.testOutputDirectory}/riharest.project.properties">-->
-									<!--<entry key="PATH_ROOT" value="${riharest.pathRoot}" />-->
-								<!--</propertyfile>-->
-							<!--</target>-->
-						<!--</configuration>-->
-					<!--</execution>-->
-					<!---->
-					<!--&lt;!&ndash; change PATH_ROOT back to test value after integration tests&ndash;&gt;-->
-					<!--<execution>-->
-		<!---->
-						<!--<id>set_test.riharest.path_root</id>-->
-		<!---->
-						<!--<phase>post-integration-test</phase>-->
-		<!---->
-						<!--<goals>-->
-							<!--<goal>run</goal>-->
-						<!--</goals>-->
-		<!---->
-						<!--<configuration>-->
-							<!--<target>-->
-								<!--<propertyfile-->
-									<!--file="${project.build.testOutputDirectory}/riharest.project.properties">-->
-									<!--<entry key="PATH_ROOT" value="${riharest.test.pathRoot}" />-->
-								<!--</propertyfile>-->
-							<!--</target>-->
-						<!--</configuration>-->
-					<!--</execution>-->
-				<!--</executions>-->
-			<!--</plugin>-->
-
 		</plugins>
 	</build>
-
-
-
-
-
 </project>
