@@ -1,5 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+	<property name="LOG_DIR" value="/var/log"/>
+	<property name="appName" value="riha-storage"/>
+	<appender name="FILEJSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR}/${appName}/${appName}.json.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/${appName}/${appName}.%d{yyyy-MM-dd}.%i.json.log</fileNamePattern>
+			<maxHistory>14</maxHistory>
+			<maxFileSize>100MB</maxFileSize>
+		</rollingPolicy>
+		<encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+	</appender>
+	<logger name="com" level="WARN">
+		<appender-ref ref="FILEJSON"/>
+	</logger>
+	<logger name="io" level="WARN">
+		<appender-ref ref="FILEJSON"/>
+	</logger>
+	<logger name="org" level="WARN">
+		<appender-ref ref="FILEJSON"/>
+	</logger>
+	<logger name="javax" level="WARN">
+		<appender-ref ref="FILEJSON"/>
+	</logger>
+	<logger name="springfox" level="WARN">
+		<appender-ref ref="FILEJSON"/>
+	</logger>
 
 	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
 		<resetJUL>true</resetJUL>
@@ -24,5 +50,6 @@
 
 	<root level="info">
 		<appender-ref ref="console" />
+		<appender-ref ref="FILEJSON"/>
 	</root>
 </configuration>

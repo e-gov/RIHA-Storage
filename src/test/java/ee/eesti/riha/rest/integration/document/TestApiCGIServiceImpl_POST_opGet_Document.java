@@ -1,18 +1,17 @@
 package ee.eesti.riha.rest.integration.document;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+import ee.eesti.riha.rest.MyTestRunner;
+import ee.eesti.riha.rest.TestHelper;
+import ee.eesti.riha.rest.error.ErrorCodes;
+import ee.eesti.riha.rest.error.RihaRestError;
+import ee.eesti.riha.rest.integration.IntegrationTestHelper;
+import ee.eesti.riha.rest.integration.TestFinals;
+import ee.eesti.riha.rest.logic.Finals;
+import ee.eesti.riha.rest.logic.util.JsonHelper;
+import ee.eesti.riha.rest.service.ApiCGIService;
+import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -23,26 +22,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import ee.eesti.riha.rest.MyTestRunner;
-import ee.eesti.riha.rest.TestHelper;
-import ee.eesti.riha.rest.error.ErrorCodes;
-import ee.eesti.riha.rest.error.RihaRestError;
-import ee.eesti.riha.rest.integration.IntegrationTestHelper;
-import ee.eesti.riha.rest.integration.TestFinals;
-import ee.eesti.riha.rest.logic.Finals;
-import ee.eesti.riha.rest.logic.util.JsonHelper;
-import ee.eesti.riha.rest.model.Data_object;
-import ee.eesti.riha.rest.model.Main_resource;
-import ee.eesti.riha.rest.service.ApiCGIService;
-import ee.eesti.riha.rest.service.ApiClassicService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
 @RunWith(MyTestRunner.class)
-@ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
+@WebAppConfiguration
+@ContextConfiguration("/integration-test-applicationContext.xml")
 public class TestApiCGIServiceImpl_POST_opGet_Document<T> {
 
   // general info here

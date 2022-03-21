@@ -6,15 +6,26 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.gson.JsonObject;
+import ee.eesti.riha.rest.MyTestRunner;
+import ee.eesti.riha.rest.TestHelper;
+import ee.eesti.riha.rest.dao.ApiGenericDAO;
+import ee.eesti.riha.rest.error.ErrorCodes;
+import ee.eesti.riha.rest.error.RihaRestError;
+import ee.eesti.riha.rest.integration.IntegrationTestHelper;
+import ee.eesti.riha.rest.integration.TestFinals;
+import ee.eesti.riha.rest.logic.Finals;
+import ee.eesti.riha.rest.logic.util.JsonHelper;
+import ee.eesti.riha.rest.model.Document;
+import ee.eesti.riha.rest.service.ApiCGIService;
+import ee.eesti.riha.rest.service.ApiClassicService;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
 import javax.ws.rs.core.Response;
-
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
@@ -24,26 +35,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-import com.google.gson.JsonObject;
-
-import ee.eesti.riha.rest.MyTestRunner;
-import ee.eesti.riha.rest.TestHelper;
-import ee.eesti.riha.rest.dao.ApiGenericDAO;
-import ee.eesti.riha.rest.error.ErrorCodes;
-import ee.eesti.riha.rest.error.RihaRestError;
-import ee.eesti.riha.rest.integration.IntegrationTestHelper;
-import ee.eesti.riha.rest.integration.TestFinals;
-import ee.eesti.riha.rest.logic.Finals;
-import ee.eesti.riha.rest.logic.util.FileHelper;
-import ee.eesti.riha.rest.logic.util.JsonHelper;
-import ee.eesti.riha.rest.model.Document;
-import ee.eesti.riha.rest.service.ApiCGIService;
-import ee.eesti.riha.rest.service.ApiClassicService;
-
-//@RunWith(SpringJUnit4ClassRunner.class)
 @RunWith(MyTestRunner.class)
-@ContextConfiguration("classpath*: **/integration-test-applicationContext.xml")
+@WebAppConfiguration
+@ContextConfiguration("/integration-test-applicationContext.xml")
 public class TestApiCGIServiceImpl_POST_opPut_Document<T> {
 
   // general info here
@@ -156,49 +152,6 @@ public class TestApiCGIServiceImpl_POST_opPut_Document<T> {
   }
 
   @Test
-  public void testUpdateDocument() throws Exception {
-
-    String path = pathToUse + idUnderTestList.get(0);
-    String json = "{\r\n" + "	\"op\":\"put\", \r\n" + "	\"path\": \"" + path + "\", \r\n"
-        + "\"token\":\"testToken\",	\"data\": " + TestFinals.JSON_TO_UPDATE_DOCUMENT_FILE + "}";
-
-    // String testContentBeginning = "PD94b";
-    String testContentBeginning = "<?xml version=\"1.0\"";
-    String updatedContentBeginning = "TEST UPDATE";
-
-    // assert file exists
-    String filePath = FileHelper.PATH_ROOT + FileHelper.createDocumentFilePath(idUnderTestList.get(0));
-    List<String> lines = FileHelper.readFile(filePath);
-    assertNotNull(lines);
-    assertTrue(!lines.isEmpty());
-    assertTrue(lines.get(0).startsWith(testContentBeginning));
-
-    Response response = serviceUnderTest.postCGI(json);
-
-    assertNotNull(response.getEntity());
-
-    Map<String, Integer> result = TestHelper.getResultMap(response);
-    Integer numOfChanged = 1;
-    assertNotNull(result);
-    assertEquals(numOfChanged, result.get(Finals.OK));
-
-    // these fields should be updated in document
-    Document updated = genericDAO.find(Document.class, idUnderTestList.get(0));
-    JsonObject json_contentStored = updated.getJson_content();
-
-    assertEquals(FileHelper.createDocumentFilePath(idUnderTestList.get(0)), json_contentStored.get("content")
-        .getAsString());
-
-    // assert file updated
-    lines = FileHelper.readFile(filePath);
-    assertNotNull(lines);
-    assertTrue(!lines.isEmpty());
-    System.out.println(lines);
-    assertTrue(lines.get(0).startsWith(updatedContentBeginning));
-
-  }
-
-  @Test
   public void testUpdateDocumentURL() throws Exception {
 
     String path = pathToUse + idUnderTestList.get(0);
@@ -293,122 +246,4 @@ public class TestApiCGIServiceImpl_POST_opPut_Document<T> {
     assertEquals(ErrorCodes.CANT_UPDATE_ARCHIVED_MSG, error.getErrmsg());
     assertTrue(error.getErrtrace().contains("" + documentId));
   }
-
-  @Test
-  public void testUpdateDocumentList() throws Exception {
-
-    String path = pathToUse;
-    // bad idea to update by kind, could update a lot of rows
-//    String kind = "infosystemTEST";
-    String fileName = "Liitumise_taotlus_70006317TEST.ddoc";
-    JsonObject jsonUpdate = JsonHelper.getFromJson(TestFinals.JSON_TO_UPDATE_DOCUMENT_FILE);
-    jsonUpdate.addProperty("filename", fileName);
-    String json = "{\r\n" + "	\"op\":\"put\", \"key\":\"filename\",\r\n" + "	\"path\": \"" + path + "\", \r\n"
-        + "\"token\":\"testToken\",	\"data\": [" + jsonUpdate.toString() + "]}";
-
-    // String testContentBeginning = "PD94b";
-    String testContentBeginning = "<?xml version=\"1.0\"";
-    String updatedContentBeginning = "TEST UPDATE";
-
-    // assert file exists
-    String filePath = FileHelper.PATH_ROOT + FileHelper.createDocumentFilePath(idUnderTestList.get(0));
-    List<String> lines = FileHelper.readFile(filePath);
-    assertNotNull(lines);
-    assertTrue(!lines.isEmpty());
-    assertTrue(lines.get(0).startsWith(testContentBeginning));
-
-    Response response = serviceUnderTest.postCGI(json);
-
-    assertNotNull(response.getEntity());
-
-    Map<String, Integer> result = TestHelper.getResultMap(response);
-    Integer numOfChanged = 1;
-    assertNotNull(result);
-    assertEquals(numOfChanged, result.get(Finals.OK));
-
-    Document updated = genericDAO.find(Document.class, idUnderTestList.get(0));
-    JsonObject json_contentStored = updated.getJson_content();
-
-    assertEquals(FileHelper.createDocumentFilePath(idUnderTestList.get(0)), json_contentStored.get("content")
-        .getAsString());
-
-    // assert file updated
-    lines = FileHelper.readFile(filePath);
-    assertNotNull(lines);
-    assertTrue(!lines.isEmpty());
-    System.out.println(lines);
-    assertTrue(lines.get(0).startsWith(updatedContentBeginning));
-
-  }
-
-  // @Ignore("unfinished")
-  // @Ignore("max connetions reached DB error; need find solution, then enable
-  // again this test") @Test
-  // public void testUpdateList() throws Exception {
-  //
-  // String path = pathToUse;
-  // String data = "[{\"main_resource_id\":922,
-  // \"short_name\":\"xLL\",\"name\":\"yLL\"},{\"main_resource_id\":923,
-  // \"short_name\":\"zLL\",\"name\":\"aLL\"}]";
-  // String json = "{\r\n" + " \"op\":\"put\", \r\n" + " \"path\": \"" + path
-  // + "\", \r\n"
-  // + "\"key\": \"main_resource_id\", \"data\": " + data + "}";
-  //
-  // Response response = client.postCGI(json);
-  //
-  // assertNotNull(response.getEntity());
-  //
-  // Map<String, Integer> result = TestHelper.getResultMap(response);
-  // Integer numOfChanged = 2;
-  // assertNotNull(result);
-  // assertEquals(numOfChanged, result.get(Finals.OK));
-  //
-  // // TODO
-  // // test thad properties were actually updated
-  //
-  // }
-  //
-  // @Ignore("TODO needs to be rewritten")
-  // @Ignore("max connetions reached DB error; need find solution, then enable
-  // again this test") @Test
-  // public void testUpdateListByOwner() throws Exception {
-  //
-  // // Integer id = 10015;
-  // // List<Main_resource> main_resources = new ArrayList<>();
-  // // String ownerOrganization = "TEST_ORG_123XX";
-  // // int count = 2;
-  // // for (int i = 0; i < count; i++) {
-  // // Main_resource main_resource =
-  // // TestApiGenericDAOMain_resource.createTestMain_resource(id + i);
-  // // main_resource.setOwner(ownerOrganization);
-  // // main_resources.add(main_resource);
-  // // }
-  // //
-  // // client.create(GsonHelper.GSON.toJson(main_resources), tableName);
-  // //
-  // // Main_resource main_resource = new Main_resource();
-  // // main_resource.setOwner(ownerOrganization);
-  // // main_resource.setName("TEST_UPDATE_NAME");
-  // // main_resource.setKind("XXXXXXXXXXX");
-  // //
-  // // String path = pathToUse;
-  // // String json = "{\r\n" + " \"op\":\"put\", \r\n" + " \"path\": \"" +
-  // // path + "\", \r\n" + " \"key\": \"owner\"," + " \"data\": ["
-  // // + GsonHelper.GSON.toJson(main_resource) + "]}";
-  // // System.out.println(json);
-  // // Response response = client.postCGI(json);
-  // // System.out.println(response);
-  // // assertNotNull(response.getEntity());
-  // //
-  // // Map<String, Integer> result = TestHelper.getResultMap(response);
-  // // Integer numOfChanged = 2;
-  // // assertNotNull(result);
-  // // assertEquals(numOfChanged, result.get(Finals.OK));
-  // //
-  // // for (int i = 0; i < count; i++) {
-  // // client.delete(tableName, id + i);
-  // // }
-  //
-  // }
-
 }

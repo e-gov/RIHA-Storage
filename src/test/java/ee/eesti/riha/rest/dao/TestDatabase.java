@@ -1,24 +1,23 @@
 package ee.eesti.riha.rest.dao;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-
-import javax.annotation.Resource;
-
+import ee.eesti.riha.rest.dao.util.FilterComponent;
+import ee.eesti.riha.rest.model.Data_object;
+import ee.eesti.riha.rest.model.Document;
+import ee.eesti.riha.rest.model.Main_resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-import ee.eesti.riha.rest.dao.util.FilterComponent;
-import ee.eesti.riha.rest.model.Data_object;
-import ee.eesti.riha.rest.model.Document;
-import ee.eesti.riha.rest.model.Main_resource;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath*: **/test-applicationContext.xml")
+@WebAppConfiguration
+@ContextConfiguration("/test-applicationContext.xml")
 public class TestDatabase {
 
   @Autowired

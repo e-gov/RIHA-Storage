@@ -2,12 +2,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
 	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://cxf.apache.org/configuration/beans http://cxf.apache.org/schemas/configuration/cxf-beans.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 		http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
 	<import resource="main-applicationContext.xml" />
+	<import resource="persistence-context.xml" />
 
 	<jaxrs:server>
 
@@ -34,6 +34,7 @@
 		<bean class="ee.eesti.riha.rest.service.impl.ApiTableServiceImpl" />
 		<bean class="ee.eesti.riha.rest.service.impl.ApiImportServiceImpl" />
 		<bean class="ee.eesti.riha.rest.service.impl.CommentServiceImpl" />
+		<bean class="ee.eesti.riha.rest.service.impl.HealthServiceImpl" />
 	</util:list>
 
 </beans>

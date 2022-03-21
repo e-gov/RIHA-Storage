@@ -1,5 +1,7 @@
 package ee.eesti.riha.rest.logic;
 
+import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.dao.GenericDAO;
@@ -8,7 +10,6 @@ import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.error.ErrorCodes;
 import ee.eesti.riha.rest.error.RihaRestError;
 import ee.eesti.riha.rest.error.RihaRestException;
-import ee.eesti.riha.rest.logic.util.FileHelper;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.logic.util.PathHolder;
 import ee.eesti.riha.rest.logic.util.QueryHolder;
@@ -16,17 +17,17 @@ import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Data_object;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.Main_resource;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-
-import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
 
 /**
  * Handles the creation of new versions of Main_resource and of items that are connected to it. Does not modify data
@@ -257,47 +258,12 @@ public class NewVersionLogic<T, K> {
       docJson.remove("kind");
       // when creating new version, then end_date will be null
       docJson.putNull("end_date");
-      docJson.put("content", FileHelper.createDocumentFilePath(docJson.get("document_id").asInt()));
       LOG.info("Original doc, modified to current: " + docJson);
       T itemTemp = JsonHelper.GSON.fromJson(docJson.toString(), clazz);
       BaseModel bm = (BaseModel) itemTemp;
       bm.setJson_content(JsonHelper.getFromJson(docJson.toString()));
       // update new version
       noLogicDAO.update(itemTemp);
-    }
-
-    LOG.info("Copying files...");
-    
-    // copy files
-    for (Entry<Integer, Integer> entry : docIdMap.entrySet()) {
-      int currentDocId = entry.getKey();
-      int archivedDocId = entry.getValue();
-      String currentDocPath = FileHelper.createDocumentFilePathWithRoot(currentDocId);
-      String archivedDocPath = FileHelper.createDocumentFilePathWithRoot(archivedDocId);
-      String archivedDocPathToSave = FileHelper.createDocumentFilePath(archivedDocId);
-      // can't update file path (content) before, because new id of archived document is not known
-      JsonObject updateJson = new JsonObject();
-      updateJson.addProperty("document_id", archivedDocId);
-      updateJson.addProperty("content", archivedDocPathToSave);
-      // add end_date here, because can't update object which has end_date set with SecureApiGenericDAO
-      updateJson.addProperty("end_date", dateJson);
-
-      LOG.info("updateJson in copy: " + updateJson);
-      
-      Document doc = JsonHelper.GSON.fromJson(updateJson, Document.class);
-      doc.setJson_content(updateJson);
-      secureDAO.update((T) doc, archivedDocId);
-      LOG.info("update successful? time to copy files");
-      try {
-        LOG.info("Copying file in new version current to archived");
-        LOG.info("Copying.. " + currentDocPath + " -> " + archivedDocPath);
-        LOG.info("IDs current -> archived " + currentDocId + " -> " + archivedDocId);
-        FileHelper.copyFile(currentDocPath, archivedDocPath);
-      } catch (IOException e) {
-        LOG.error("Error creating helper", e);
-        throw new RuntimeException(e);
-      }
-
     }
   }
 

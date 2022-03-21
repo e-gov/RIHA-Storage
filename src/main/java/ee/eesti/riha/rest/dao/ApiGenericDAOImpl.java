@@ -2,62 +2,73 @@ package ee.eesti.riha.rest.dao;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import ee.eesti.riha.rest.dao.util.*;
+import ee.eesti.riha.rest.dao.util.DaoHelper;
+import ee.eesti.riha.rest.dao.util.FieldTypeHolder;
+import ee.eesti.riha.rest.dao.util.FilterComponent;
+import ee.eesti.riha.rest.dao.util.OrderByData;
+import ee.eesti.riha.rest.dao.util.SqlFilter;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.MyExceptionHandler;
 import ee.eesti.riha.rest.logic.Validator;
-import ee.eesti.riha.rest.logic.util.*;
+import ee.eesti.riha.rest.logic.util.JsonContentBasedTable;
+import ee.eesti.riha.rest.logic.util.JsonFieldHelper;
+import ee.eesti.riha.rest.logic.util.JsonHelper;
+import ee.eesti.riha.rest.logic.util.StringHelper;
 import ee.eesti.riha.rest.model.BaseModel;
 import ee.eesti.riha.rest.model.Document;
 import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.persistence.Table;
-import javax.transaction.Transactional;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.Table;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ApiGenericDAOImpl.
  *
  * @param <T> the generic type
  * @param <K> the key type
  */
-@Transactional
 @Component
+@Transactional
 public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
+
   private static final Logger LOG = LoggerFactory.getLogger(ApiGenericDAOImpl.class);
   public static final int NOT_PART_OF_MODEL_OR_JSON = -1001;
 
-  @Autowired
-  SessionFactory sessionFactory;
+  private final SessionFactory sessionFactory;
 
-  @Autowired
-  KindRepository kindRepository;
+  private final SqlFilter sqlFilter;
 
-  @Autowired
-  SqlFilter sqlFilter;
+  public ApiGenericDAOImpl(SessionFactory sessionFactory, SqlFilter sqlFilter) {
+    this.sessionFactory = sessionFactory;
+    this.sqlFilter = sqlFilter;
+  }
 
   /**
    * Gets the table name.
@@ -76,7 +87,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#find(java.lang.Class, java.lang.Integer, java.lang.Integer,
    * java.util.List, java.lang.String)
    */
@@ -117,7 +128,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#find(java.lang.Class, java.lang.Integer)
    */
   @Override
@@ -134,20 +145,22 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#findByMainResourceId(java.lang.Class, java.lang.Integer)
    */
   @Override
   public List<T> findByMainResourceId(Class<T> clazz, Integer id) {
 
-    Session session = sessionFactory.getCurrentSession();
-
     LOG.info("FIND BY MAIN_RESOURCE_ID");
 
-    List<T> objectList = session.createCriteria(clazz).add(Restrictions.eq(Finals.MAIN_RESOURCE_ID, id)).list();
+    Session session = sessionFactory.getCurrentSession();
+    CriteriaBuilder cb = session.getCriteriaBuilder();
+    CriteriaQuery<T> criteria = cb.createQuery(clazz);
+    Root<T> root = criteria.from(clazz);
 
-    return objectList;
+    criteria.where(cb.equal(root.get(Finals.MAIN_RESOURCE_ID), id));
 
+    return session.createQuery(criteria).getResultList();
   }
 
   /**
@@ -332,20 +345,21 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
    * @param offset the offset
    * @return the list
    */
-  private List<T> noFilterOrderHelper(Session session, Class clazz, OrderByData orderData, int limit, int offset) {
+  private List<T> noFilterOrderHelper(Session session, Class<T> clazz, OrderByData orderData,
+      int limit, int offset) {
+    boolean orderByIsJsonContentField = (!DaoHelper.isFieldPartOfModel(orderData.getOrderByField(),
+        clazz));
     List<T> objectList;
-    Criteria criteria = session.createCriteria(clazz);
 
-    boolean orderByIsJsonContentField = (!DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz));
     if (orderByIsJsonContentField) {
       StringBuilder qry = new StringBuilder();
       qry.append("SELECT *")
-              .append(" FROM ").append(getTableName(clazz)).append(" item ");
+          .append(" FROM ").append(getTableName(clazz)).append(" item ");
 
       String orderByParameterName = "jOrderParameter";
       qry.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
 
-      Query query = session.createSQLQuery(qry.toString()).addEntity(clazz);
+      NativeQuery<T> query = session.createSQLQuery(qry.toString()).addEntity(clazz);
 
       String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
       query.setParameter(orderByParameterName, jsonOrderByFieldName);
@@ -353,13 +367,22 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       query.setFirstResult(offset);
       objectList = query.setMaxResults(limit).list();
     } else {
+      CriteriaBuilder cb = session.getCriteriaBuilder();
+      CriteriaQuery<T> cq = cb.createQuery(clazz);
+
+      Root<T> root = cq.from(clazz);
+
       if (orderData.isAsc()) {
-        criteria.addOrder(Order.asc(orderData.getOrderByField()));
+        cq.orderBy(cb.asc(root.get(orderData.getOrderByField())));
       } else {
-        criteria.addOrder(Order.desc(orderData.getOrderByField()));
+        cq.orderBy(cb.desc(root.get(orderData.getOrderByField())));
       }
-      criteria.setFirstResult(offset);
-      objectList = criteria.setMaxResults(limit).list();
+
+      TypedQuery<T> query = session.createQuery(cq);
+      query.setFirstResult(offset);
+      query.setMaxResults(limit);
+
+      objectList = query.getResultList();
     }
 
     return objectList;
@@ -382,7 +405,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#findCount(java.lang.Class, java.lang.Integer, java.lang.Integer,
    * java.util.List, java.lang.String)
    */
@@ -424,24 +447,23 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#findCount(java.lang.Class)
    */
   @Override
   public Integer findCount(Class<T> clazz) {
-
     Session session = sessionFactory.getCurrentSession();
 
-    Integer rowCount = ((Long) session.createCriteria(clazz).setProjection(Projections.rowCount()).uniqueResult())
-        .intValue();
+    CriteriaBuilder qb = session.getCriteriaBuilder();
+    CriteriaQuery<Long> cq = qb.createQuery(Long.class);
+    cq.select(qb.count(cq.from(clazz)));
 
-    return rowCount;
-
+    return session.createQuery(cq).getSingleResult().intValue();
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#create(java.lang.Object)
    */
   @Override
@@ -460,7 +482,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#create(java.util.List)
    */
   @Override
@@ -480,7 +502,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#update(java.lang.Object, java.lang.Integer)
    */
   @Override
@@ -544,7 +566,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
       LOG.error("Failed to update entity {}", existing);
       LOG.debug("Failed to update entity", e);
-      
+
       return 0;
     }
     return 1;
@@ -660,7 +682,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#update(java.util.List, java.lang.String)
    */
 
@@ -705,8 +727,6 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           Validator.cantUpdateArchivedElement(item);
           Validator.cantUpdateVersionHere(item, updateData);
 
-          FileHelper.writeDocumentContentToFile(updateData, baseModel.callGetId());
-
           JsonHelper.updateJsonObjWithValuesFromAnotherJsonObj(baseModel.getJson_content(),
               updateInfo.getJson_content(), clazz);
 
@@ -725,7 +745,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           updateInfo.setJson_content(updateInfoJsonContent);
           numOfChanged++;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-            | IntrospectionException | IOException e) {
+            | IntrospectionException e) {
           LOG.error("Error updating, ROLLING BACK UPDATES", e);
           return 0;
         }
@@ -738,7 +758,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#delete(java.lang.Class, java.lang.Integer)
    */
   @Override
@@ -762,7 +782,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#delete(java.lang.Object)
    */
   // used in tests only
@@ -777,7 +797,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#delete(java.util.List)
    */
   // used in tests only
@@ -857,25 +877,9 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     return documentIds;
   }
 
-  /**
-   * Delete document files.
-   *
-   * @param tableName the table name
-   * @param documentIds the document ids
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  // delete files on disk
-  private void deleteDocumentFiles(String tableName, List<Integer> documentIds) throws IOException {
-    if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class && documentIds != null) {
-      for (int id : documentIds) {
-        FileHelper.deleteFile(FileHelper.PATH_ROOT + FileHelper.createDocumentFilePath(id));
-      }
-    }
-  }
-
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see ee.eesti.riha.rest.dao.ApiGenericDAO#delete(java.lang.String, java.lang.String, java.lang.Object[])
    */
   @Override
@@ -912,15 +916,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     query.setParameterList("fieldValues", values);
     numOfDeleted = query.executeUpdate();
 
-    try {
-      deleteDocumentFiles(tableName, documentIds);
-    } catch (IOException e) {
-      LOG.error("Error while deleting", e);
-      throw new RuntimeException(e);
-    }
-
     return numOfDeleted;
-
   }
 
   /**

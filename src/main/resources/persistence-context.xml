@@ -2,10 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:jee="http://www.springframework.org/schema/jee"
-	   xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
 	   xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.2.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 	<tx:annotation-driven transaction-manager="txManager"/>
 
@@ -23,9 +23,8 @@
 
 
 	<bean id="sessionFactory"
-		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
-		<!-- <property name="packagesToScan" value="ee.eesti.riha.rest.model" /> -->
 		<property name="annotatedClasses">
 			<list>
 				<value>ee.eesti.riha.rest.model.Main_resource</value>
@@ -52,6 +51,7 @@
 			<props>
 				<prop key="hibernate.dialect">ee.eesti.riha.rest.model.hibernate.JsonPostgreSQLDialect</prop>
 				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.id.new_generator_mappings">false</prop>
 				<!-- <prop key="hibernate.format_sql" >true</prop> -->
 				<!-- <prop key="hibernate.use_sql_comments">true</prop> -->
 				<!-- to overcome occasional http://stackoverflow.com/questions/10075081/hibernate-slow-to-acquire-postgres-connection -->
@@ -61,7 +61,7 @@
 	</bean>
 
 	<bean id="txManager"
-		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 

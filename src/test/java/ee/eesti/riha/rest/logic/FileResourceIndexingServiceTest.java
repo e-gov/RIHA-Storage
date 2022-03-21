@@ -1,21 +1,15 @@
 package ee.eesti.riha.rest.logic;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+
 import ee.eesti.riha.rest.dao.FileResourceDAO;
 import ee.eesti.riha.rest.dao.util.CsvToGsonConverter;
 import ee.eesti.riha.rest.dao.util.ExcelToGsonConverter;
 import ee.eesti.riha.rest.dao.util.ToGsonConverter;
 import ee.eesti.riha.rest.model.FileResource;
 import ee.eesti.riha.rest.model.LargeObject;
-import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,9 +18,15 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.when;
+import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileResourceIndexingServiceTest {
@@ -53,7 +53,7 @@ public class FileResourceIndexingServiceTest {
 
         File excelFile = new File("src/test/resources/xlsx/test1.xlsx");
 
-        when(blob.getBytes(anyInt(), anyInt())).thenReturn(IOUtils.toByteArray(new FileInputStream(excelFile)));
+        when(blob.getBytes(anyLong(), anyInt())).thenReturn(IOUtils.toByteArray(new FileInputStream(excelFile)));
 
         LargeObject largeObject = new LargeObject();
         largeObject.setData(blob);

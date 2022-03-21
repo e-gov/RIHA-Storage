@@ -1,15 +1,13 @@
 package ee.eesti.riha.rest.dao;
 
-import org.springframework.cache.annotation.Cacheable;
-
 import ee.eesti.riha.rest.model.readonly.Kind;
+import org.springframework.cache.annotation.Cacheable;
 
 /**
  * Cache repository of {@link ee.eesti.riha.rest.model.readonly.Kind Kind} objects
  *
  */
 public interface KindRepository extends ClassifierRepository<Kind> {
-  // public interface KindRepository {
 
   @Cacheable(cacheNames = "kinds", key = "#name")
   @Override
