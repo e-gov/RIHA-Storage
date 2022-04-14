@@ -21,7 +21,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 
-		<liquibase.version>3.5.3</liquibase.version>
+		<liquibase.version>4.9.1</liquibase.version>
 		<cxf.version>3.1.6</cxf.version>
 	</properties>
 
