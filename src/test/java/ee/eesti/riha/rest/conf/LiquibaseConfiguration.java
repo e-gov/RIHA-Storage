@@ -20,6 +20,7 @@ public class LiquibaseConfiguration {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setChangeLog("classpath:db/db.changelog-test.xml");
         liquibase.setDataSource(dataSource);
+        liquibase.setDefaultSchema("riha");
         return liquibase;
     }
 }
