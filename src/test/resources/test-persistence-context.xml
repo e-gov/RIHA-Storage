@@ -30,8 +30,6 @@
                 <value>ee.eesti.riha.rest.model.Comment</value>
                 <value>ee.eesti.riha.rest.model.LargeObject</value>
                 <value>ee.eesti.riha.rest.model.FileResource</value>
-<!--                <value>ee.eesti.riha.rest.model.Main_resource_relation</value>-->
-<!--                <value>ee.eesti.riha.rest.model.Classifier</value>-->
 
                 <value>ee.eesti.riha.rest.model.readonly.Kind</value>
 <!--                <value>ee.eesti.riha.rest.model.readonly.Isik</value>-->
