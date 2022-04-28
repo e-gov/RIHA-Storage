@@ -4,6 +4,6 @@
          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
 	<import resource="main-applicationContext.xml" />
-	<import resource="test-persistence-context.xml" />
+	<import resource="persistence-context.xml" />
 
 </beans>
