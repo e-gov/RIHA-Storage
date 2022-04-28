@@ -1,5 +1,5 @@
-DROP VIEW IF EXISTS main_resource_view CASCADE;
-CREATE OR REPLACE VIEW main_resource_view AS
+DROP VIEW IF EXISTS riha.main_resource_view CASCADE;
+CREATE OR REPLACE VIEW riha.main_resource_view AS
   SELECT DISTINCT ON (json_content ->> 'uuid')
     main_resource.*,
     ((main_resource.json_content #>>
@@ -11,12 +11,12 @@ CREATE OR REPLACE VIEW main_resource_view AS
     last_positive_establishment_request.modified_date                      AS last_positive_establishment_request_date,
     last_positive_take_into_use_request.modified_date                      AS last_positive_take_into_use_request_date,
     last_positive_finalization_request.modified_date                       AS last_positive_finalization_request_date
-  FROM main_resource AS main_resource
+  FROM riha.main_resource AS main_resource
     LEFT JOIN (SELECT DISTINCT ON (infosystem_uuid)
                  infosystem_uuid,
                  sub_type,
                  modified_date
-               FROM comment
+               FROM riha.comment
                WHERE
                  type = 'ISSUE'
                  AND sub_type IN ('ESTABLISHMENT_REQUEST',
@@ -29,7 +29,7 @@ CREATE OR REPLACE VIEW main_resource_view AS
     LEFT JOIN (SELECT DISTINCT ON (infosystem_uuid)
                 infosystem_uuid,
                 modified_date
-              FROM comment
+              FROM riha.comment
               WHERE
                 type = 'ISSUE'
                 AND sub_type = 'ESTABLISHMENT_REQUEST'
@@ -40,7 +40,7 @@ CREATE OR REPLACE VIEW main_resource_view AS
       LEFT JOIN (SELECT DISTINCT ON (infosystem_uuid)
                 infosystem_uuid,
                 modified_date
-              FROM comment
+              FROM riha.comment
               WHERE
                 type = 'ISSUE'
                 AND sub_type = 'TAKE_INTO_USE_REQUEST'
@@ -51,7 +51,7 @@ CREATE OR REPLACE VIEW main_resource_view AS
       LEFT JOIN (SELECT DISTINCT ON (infosystem_uuid)
                 infosystem_uuid,
                 modified_date
-              FROM comment
+              FROM riha.comment
               WHERE
                 type = 'ISSUE'
                 AND sub_type = 'FINALIZATION_REQUEST'
@@ -63,31 +63,31 @@ CREATE OR REPLACE VIEW main_resource_view AS
     j_update_timestamp DESC NULLS LAST,
     main_resource_id DESC;
 
-DROP VIEW IF EXISTS main_resource_relation_view;
-CREATE OR REPLACE VIEW main_resource_relation_view AS
+DROP VIEW IF EXISTS riha.main_resource_relation_view;
+CREATE OR REPLACE VIEW riha.main_resource_relation_view AS
   SELECT
     mrr.*,
     infosystem.json_content ->> 'short_name'         AS infosystem_short_name,
     infosystem.json_content ->> 'name'               AS infosystem_name,
     related_infosystem.json_content ->> 'short_name' AS related_infosystem_short_name,
     related_infosystem.json_content ->> 'name'       AS related_infosystem_name
-  FROM main_resource_relation mrr
-    LEFT JOIN main_resource_view infosystem ON (infosystem.json_content ->> 'uuid') = mrr.infosystem_uuid :: TEXT
-    LEFT JOIN main_resource_view related_infosystem
+  FROM riha.main_resource_relation mrr
+    LEFT JOIN riha.main_resource_view infosystem ON (infosystem.json_content ->> 'uuid') = mrr.infosystem_uuid :: TEXT
+    LEFT JOIN riha.main_resource_view related_infosystem
       ON (related_infosystem.json_content ->> 'uuid') = mrr.related_infosystem_uuid :: TEXT;
 
-DROP VIEW IF EXISTS comment_type_issue_view;
-CREATE OR REPLACE VIEW comment_type_issue_view AS
+DROP VIEW IF EXISTS riha.comment_type_issue_view;
+CREATE OR REPLACE VIEW riha.comment_type_issue_view AS
   SELECT
     issue.*,
     infosystem.json_content ->> 'short_name' infosystem_short_name,
     infosystem.json_content ->> 'name' infosystem_full_name,
     array_to_json(array_agg(event ORDER BY event.comment_id) FILTER (WHERE event.type = 'ISSUE_EVENT')) events,
     last_comment.*
-  FROM comment issue
-    INNER JOIN main_resource_view infosystem
+  FROM riha.comment issue
+    INNER JOIN riha.main_resource_view infosystem
       ON (infosystem.json_content ->> 'uuid') = issue.infosystem_uuid :: TEXT
-    LEFT JOIN comment event
+    LEFT JOIN riha.comment event
       ON issue.comment_id = event.comment_parent_id
     LEFT JOIN (SELECT DISTINCT ON (comment_parent_id)
                  comment_id             last_comment_id,
@@ -96,7 +96,7 @@ CREATE OR REPLACE VIEW comment_type_issue_view AS
                  author_name            last_comment_author_name,
                  organization_name      last_comment_organization_name,
                  organization_code      last_comment_organization_code
-               FROM comment
+               FROM riha.comment
                WHERE type = 'ISSUE_COMMENT'
                ORDER BY comment_parent_id, creation_date DESC) last_comment
       ON issue.comment_id = last_comment.last_comment_parent_id
@@ -105,8 +105,8 @@ CREATE OR REPLACE VIEW comment_type_issue_view AS
     last_comment_creation_date, last_comment_author_name, last_comment_organization_name, last_comment_organization_code
   ORDER BY issue.comment_id;
 
-DROP VIEW IF EXISTS  registered_file_view;
-CREATE OR REPLACE VIEW registered_file_view AS
+DROP VIEW IF EXISTS  riha.registered_file_view;
+CREATE OR REPLACE VIEW riha.registered_file_view AS
   SELECT
     f.uuid            AS file_resource_uuid,
     f.name            AS file_resource_name,
@@ -116,10 +116,10 @@ CREATE OR REPLACE VIEW registered_file_view AS
     i.name            AS infosystem_name,
     i.owner_name      AS infosystem_owner_name,
     i.owner_code      AS infosystem_owner_code
-  FROM registered_file r
-    LEFT JOIN file_resource f
+  FROM riha.registered_file r
+    LEFT JOIN riha.file_resource f
       ON f.uuid = r.file_resource_uuid
-    LEFT JOIN large_object lo
+    LEFT JOIN riha.large_object lo
       ON f.large_object_id = lo.id
     LEFT JOIN (
                 SELECT
@@ -128,5 +128,5 @@ CREATE OR REPLACE VIEW registered_file_view AS
                   json_content #>> '{name}'           AS name,
                   json_content #>> '{owner,name}'     AS owner_name,
                   json_content #>> '{owner,code}'     AS owner_code
-                FROM main_resource_view) i
+                FROM riha.main_resource_view) i
       ON i.uuid = r.main_resource_uuid;
