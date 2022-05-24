@@ -5,6 +5,8 @@
 
 -- DROP SEQUENCE riha.comment_seq;
 
+CREATE SCHEMA riha;
+
 CREATE SEQUENCE riha.comment_seq
 INCREMENT 1
 MINVALUE 1
@@ -203,9 +205,9 @@ CREATE INDEX ixfk_main_resource_kind_template
 
 -- DROP INDEX IF EXISTS idx_main_resource_search;
 
-CREATE INDEX idx_main_resource_search
-  ON riha.main_resource
-  USING GIN (search_content gin_trgm_ops);
+-- CREATE INDEX idx_main_resource_search
+--   ON riha.main_resource
+--   USING GIN (search_content gin_trgm_ops);
 
 
 
