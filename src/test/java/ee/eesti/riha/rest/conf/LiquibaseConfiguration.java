@@ -18,7 +18,7 @@ public class LiquibaseConfiguration {
     @Primary
     public SpringLiquibase liquibase() {
         SpringLiquibase liquibase = new SpringLiquibase();
-        liquibase.setChangeLog("classpath:liquibase/db.changelog.xml");
+        liquibase.setChangeLog("classpath:db/db.changelog-test.xml");
         liquibase.setDataSource(dataSource);
         return liquibase;
     }
