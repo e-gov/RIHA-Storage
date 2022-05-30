@@ -83,26 +83,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- embedded postgres -->
-        <dependency>
-            <groupId>ru.yandex.qatools.embed</groupId>
-            <artifactId>postgresql-embedded</artifactId>
-            <version>2.10</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>de.flapdoodle.embed</groupId>
-                    <artifactId>de.flapdoodle.embed.process</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.process</artifactId>
-            <version>2.0.5</version>
-        </dependency>
-      
-
 		<!-- other -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -139,13 +119,6 @@
 			<artifactId>postgresql</artifactId>
 			<version>1.17.1</version>
 		</dependency>
-
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.11.0</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -211,7 +184,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<disableXmlReport>true</disableXmlReport>
 					<includes>
 						<include>**/DAOTestSuite.class</include>
 					</includes>
