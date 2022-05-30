@@ -9,6 +9,7 @@ import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Main_resource;
+
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -18,10 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,7 +30,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration("/test-applicationContext.xml")
+
 public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
+
   @Test
   public void testFindAll() throws RihaRestException {
     List<Main_resource> main_resources = mainResourceDao.find(Main_resource.class, null, null, null, null);
@@ -72,15 +72,6 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
     Integer rowCount = mainResourceDao.findCount(Main_resource.class, limit, 0, null, null);
     assertNotNull(rowCount);
     assertEquals(limit, rowCount);
-  }
-
-  @Ignore("Currently not using default limit ")
-  @Test
-  public void testFindCountFilteredDefaultLimit() throws Exception {
-    Integer limit = 1234567;
-    Integer rowCount = mainResourceDao.findCount(Main_resource.class, limit, null, null, null);
-    assertNotNull(rowCount);
-    assertEquals((Integer) Finals.NUM_OF_ITEMS_IN_RESULT_ALLOWED, rowCount);
   }
 
   @Test
