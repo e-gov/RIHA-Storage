@@ -12,7 +12,7 @@ import java.io.IOException;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        testApiGenericDAOMainResource.class,
+        TestApiGenericDAOMainResource.class,
         TestDatabase.class,
         TestKindRepository.class,
         TestSecureApiGenericDAO.class,
