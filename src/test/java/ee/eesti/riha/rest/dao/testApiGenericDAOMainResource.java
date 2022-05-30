@@ -11,7 +11,6 @@ import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Main_resource;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 @WebAppConfiguration
 @ContextConfiguration("/test-applicationContext.xml")
 
-public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
+public class testApiGenericDAOMainResource extends AbstractGenericDaoTest {
 
   @Test
   public void testFindAll() throws RihaRestException {
