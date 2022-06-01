@@ -12,7 +12,7 @@ import java.io.IOException;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        TestApiGenericDAOMain_resource.class,
+        TestApiGenericDAOMainResource.class,
         TestDatabase.class,
         TestKindRepository.class,
         TestSecureApiGenericDAO.class,
@@ -21,7 +21,7 @@ import java.io.IOException;
 public class DAOTestSuite {
 
     private static String PROJECT_DB = "riha";
-    private static String POSTGRES_IMAGE = "nexus.example.ee:8500/postgres:10";
+    private static String POSTGRES_IMAGE = "nexus.example.ee:8500/postgres:12";
 
     static DockerImageName myImage = DockerImageName.parse(POSTGRES_IMAGE).asCompatibleSubstituteFor("postgres");
 

@@ -11,7 +11,6 @@ import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Main_resource;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 @WebAppConfiguration
 @ContextConfiguration("/test-applicationContext.xml")
 
-public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
+public class TestApiGenericDAOMainResource extends AbstractGenericDaoTest {
 
   @Test
   public void testFindAll() throws RihaRestException {
@@ -144,7 +143,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_wrongFilter_thenEmpty() throws Exception {
+  public void testFindFilteredWrongFilterThenEmpty() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
 
@@ -163,7 +162,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_oneWrongFilter_thenEmpty() throws Exception {
+  public void testFindFilteredOneWrongFilterThenEmpty() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
 
@@ -183,7 +182,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_notArray_thenError() throws Exception {
+  public void testFindFilteredNotArrayThenError() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
 
@@ -212,7 +211,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_isNull() throws Exception {
+  public void testFindFilteredIsNull() throws Exception {
 
     // testing
     FilterComponent fc = new FilterComponent("parent_uri", "isnull", null);
@@ -230,7 +229,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_isNotNull() throws Exception {
+  public void testFindFilteredIsNotNull() throws Exception {
     // testing
     FilterComponent fc = new FilterComponent("kind", "isnotnull", null);
 
@@ -247,7 +246,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFilteredOverJson_isNull() throws Exception {
+  public void testFindFilteredOverJsonIsNull() throws Exception {
 
     // create test data
     Main_resource mr = createMain_resource_withJsonContent();
@@ -271,7 +270,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFilteredOverJson_isNotNull() throws Exception {
+  public void testFindFilteredOverJsonIsNotNull() throws Exception {
 
     // create test data
     Main_resource mr = createMain_resource_withJsonContent();
@@ -294,7 +293,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_invalidKind_thenEmpty() throws Exception {
+  public void testFindFilteredInvalidKindThenEmpty() throws Exception {
     // create test data
     String badKind = "asdasdgfsdaf_some_kind";
     Main_resource mr = createMain_resource_withTestArray();
@@ -313,7 +312,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_findByKindName_ifIdNotGiven() throws Exception {
+  public void testFindFilteredFindByKindNameIfIdNotGiven() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
     mr.setKind(INFOSYSTEM_KIND_NAME);
@@ -330,7 +329,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_kindIsNull_thenEmpty() throws Exception {
+  public void testFindFilteredKindIsNullThenEmpty() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
     mr.setKind(null);
