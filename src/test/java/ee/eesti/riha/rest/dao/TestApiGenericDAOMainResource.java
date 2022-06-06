@@ -9,8 +9,8 @@ import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Main_resource;
+
 import org.hibernate.exception.ConstraintViolationException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,10 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,7 +29,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration("/test-applicationContext.xml")
-public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
+
+public class TestApiGenericDAOMainResource extends AbstractGenericDaoTest {
+
   @Test
   public void testFindAll() throws RihaRestException {
     List<Main_resource> main_resources = mainResourceDao.find(Main_resource.class, null, null, null, null);
@@ -72,15 +71,6 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
     Integer rowCount = mainResourceDao.findCount(Main_resource.class, limit, 0, null, null);
     assertNotNull(rowCount);
     assertEquals(limit, rowCount);
-  }
-
-  @Ignore("Currently not using default limit ")
-  @Test
-  public void testFindCountFilteredDefaultLimit() throws Exception {
-    Integer limit = 1234567;
-    Integer rowCount = mainResourceDao.findCount(Main_resource.class, limit, null, null, null);
-    assertNotNull(rowCount);
-    assertEquals((Integer) Finals.NUM_OF_ITEMS_IN_RESULT_ALLOWED, rowCount);
   }
 
   @Test
@@ -153,7 +143,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_wrongFilter_thenEmpty() throws Exception {
+  public void testFindFilteredWrongFilterThenEmpty() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
 
@@ -172,7 +162,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_oneWrongFilter_thenEmpty() throws Exception {
+  public void testFindFilteredOneWrongFilterThenEmpty() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
 
@@ -192,7 +182,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_notArray_thenError() throws Exception {
+  public void testFindFilteredNotArrayThenError() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
 
@@ -221,7 +211,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_isNull() throws Exception {
+  public void testFindFilteredIsNull() throws Exception {
 
     // testing
     FilterComponent fc = new FilterComponent("parent_uri", "isnull", null);
@@ -239,7 +229,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_isNotNull() throws Exception {
+  public void testFindFilteredIsNotNull() throws Exception {
     // testing
     FilterComponent fc = new FilterComponent("kind", "isnotnull", null);
 
@@ -256,7 +246,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFilteredOverJson_isNull() throws Exception {
+  public void testFindFilteredOverJsonIsNull() throws Exception {
 
     // create test data
     Main_resource mr = createMain_resource_withJsonContent();
@@ -280,7 +270,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFilteredOverJson_isNotNull() throws Exception {
+  public void testFindFilteredOverJsonIsNotNull() throws Exception {
 
     // create test data
     Main_resource mr = createMain_resource_withJsonContent();
@@ -303,7 +293,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_invalidKind_thenEmpty() throws Exception {
+  public void testFindFilteredInvalidKindThenEmpty() throws Exception {
     // create test data
     String badKind = "asdasdgfsdaf_some_kind";
     Main_resource mr = createMain_resource_withTestArray();
@@ -322,7 +312,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_findByKindName_ifIdNotGiven() throws Exception {
+  public void testFindFilteredFindByKindNameIfIdNotGiven() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
     mr.setKind(INFOSYSTEM_KIND_NAME);
@@ -339,7 +329,7 @@ public class TestApiGenericDAOMain_resource extends AbstractGenericDaoTest {
   }
 
   @Test
-  public void testFindFiltered_kindIsNull_thenEmpty() throws Exception {
+  public void testFindFilteredKindIsNullThenEmpty() throws Exception {
     // create test data
     Main_resource mr = createMain_resource_withTestArray();
     mr.setKind(null);
