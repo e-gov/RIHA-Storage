@@ -54,7 +54,7 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            UUID fileResourceUuid = fileResourceLogic.create(dataHandler.getInputStream(), infoSystemUuid, name, contentType);
+            UUID fileResourceUuid = fileResourceLogic.createFileResource(dataHandler.getInputStream(), infoSystemUuid, name, contentType);
             return Response.ok(fileResourceUuid.toString()).build();
         } catch (IOException e) {
             throw new IllegalStateException("Could not retrieve request attachment input stream", e);

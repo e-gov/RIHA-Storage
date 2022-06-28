@@ -161,7 +161,7 @@ public final class MyExceptionHandler {
       String varCharLength = errMsg.split("character varying\\(")[1].split("\\)")[0];
       error.setErrcode(ErrorCodes.VARCHAR_TOO_LONG_ERROR);
       error.setErrmsg(ErrorCodes.VARCHAR_TOO_LONG_ERROR_MSG + varCharLength);
-      if (Integer.valueOf(varCharLength) == VERSION_MAX_LENGTH) {
+      if (Integer.valueOf(varCharLength).equals(VERSION_MAX_LENGTH)) {
         error.setErrmsg(error.getErrmsg() + " (version)");
       }
     } else {
