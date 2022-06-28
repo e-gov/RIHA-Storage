@@ -35,9 +35,10 @@ public class HealthServiceImpl implements HealthService {
     Date appStartTime = new Date(runtimeBeen.getStartTime());
 
     private String getDbStatus() throws SQLException {
-        Connection connection = dataSource.getConnection();
-        boolean isValid = connection.isValid(5);
-        return isValid ? "UP" : "DOWN";
+        try(Connection connection = dataSource.getConnection()){
+            boolean isValid = connection.isValid(5);
+            return isValid ? "UP" : "DOWN";
+        }
     }
 
     @Override
