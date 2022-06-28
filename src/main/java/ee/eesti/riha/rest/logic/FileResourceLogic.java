@@ -45,11 +45,6 @@ public class FileResourceLogic {
      * @param contentType resource content type
      * @return UUID of created file resource
      */
-    public UUID create(InputStream inputStream, UUID infoSystemUuid, String name, String contentType) {
-        UUID uuid = createFileResource(inputStream, infoSystemUuid, name, contentType);
-        indexFileResource(uuid);
-        return uuid;
-    }
 
     @Transactional
     public UUID createFileResource(InputStream inputStream, UUID infoSystemUuid, String name, String contentType) {
@@ -72,6 +67,8 @@ public class FileResourceLogic {
 
         UUID uuid = fileResourceDAO.create(entity);
         logger.info("Created file resource '{}'", uuid);
+
+        indexFileResource(uuid);
 
         return uuid;
     }
