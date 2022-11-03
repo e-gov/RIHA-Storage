@@ -8,21 +8,21 @@
         <comment>sync Live state with Develop</comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/update_20180301_add_json_content_to_large_object_table.sql"
+                 path="./liquibase/update/update_20180301_add_json_content_to_large_object_table.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
 
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/update_20180306_add_registered_file_table.sql"
+                 path="./liquibase/update/update_20180306_add_registered_file_table.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
 
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/update_20180307_create_registered_file_view.sql"
+                 path="./liquibase/update/update_20180307_create_registered_file_view.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
 
@@ -30,21 +30,21 @@
 
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/update_20180307_extract_last_comment_as_flat_structure.sql"
+                 path="./liquibase/update/update_20180307_extract_last_comment_as_flat_structure.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
 
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/update_20180307_maintenance.sql"
+                 path="./liquibase/update/update_20180307_maintenance.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
 
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/update_20181220_rename_json_content_column_of_large_object_table.sql"
+                 path="./liquibase/update/update_20181220_rename_json_content_column_of_large_object_table.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -53,7 +53,7 @@
         <comment>DataObjectSearch view creation</comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190206_create_dataobject_search_view.sql"
+                 path="./liquibase/update/20190206_create_dataobject_search_view.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -62,7 +62,7 @@
         <comment>DataObjectSearch view creation</comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190212_create_dataobject_search_view_with_search_name.sql"
+                 path="./liquibase/update/20190212_create_dataobject_search_view_with_search_name.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -71,7 +71,7 @@
         <comment>DataObjectSearch view refactoring</comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190213_create_dataobject_search_view_with_search_name.sql"
+                 path="./liquibase/update/20190213_create_dataobject_search_view_with_search_name.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -80,7 +80,7 @@
         <comment>Added system short name as part of the surrogate ID field</comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190219_create_dataobject_search_view.sql"
+                 path="./liquibase/update/20190219_create_dataobject_search_view.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -89,7 +89,7 @@
         <comment>Added search_text field, minor refactoring</comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190224_create_dataobject_search_view.sql"
+                 path="./liquibase/update/20190224_create_dataobject_search_view.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -98,7 +98,7 @@
         <comment>bugfixing riha.main_resource_current_version </comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190226_main_resource_current_version.sql"
+                 path="./liquibase/update/20190226_main_resource_current_version.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -107,7 +107,7 @@
     <changeSet id="RIHAKB-656" author="aleksandr">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190124_add_used_type_relations_info_to_main_resource_view.sql"
+                 path="./liquibase/update/20190124_add_used_type_relations_info_to_main_resource_view.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -116,7 +116,7 @@
     <changeSet id="RIHAKB-761" author="vadim">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190220_create_classifier_table_and_content.sql"
+                 path="./liquibase/update/20190220_create_classifier_table_and_content.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -124,7 +124,7 @@
     <changeSet id="RIHAKB-740" author="aleksandr">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190304_main_resource_view_update.sql"
+                 path="./liquibase/update/20190304_main_resource_view_update.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -132,7 +132,7 @@
     <changeSet id="RIHAKB-740-1" author="aleksandr">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190306_issue_type_classifier.sql"
+                 path="./liquibase/update/20190306_issue_type_classifier.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -140,7 +140,7 @@
     <changeSet id="RIHAKB-740-2" author="aleksandr">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20190308_main_resource_view_corrections.sql"
+                 path="./liquibase/update/20190308_main_resource_view_corrections.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -148,7 +148,7 @@
     <changeSet id="RIHAKB-993" author="kristjankr">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20201117_update_classifier.sql"
+                 path="./liquibase/update/20201117_update_classifier.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -156,7 +156,7 @@
     <changeSet id="RIHAKB-975" author="kristjankr">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20201711_update_main_resource_view.sql"
+                 path="./liquibase/update/20201711_update_main_resource_view.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -164,7 +164,7 @@
     <changeSet id="RIHAKB-1078" author="makarsokarev">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20220103_update_classifier.sql"
+                 path="./liquibase/update/20220103_update_classifier.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -172,7 +172,7 @@
     <changeSet id="RIHAKB-1084" author="makarsokarev">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20220601_update_main_resource_relation_view.sql"
+                 path="./liquibase/update/20220601_update_main_resource_relation_view.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -180,7 +180,7 @@
     <changeSet id="RIHAKB-1075" author="makarsokarev">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20221101_update_classifier.sql"
+                 path="./liquibase/update/20221101_update_classifier.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
@@ -188,7 +188,7 @@
     <changeSet id="RIHAKB-1092" author="makarsokarev">
         <sqlFile dbms="postgresql"
                  encoding="utf8"
-                 path="./update/20220201_update_large_object_seq.sql"
+                 path="./liquibase/update/20220201_update_large_object_seq.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"
         />
