@@ -68,8 +68,6 @@ public class FileResourceLogic {
         UUID uuid = fileResourceDAO.create(entity);
         logger.info("Created file resource '{}'", uuid);
 
-        indexFileResource(uuid);
-
         return uuid;
     }
 

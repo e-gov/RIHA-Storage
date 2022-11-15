@@ -65,16 +65,18 @@ public class FileResourceIndexingService {
     public void index(UUID uuid, boolean reindex) throws IOException, SQLException {
         FileResource fileResource = fileResourceDAO.get(uuid);
 
-        if (!reindex && fileResource.getLargeObject().isIndexed()) {
-            logger.info("File resource '{}' already indexed, skipping", fileResource.getUuid());
-            return;
+        if (fileResource != null) {
+            if (!reindex && fileResource.getLargeObject().isIndexed()) {
+                logger.info("File resource '{}' already indexed, skipping", fileResource.getUuid());
+                return;
+            }
+
+            logger.info("Starting file resource '{}' indexing", fileResource.getUuid());
+            createIndex(fileResource);
+
+            fileResource.getLargeObject().setIndexed(true);
+            logger.info("File resource '{}' indexing is complete", fileResource.getUuid());
         }
-
-        logger.info("Starting file resource '{}' indexing", fileResource.getUuid());
-        createIndex(fileResource);
-
-        fileResource.getLargeObject().setIndexed(true);
-        logger.info("File resource '{}' indexing is complete", fileResource.getUuid());
     }
 
     /**

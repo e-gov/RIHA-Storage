@@ -38,6 +38,7 @@ public class CsvToGsonConverter implements ToGsonConverter {
     private static final String CSV_FILE_SUFFIX = ".csv";
     private static final CSVFormat DEFAULT_WITH_HEADERS = CSVFormat.DEFAULT
             .withDelimiter(DELIMITER)
+            .withQuote(null)
             .withFirstRecordAsHeader()
             .withIgnoreEmptyLines()
             .withIgnoreSurroundingSpaces();
