@@ -36,13 +36,12 @@ public class CsvToGsonConverter implements ToGsonConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvToGsonConverter.class);
 
     private static final String CSV_FILE_SUFFIX = ".csv";
-    private static final CSVFormat DEFAULT_WITH_HEADERS = CSVFormat.DEFAULT.builder()
-            .setHeader().setSkipHeaderRecord(true)
-            .setQuote(null)
-            .setDelimiter(DELIMITER)
-            .setIgnoreEmptyLines(true)
-            .setIgnoreSurroundingSpaces(true)
-            .build();
+    private static final CSVFormat DEFAULT_WITH_HEADERS = CSVFormat.DEFAULT
+            .withDelimiter(DELIMITER)
+            .withQuote(null)
+            .withFirstRecordAsHeader()
+            .withIgnoreEmptyLines()
+            .withIgnoreSurroundingSpaces();
 
     private static final List<MediaType> SUPPORTED_MEDIA_TYPES = Collections.singletonList(MediaType.valueOf("text/csv"));
 
