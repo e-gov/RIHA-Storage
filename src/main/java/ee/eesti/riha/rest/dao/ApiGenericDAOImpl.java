@@ -45,6 +45,7 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -64,7 +65,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   private final SqlFilter sqlFilter;
 
-  public ApiGenericDAOImpl(SessionFactory sessionFactory, SqlFilter sqlFilter) {
+  public ApiGenericDAOImpl(@Qualifier("sessionFactory") SessionFactory sessionFactory, SqlFilter sqlFilter) {
     this.sessionFactory = sessionFactory;
     this.sqlFilter = sqlFilter;
   }
