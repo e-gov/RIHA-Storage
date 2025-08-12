@@ -314,7 +314,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
                 .append(" OFFSET ")
                 .append(offset)
                 .append(") AS foo;");
-        query = session.createNativeQuery(queryString.toString(), Number.class);
+        query = session.createNativeQuery(queryString.toString(), BigInteger.class);
       } else {
         // get object of type clazz in results
         query = session.createNativeQuery(queryString.toString(), clazz);
@@ -400,7 +400,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
   private Query countNoFilter(Session session, String tableName, Integer limit, Integer offset) {
     // no filter, only limit and offset
     return session.createNativeQuery("SELECT count(*) FROM " + "(SELECT * from " + tableName + " LIMIT " + limit
-        + " OFFSET " + offset + ") AS foo;", Number.class);
+        + " OFFSET " + offset + ") AS foo;", BigInteger.class);
   }
 
   /*
@@ -492,7 +492,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     Set<K> createdIds = new HashSet<>();
     for (T t : objects) {
-      Integer id = (Integer) session.save(t);
+      session.persist(t);
+      Integer id = (Integer) session.getIdentifier(t);
       createdIds.add((K) id);
     }
 
@@ -544,7 +545,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       updateInfo.setJson_content(null);
 
       copyNotNullValues(existing, newValue);
-      session.update(existing);
+      session.merge(existing);
 
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
         | IntrospectionException e) {
@@ -562,7 +563,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     try {
       copyNotNullValues(existing, updatedEntity);
-      session.update(existing);
+      session.merge(existing);
     } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
       LOG.error("Failed to update entity {}", existing);
       LOG.debug("Failed to update entity", e);
@@ -739,7 +740,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           updateInfo.setJson_content(null);
 
           copyNotNullValues(item, updateData);
-          session.update(item);
+          session.merge(item);
 
           // set updateInfo json_content to its old value
           updateInfo.setJson_content(updateInfoJsonContent);
@@ -970,7 +971,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Query q = session.createNativeQuery("select count(*) from " + tableName +
                                              " where (" + Finals.JSON_CONTENT + "->" +
                                              StringUtils.join(conditionTokens, "->") +
-                                             ") is not null;", Number.class);
+                                             ") is not null;", BigInteger.class);
     q.setProperties(parameters);
     int rowCount = ((Number) q.uniqueResult()).intValue();
     return rowCount > 0;
