@@ -8,11 +8,11 @@ import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
-import static javax.persistence.GenerationType.AUTO;
+import static jakarta.persistence.GenerationType.AUTO;
 
 @Entity
 @Table(name = "main_resource_relation")
@@ -36,11 +36,11 @@ public class Main_resource_relation implements BaseModel {
     private Date modified_date;
 
     @Column(name = "infosystem_uuid")
-    @Type(type = "pg-uuid")
+    @Type(pg-uuid.class)
     private UUID infosystem_uuid;
 
     @Column(name = "related_infosystem_uuid")
-    @Type(type = "pg-uuid")
+    @Type(pg-uuid.class)
     private UUID related_infosystem_uuid;
 
     @Column(name = "type")

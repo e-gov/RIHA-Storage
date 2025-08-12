@@ -4,7 +4,7 @@ package ee.eesti.riha.rest.model.readonly;
 import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
@@ -33,7 +33,7 @@ public class DataObjectSearchView {
     private String shortName;
 
     @Column(name = "file_uuid")
-    @Type(type = "pg-uuid")
+    @Type(pg-uuid.class)
     private UUID fileUuid;
 
     @Column(name = "DIA")

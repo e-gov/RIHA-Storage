@@ -6,7 +6,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -19,7 +19,7 @@ public class FileResource {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "uuid", unique = true)
-    @Type(type = "pg-uuid")
+    @Type(pg-uuid.class)
     private UUID uuid;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Finals.DATE_FORMAT)
@@ -28,7 +28,7 @@ public class FileResource {
     private Date creationDate;
 
     @Column(name = "infosystem_uuid")
-    @Type(type = "pg-uuid")
+    @Type(pg-uuid.class)
     private UUID infoSystemUuid;
 
     @Column(name = "name")

@@ -1,12 +1,7 @@
 package ee.eesti.riha.rest.integration.special;
 
 import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.MyTestRunner;
@@ -31,12 +26,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -76,7 +71,7 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
   // needed to delete test files
   private List<Integer> connectedDocIds = new ArrayList<>();
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
     serviceHelpingCreateDeleteTestData = JAXRSClientFactory.fromClient(webClient, ApiClassicService.class, true);
@@ -98,7 +93,7 @@ public class TestApiCGIServiceImpl_POST_opNewVersion {
     connectedData_objectId = IntegrationTestHelper.addTestDataToDB(serviceHelpingCreateDeleteTestData, TestFinals.DATA_OBJECT, dataJson.toString());
   }
 
-  @After
+  @AfterEach
   public void afterTest() throws IOException {
     for (Integer idForTestEntry : idUnderTestList) {
       IntegrationTestHelper.removeTestDataFromDB(serviceHelpingCreateDeleteTestData, tableUnderTest, idForTestEntry);

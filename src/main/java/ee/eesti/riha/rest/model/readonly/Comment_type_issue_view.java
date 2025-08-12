@@ -10,7 +10,7 @@ import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -37,7 +37,7 @@ public class Comment_type_issue_view implements BaseModel {
     private Date modified_date;
 
     @Column(name = "infosystem_uuid")
-    @Type(type = "pg-uuid")
+    @Type(pg-uuid.class)
     private UUID infosystem_uuid;
 
     @Column(name = "comment")

@@ -4,7 +4,7 @@ import ee.eesti.riha.rest.TestHelper;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import org.springframework.util.StringUtils;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 
