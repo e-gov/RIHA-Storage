@@ -4,6 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class NamesDAOImpl implements NamesDAO {
 
   @Autowired
+  @Qualifier("sessionFactory")
   SessionFactory sessionFactory;
 
   private static final int MAX_NUM_OF_COLUMNS = 3;

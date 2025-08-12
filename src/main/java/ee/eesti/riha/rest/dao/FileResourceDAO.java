@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +21,7 @@ public class FileResourceDAO {
 
     private final SessionFactory sessionFactory;
 
-    public FileResourceDAO(SessionFactory sessionFactory) {
+    public FileResourceDAO(@Qualifier("sessionFactory") SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 

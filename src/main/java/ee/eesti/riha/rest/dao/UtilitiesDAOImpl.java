@@ -12,6 +12,7 @@ import org.hibernate.query.NativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
@@ -29,6 +30,7 @@ import java.math.BigInteger;
 public class UtilitiesDAOImpl<T> implements UtilitiesDAO<T> {
 
   @Autowired
+  @Qualifier("sessionFactory")
   private SessionFactory sessionFactory;
 
   private static final Logger LOG = LoggerFactory.getLogger(UtilitiesDAOImpl.class);

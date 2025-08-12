@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 // TODO: Auto-generated Javadoc
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 public class GenericDAOImpl<T> implements GenericDAO<T> {
 
   @Autowired
+  @Qualifier("sessionFactory")
   SessionFactory sessionFactory;
 
   /*

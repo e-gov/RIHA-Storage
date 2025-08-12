@@ -661,7 +661,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Query queryExisting;
     if (DaoHelper.isFieldPartOfHibernateModel(idFieldName, clazz)) {
       FieldTypeHolder idField = FieldTypeHolder.construct(updateInfo, idFieldName);
-      queryExisting = session.createQuery("FROM " + tableName + " item WHERE item." + idFieldName + "=:idFieldValue");
+      queryExisting = session.createQuery("FROM " + tableName + " item WHERE item." + idFieldName + "=:idFieldValue", clazz);
       queryExisting.setParameter("idFieldValue", idField.getValue());
     } else if (jsonFieldExists(session, tableName, idFieldName)) {
       // select * from main_resource
@@ -773,7 +773,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     T toBeDeleted = find(type, id);
     if (toBeDeleted != null) {
-      session.delete(toBeDeleted);
+      session.remove(toBeDeleted);
       numOfDeleted = 1;
     }
 
@@ -792,7 +792,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     Session session = sessionFactory.getCurrentSession();
 
-    session.delete(object);
+    session.remove(object);
 
   }
 
@@ -808,7 +808,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Session session = sessionFactory.getCurrentSession();
 
     for (T t : objects) {
-      session.delete(t);
+      session.remove(t);
     }
 
   }
@@ -831,7 +831,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class
             && DaoHelper.isFieldPartOfModel(key, Finals.getClassRepresentingTable(tableName))) {
       String documentHQL = "select document_id from " + className + " where " + key + " IN (:fieldValues)";
-      documentQuery = session.createQuery(documentHQL);
+      documentQuery = session.createQuery(documentHQL, Integer.class);
     }
     return documentQuery;
   }
