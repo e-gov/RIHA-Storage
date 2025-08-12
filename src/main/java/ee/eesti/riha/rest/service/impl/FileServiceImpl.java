@@ -41,6 +41,8 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Response upload(Attachment attachment, String infoSystemUuidStr) {
+        LOG.info("=== FILE UPLOAD DEBUG: Starting upload process ===");
+        
         jakarta.activation.DataHandler dataHandler = attachment.getDataHandler();
         String name = dataHandler.getName();
         String contentType = dataHandler.getContentType();
@@ -48,16 +50,29 @@ public class FileServiceImpl implements FileService {
                 ? UUID.fromString(infoSystemUuidStr)
                 : null;
 
+        LOG.info("FILE UPLOAD DEBUG: name='{}', contentType='{}', infoSystemUuid='{}'", name, contentType, infoSystemUuid);
+
         if (LOG.isInfoEnabled()) {
             LOG.info("Receiving upload of file '{}' with content type '{}'", name, contentType);
         }
 
         try {
+            LOG.info("FILE UPLOAD DEBUG: About to call createFileResource");
             UUID fileResourceUuid = fileResourceLogic.createFileResource(dataHandler.getInputStream(), infoSystemUuid, name, contentType);
+            LOG.info("FILE UPLOAD DEBUG: createFileResource returned UUID: {}", fileResourceUuid);
+            
+            LOG.info("FILE UPLOAD DEBUG: About to call indexFileResource");
             fileResourceLogic.indexFileResource(fileResourceUuid);
+            LOG.info("FILE UPLOAD DEBUG: indexFileResource completed");
+            
+            LOG.info("FILE UPLOAD DEBUG: Returning successful response with UUID: {}", fileResourceUuid);
             return Response.ok(fileResourceUuid.toString()).build();
         } catch (IOException e) {
+            LOG.error("FILE UPLOAD DEBUG: IOException occurred", e);
             throw new IllegalStateException("Could not retrieve request attachment input stream", e);
+        } catch (Exception e) {
+            LOG.error("FILE UPLOAD DEBUG: Unexpected exception occurred", e);
+            throw e;
         }
     }
 
