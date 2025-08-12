@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -21,7 +22,6 @@ import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 import jakarta.persistence.metamodel.SingularAttribute;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -38,7 +38,7 @@ public abstract class AbstractQueryGrid {
 
     private boolean initialized = false;
 
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
 
     /**
