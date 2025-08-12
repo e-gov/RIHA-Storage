@@ -22,7 +22,7 @@
 		<java.version>17</java.version>
 
 		<liquibase.version>4.17.2</liquibase.version>
-		<cxf.version>3.5.2</cxf.version>
+		<cxf.version>4.0.5</cxf.version>
 	</properties>
 
 	<dependencies>

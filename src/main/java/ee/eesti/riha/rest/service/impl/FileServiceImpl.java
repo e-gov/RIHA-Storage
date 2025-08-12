@@ -41,9 +41,9 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Response upload(Attachment attachment, String infoSystemUuidStr) {
-        javax.activation.DataHandler javaxDataHandler = attachment.getDataHandler();
-        String name = javaxDataHandler.getName();
-        String contentType = javaxDataHandler.getContentType();
+        jakarta.activation.DataHandler dataHandler = attachment.getDataHandler();
+        String name = dataHandler.getName();
+        String contentType = dataHandler.getContentType();
         UUID infoSystemUuid = StringUtils.hasText(infoSystemUuidStr)
                 ? UUID.fromString(infoSystemUuidStr)
                 : null;
@@ -53,7 +53,7 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            UUID fileResourceUuid = fileResourceLogic.createFileResource(javaxDataHandler.getInputStream(), infoSystemUuid, name, contentType);
+            UUID fileResourceUuid = fileResourceLogic.createFileResource(dataHandler.getInputStream(), infoSystemUuid, name, contentType);
             fileResourceLogic.indexFileResource(fileResourceUuid);
             return Response.ok(fileResourceUuid.toString()).build();
         } catch (IOException e) {
