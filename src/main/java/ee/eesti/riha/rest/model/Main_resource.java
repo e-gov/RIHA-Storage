@@ -11,7 +11,6 @@ import jakarta.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDefs;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -30,7 +29,6 @@ import ee.eesti.riha.rest.model.util.FieldIsPK;
  * The Class Main_resource.
  */
 // @TypeDefs({ @TypeDef(name = "StringJsonObject", typeClass = StringJsonUserType.class) })
-@TypeDefs({})
 @Transactional
 @Entity
 @Table(name = "main_resource")
@@ -58,7 +56,7 @@ public class Main_resource implements BaseModel {
   // @Type(type = "StringJsonObject")
   @JsonRawValue
   // otherwise mapping exception
-  @Type(JsonObjectUserType.class)
+  @Type(value = JsonObjectUserType.class)
   private JsonObject json_content;
 
   @JsonIgnore

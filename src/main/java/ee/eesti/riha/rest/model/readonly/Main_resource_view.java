@@ -8,13 +8,11 @@ import ee.eesti.riha.rest.model.hibernate.JsonObjectUserType;
 import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDefs;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.*;
 import java.util.Date;
 
-@TypeDefs({})
 @Transactional
 @Entity
 @Table(name = "main_resource_view")
@@ -31,7 +29,7 @@ public class Main_resource_view implements BaseModel {
     private String uri;
 
     @JsonRawValue
-    @Type(JsonObjectUserType.class)
+    @Type(value = JsonObjectUserType.class)
     private JsonObject json_content;
 
     @JsonIgnore

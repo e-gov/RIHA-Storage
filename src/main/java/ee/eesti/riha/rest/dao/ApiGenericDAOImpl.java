@@ -21,7 +21,6 @@ import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -314,10 +313,10 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
                 .append(" OFFSET ")
                 .append(offset)
                 .append(") AS foo;");
-        query = session.createSQLQuery(queryString.toString());
+        query = session.createNativeQuery(queryString.toString(), Number.class);
       } else {
         // get object of type clazz in results
-        query = session.createSQLQuery(queryString.toString()).addEntity(clazz);
+        query = session.createNativeQuery(queryString.toString(), clazz);
         query.setMaxResults(limit);
         query.setFirstResult(offset);
       }
@@ -359,7 +358,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       String orderByParameterName = "jOrderParameter";
       qry.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
 
-      NativeQuery<T> query = session.createSQLQuery(qry.toString()).addEntity(clazz);
+      NativeQuery<T> query = session.createNativeQuery(qry.toString(), clazz);
 
       String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
       query.setParameter(orderByParameterName, jsonOrderByFieldName);
@@ -399,8 +398,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
    */
   private Query countNoFilter(Session session, String tableName, Integer limit, Integer offset) {
     // no filter, only limit and offset
-    return session.createSQLQuery("SELECT count(*) FROM " + "(SELECT * from " + tableName + " LIMIT " + limit
-        + " OFFSET " + offset + ") AS foo;");
+    return session.createNativeQuery("SELECT count(*) FROM " + "(SELECT * from " + tableName + " LIMIT " + limit
+        + " OFFSET " + offset + ") AS foo;", Number.class);
   }
 
   /*
@@ -475,7 +474,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     LOG.info(JsonHelper.GSON.toJson(object));
     session.save(object);
 
-    Serializable id = session.getIdentifier(object);
+    Object id = session.getIdentifier(object);
     return Arrays.asList((K) id);
 
   }
@@ -667,7 +666,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       // where json_content ->> 'test_abc' = '1234';
       String idFieldNameParameter = "idFieldNameParam";
       String sql = "SELECT * FROM " + tableName + " where json_content ->> :" + idFieldNameParameter + " =:idFieldValue";
-      queryExisting = session.createSQLQuery(sql).addEntity(clazz);
+      queryExisting = session.createNativeQuery(sql, clazz);
 
       BaseModel bm = (BaseModel) updateInfo;
       String fieldValueString = bm.getJson_content().get(idFieldName).getAsString();
@@ -852,7 +851,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       String keyParameter = "keyParameter";
       String documentSQL = "select document_id from " + className + " where json_content ->> :" + keyParameter
           + " IN (:fieldValues)";
-      documentQuery = session.createSQLQuery(documentSQL);
+      documentQuery = session.createNativeQuery(documentSQL, Integer.class);
       documentQuery.setParameter(keyParameter, key);
     }
     return documentQuery;
@@ -901,7 +900,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       // where json_content ->> 'test_abc' IN ('test_123', 'test_1234');
       String keyParameter = "keyParam";
       String sql = "delete from " + className + " where json_content ->> :" + keyParameter + " IN (:fieldValues)";
-      query = session.createSQLQuery(sql);
+      query = session.createNativeQuery(sql);
       query.setParameter(keyParameter, key);
       // psql cannot get number from json, only json or text
       // therefore possible numbers must be converted to strings
@@ -967,12 +966,12 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     }
 
     // Create native SQL query with key tokens
-    Query q = session.createSQLQuery("select count(*) from " + tableName +
+    Query q = session.createNativeQuery("select count(*) from " + tableName +
                                              " where (" + Finals.JSON_CONTENT + "->" +
                                              StringUtils.join(conditionTokens, "->") +
-                                             ") is not null;");
+                                             ") is not null;", Number.class);
     q.setProperties(parameters);
-    int rowCount = ((BigInteger) q.uniqueResult()).intValue();
+    int rowCount = ((Number) q.uniqueResult()).intValue();
     return rowCount > 0;
   }
 

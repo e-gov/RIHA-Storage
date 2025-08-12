@@ -10,7 +10,6 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDefs;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -29,7 +28,6 @@ import ee.eesti.riha.rest.model.util.FieldIsPK;
  * The Class Document.
  */
 // @TypeDefs({ @TypeDef(name = "StringJsonObject", typeClass = StringJsonUserType.class) })
-@TypeDefs({})
 @Transactional
 @Entity
 @Table(name = "document")
@@ -50,7 +48,7 @@ public class Document implements BaseModel {
   // @Type(type = "StringJsonObject")
   @JsonRawValue
   // otherwise mapping exception
-  @Type(JsonObjectUserType.class)
+  @Type(value = JsonObjectUserType.class)
   private JsonObject json_content;
 
   private Character state;

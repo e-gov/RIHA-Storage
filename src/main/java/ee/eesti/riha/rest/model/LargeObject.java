@@ -7,7 +7,6 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.model.hibernate.JsonObjectUserType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDefs;
 
 import jakarta.persistence.*;
 import java.sql.Blob;
@@ -21,7 +20,6 @@ import static jakarta.persistence.GenerationType.AUTO;
 @Entity
 @Table(name = "large_object")
 @DynamicUpdate
-@TypeDefs({})
 public class LargeObject {
 
     @Id
@@ -47,7 +45,7 @@ public class LargeObject {
 
     @JsonIgnore
     @Column(name = "search_content")
-    @Type(JsonObjectUserType.class)
+    @Type(value = JsonObjectUserType.class)
     private JsonObject searchContent;
 
     @JsonIgnore

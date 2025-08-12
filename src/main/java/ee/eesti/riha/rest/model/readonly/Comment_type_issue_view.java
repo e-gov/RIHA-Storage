@@ -37,7 +37,7 @@ public class Comment_type_issue_view implements BaseModel {
     private Date modified_date;
 
     @Column(name = "infosystem_uuid")
-    @Type(pg-uuid.class)
+    
     private UUID infosystem_uuid;
 
     @Column(name = "comment")

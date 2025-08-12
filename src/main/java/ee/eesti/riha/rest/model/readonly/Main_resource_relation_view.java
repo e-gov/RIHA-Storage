@@ -35,7 +35,7 @@ public class Main_resource_relation_view implements BaseModel {
     private Date modified_date;
 
     @Column(name = "infosystem_uuid")
-    @Type(pg-uuid.class)
+    
     private UUID infosystem_uuid;
 
     @Column(name = "infosystem_name")
@@ -45,7 +45,7 @@ public class Main_resource_relation_view implements BaseModel {
     private String infosystem_short_name;
 
     @Column(name = "related_infosystem_uuid")
-    @Type(pg-uuid.class)
+    
     private UUID related_infosystem_uuid;
 
     @Column(name = "related_infosystem_name")

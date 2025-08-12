@@ -33,7 +33,7 @@ public class DataObjectSearchView {
     private String shortName;
 
     @Column(name = "file_uuid")
-    @Type(pg-uuid.class)
+    
     private UUID fileUuid;
 
     @Column(name = "DIA")

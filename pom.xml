@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.13</version>
+		<version>3.4.8</version>
 		<relativePath/>
 	</parent>
 
@@ -110,7 +110,6 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
-			<version>1.20.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.ws</groupId>
@@ -121,7 +120,11 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>1.20.4</version>
+		</dependency>
+		<!-- Compatibility for UUID types -->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-community-dialects</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -136,6 +139,36 @@
 			<testResource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
+				<excludes>
+					<exclude>**/*.xlsx</exclude>
+					<exclude>**/*.xls</exclude>
+					<exclude>**/*.pdf</exclude>
+					<exclude>**/*.doc</exclude>
+					<exclude>**/*.docx</exclude>
+					<exclude>**/*.png</exclude>
+					<exclude>**/*.jpg</exclude>
+					<exclude>**/*.jpeg</exclude>
+					<exclude>**/*.gif</exclude>
+					<exclude>**/*.zip</exclude>
+					<exclude>**/*.jar</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>**/*.xlsx</include>
+					<include>**/*.xls</include>
+					<include>**/*.pdf</include>
+					<include>**/*.doc</include>
+					<include>**/*.docx</include>
+					<include>**/*.png</include>
+					<include>**/*.jpg</include>
+					<include>**/*.jpeg</include>
+					<include>**/*.gif</include>
+					<include>**/*.zip</include>
+					<include>**/*.jar</include>
+				</includes>
 			</testResource>
 		</testResources>
 		<pluginManagement>

@@ -75,7 +75,7 @@ public class NamesDAOImpl implements NamesDAO {
   private Map<String, String> getGeneric(String sql, List values) {
     Session session = sessionFactory.getCurrentSession();
 
-    Query query = session.createSQLQuery(sql);
+    Query<Object[]> query = session.createNativeQuery(sql, Object[].class);
     query.setParameterList("values", values);
     List<Object[]> result = query.list();
 

@@ -8,7 +8,7 @@ import ee.eesti.riha.rest.model.Main_resource;
 import ee.eesti.riha.rest.model.Main_resource_relation;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
+import org.hibernate.query.NativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +57,8 @@ public class UtilitiesDAOImpl<T> implements UtilitiesDAO<T> {
     } else {
       throw new IllegalStateException("Wrong class provided or code needs class->seq mapping specified.");
     }
-    Query query = session.createSQLQuery("SELECT nextval('" + seqName + "')");
-    int nextPK = ((BigInteger) query.uniqueResult()).intValue();
+    NativeQuery<BigInteger> query = session.createNativeQuery("SELECT nextval('" + seqName + "')", BigInteger.class);
+    int nextPK = query.uniqueResult().intValue();
     LOG.info("NEXT PK: " + nextPK);
     return nextPK;
 

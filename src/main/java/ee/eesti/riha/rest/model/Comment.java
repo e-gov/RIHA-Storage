@@ -9,7 +9,6 @@ import ee.eesti.riha.rest.model.hibernate.JsonObjectUserType;
 import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
 import ee.eesti.riha.rest.model.util.FieldIsPK;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDefs;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.*;
@@ -21,7 +20,6 @@ import java.util.UUID;
  * The Class Comment.
  */
 // @TypeDefs({ @TypeDef(name = "StringJsonObject", typeClass = StringJsonUserType.class) })
-@TypeDefs({})
 @Transactional
 @Entity
 @Table(name = "comment")
@@ -42,7 +40,6 @@ public class Comment implements BaseModel {
   @Temporal(TemporalType.TIMESTAMP)
   private Date modified_date;
 
-  @Type(pg-uuid.class)
   private UUID infosystem_uuid;
 
   @Column(name = "title")

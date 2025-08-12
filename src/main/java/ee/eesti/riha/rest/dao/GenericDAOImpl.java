@@ -1,11 +1,8 @@
 package ee.eesti.riha.rest.dao;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.logging.Logger;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.transaction.Transactional;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,22 +21,18 @@ public class GenericDAOImpl<T> implements GenericDAO<T> {
   @Autowired
   SessionFactory sessionFactory;
 
-  private static final Logger LOG = Logger.getLogger("GeneridDAO");
-
   /*
    * (non-Javadoc)
    * 
    * @see ee.eesti.riha.rest.dao.GenericDAO#findAll(java.lang.Class)
    */
   @Override
-  @SuppressWarnings("deprecation")
   public List<T> findAll(Class<T> clazz) {
     Session session = sessionFactory.getCurrentSession();
     CriteriaQuery<T> cq = session.getCriteriaBuilder().createQuery(clazz);
-
-    // In Hibernate 6.0, the ResultTransformer will be replaced by a @FunctionalInterface and for this reason, the setResultTransformer() method in org.hibernate.query.Query is deprecated.
-    // There is no replacement for ResultTransformer in Hibernate 5.3, therefore as recommended here, for the moment it can be used as-is.
-    return session.createQuery(cq.select(cq.from(clazz))).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).getResultList();
+    
+    // In Hibernate 6, distinct handling is done through the query itself
+    return session.createQuery(cq.select(cq.from(clazz)).distinct(true)).getResultList();
   }
 
   /*
@@ -77,8 +70,8 @@ public class GenericDAOImpl<T> implements GenericDAO<T> {
   private int createOrUpdate(T object) {
     Session session = sessionFactory.getCurrentSession();
 
-    session.saveOrUpdate(object);
-    Serializable id = session.getIdentifier(object);
+    session.merge(object);
+    Object id = session.getIdentifier(object);
 
     return (Integer) id;
 
@@ -103,7 +96,7 @@ public class GenericDAOImpl<T> implements GenericDAO<T> {
   public void delete(T object) {
     Session session = sessionFactory.getCurrentSession();
 
-    session.delete(object);
+    session.remove(object);
 
   }
 

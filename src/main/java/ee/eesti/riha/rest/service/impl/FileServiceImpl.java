@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.UUID;
-import jakarta.activation.DataHandler;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -42,9 +41,9 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Response upload(Attachment attachment, String infoSystemUuidStr) {
-        DataHandler dataHandler = attachment.getDataHandler();
-        String name = dataHandler.getName();
-        String contentType = dataHandler.getContentType();
+        javax.activation.DataHandler javaxDataHandler = attachment.getDataHandler();
+        String name = javaxDataHandler.getName();
+        String contentType = javaxDataHandler.getContentType();
         UUID infoSystemUuid = StringUtils.hasText(infoSystemUuidStr)
                 ? UUID.fromString(infoSystemUuidStr)
                 : null;
@@ -54,7 +53,7 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            UUID fileResourceUuid = fileResourceLogic.createFileResource(dataHandler.getInputStream(), infoSystemUuid, name, contentType);
+            UUID fileResourceUuid = fileResourceLogic.createFileResource(javaxDataHandler.getInputStream(), infoSystemUuid, name, contentType);
             fileResourceLogic.indexFileResource(fileResourceUuid);
             return Response.ok(fileResourceUuid.toString()).build();
         } catch (IOException e) {
