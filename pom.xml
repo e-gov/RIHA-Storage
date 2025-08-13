@@ -227,18 +227,6 @@
 					<configuration>
 						<skipSource>true</skipSource>
 					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-utils</artifactId>
-							<version>${plexus-utils.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-archiver</artifactId>
-							<version>${plexus-archiver.version}</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -247,45 +235,14 @@
 					<configuration>
 						<autoVersionSubmodules>true</autoVersionSubmodules>
 					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-utils</artifactId>
-							<version>${plexus-utils.version}</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<dependencies>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-archiver</artifactId>
-							<version>${plexus-archiver.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-utils</artifactId>
-							<version>${plexus-utils.version}</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<dependencies>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-archiver</artifactId>
-							<version>${plexus-archiver.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-utils</artifactId>
-							<version>${plexus-utils.version}</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>
