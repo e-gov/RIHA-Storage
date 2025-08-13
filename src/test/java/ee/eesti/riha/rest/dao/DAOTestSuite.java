@@ -1,8 +1,8 @@
 package ee.eesti.riha.rest.dao;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -31,7 +31,7 @@ public class DAOTestSuite {
             .withUsername(PROJECT_DB)
             .withPassword(PROJECT_DB);
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws IOException {
 
         System.setProperty("riharest.jdbc.url", postgres.getJdbcUrl());
@@ -39,7 +39,7 @@ public class DAOTestSuite {
         System.setProperty("riharest.jdbc.password", postgres.getPassword());
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         System.out.println("tearing down");
     }

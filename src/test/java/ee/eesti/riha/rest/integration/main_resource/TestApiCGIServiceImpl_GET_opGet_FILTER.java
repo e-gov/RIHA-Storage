@@ -13,23 +13,21 @@ import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -51,7 +49,7 @@ public class TestApiCGIServiceImpl_GET_opGet_FILTER<T> {
   // other specifics
   private static String pathToUse = TestFinals.CGI_PATH_PROPERTY_VALUE_FOR_MAIN_RESOURCE;
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
     serviceHelpingCreateDeleteTestData = JAXRSClientFactory.fromClient(webClient, ApiClassicService.class, true);
@@ -60,7 +58,7 @@ public class TestApiCGIServiceImpl_GET_opGet_FILTER<T> {
         jsonToUseForCreate));
   }
 
-  @After
+  @AfterEach
   public void afterTest() {
     for (Integer idForTestEntry : idUnderTestList) {
       IntegrationTestHelper.removeTestDataFromDB(serviceHelpingCreateDeleteTestData, tableUnderTest, idForTestEntry);
@@ -827,7 +825,7 @@ public class TestApiCGIServiceImpl_GET_opGet_FILTER<T> {
   // QUERY IS MADE OVER JSON_CONTENT FIELD)
   // DATE comparison
   // presumes that entries are returned by their create order
-  @Ignore("TODO")
+  @Disabled("TODO")
   @Test
   public void testGetList_testingFilter_atLeastOneFieldsExistOnlyInJsonContent_dateComparisonShouldWork()
       throws Exception {

@@ -1,12 +1,10 @@
 package ee.eesti.riha.rest.logic.util;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.logic.util.PathHolder;
+import org.junit.jupiter.api.Test;
 
 public class PathHolderTest {
 
@@ -58,56 +56,76 @@ public class PathHolderTest {
   }
 
   // testing some examples that should not accept
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat() throws Exception {
-    pathHolder = new PathHolder("NOTdb/mytable/");
+    assertThrows(IllegalStateException.class, () -> {
+      pathHolder = new PathHolder("NOTdb/mytable/");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat1() throws Exception {
-    pathHolder = new PathHolder("/NOTdb/mytable/");
+    assertThrows(IllegalStateException.class, () -> {
+      pathHolder = new PathHolder("/NOTdb/mytable/");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat2() throws Exception {
-    pathHolder = new PathHolder(null);
+    assertThrows(IllegalStateException.class, () -> {
+      pathHolder = new PathHolder(null);
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat3() throws Exception {
-    pathHolder = new PathHolder("");
+    assertThrows(IllegalStateException.class, () -> {
+      pathHolder = new PathHolder("");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat4() throws Exception {
-    pathHolder = new PathHolder("a");
+    assertThrows(IllegalStateException.class, () -> {
+      pathHolder = new PathHolder("a");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat5() throws Exception {
-    pathHolder = new PathHolder("/db/");
+    assertThrows(IllegalStateException.class, () -> {
+      pathHolder = new PathHolder("/db/");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat6() throws Exception {
-    pathHolder = new PathHolder("/db///");
+    assertThrows(IllegalStateException.class, () -> {
+      pathHolder = new PathHolder("/db///");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat7() throws Exception {
-    pathHolder = new PathHolder("///");
+    assertThrows(IllegalStateException.class, () -> {
+      pathHolder = new PathHolder("///");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_indigestableFormat8() throws Exception {
-    // too many parameters
-    pathHolder = new PathHolder("db/tablenamehere/1/2");
+    assertThrows(IllegalStateException.class, () -> {
+      // too many parameters
+      pathHolder = new PathHolder("db/tablenamehere/1/2");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testPathHolder_whenWhereNumberIsExpectedAsIdAndNoNumProvided_thenException() throws Exception {
-    // id should be number
-    pathHolder = new PathHolder("db/tablenamehere/a");
+    assertThrows(IllegalStateException.class, () -> {
+      // id should be number
+      pathHolder = new PathHolder("db/tablenamehere/a");
+    });
   }
 
 }

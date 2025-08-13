@@ -22,26 +22,21 @@ import ee.eesti.riha.rest.service.ApiClassicService;
 import ee.eesti.riha.rest.service.ApiImportService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -84,7 +79,7 @@ public class TestApiImportServiceImpl {
   private static final String TEST_KINDS_DOC = "documentTests";
   private static final String TEST_KINDS_SERVICE = "services";
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     if (idUnderTestList.size() == 0) {
 
@@ -116,7 +111,7 @@ public class TestApiImportServiceImpl {
     }
   }
 
-  @After
+  @AfterEach
   public void afterTest() {
     // clean up always
     for (Integer idForTestEntry : idUnderTestList) {

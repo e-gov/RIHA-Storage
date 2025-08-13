@@ -48,27 +48,44 @@ public class FileResourceLogic {
 
     @Transactional
     public UUID createFileResource(InputStream inputStream, UUID infoSystemUuid, String name, String contentType) {
+        logger.info("=== FILE RESOURCE LOGIC DEBUG: Starting createFileResource ===");
+        logger.info("FILE RESOURCE LOGIC DEBUG: name='{}', contentType='{}', infoSystemUuid='{}'", name, contentType, infoSystemUuid);
+        
         if (logger.isTraceEnabled()) {
             logger.trace("Creating file resource for name: '{}' and content type: '{}'", name, contentType);
         }
-        int largeObjectId = largeObjectDAO.create(inputStream);
-        logger.info("Created large object id: {}", largeObjectId);
+        
+        try {
+            logger.info("FILE RESOURCE LOGIC DEBUG: About to create large object");
+            int largeObjectId = largeObjectDAO.create(inputStream);
+            logger.info("Created large object id: {}", largeObjectId);
+            logger.info("FILE RESOURCE LOGIC DEBUG: Successfully created large object with id: {}", largeObjectId);
 
-        LargeObject largeObject = largeObjectDAO.get(largeObjectId);
-        if (largeObject == null) {
-            throw new IllegalStateException("LargeObject with id " + largeObjectId + " is not found");
+            logger.info("FILE RESOURCE LOGIC DEBUG: About to get large object");
+            LargeObject largeObject = largeObjectDAO.get(largeObjectId);
+            if (largeObject == null) {
+                logger.error("FILE RESOURCE LOGIC DEBUG: LargeObject with id {} is null!", largeObjectId);
+                throw new IllegalStateException("LargeObject with id " + largeObjectId + " is not found");
+            }
+            logger.info("FILE RESOURCE LOGIC DEBUG: Successfully retrieved large object");
+
+            logger.info("FILE RESOURCE LOGIC DEBUG: About to create FileResource entity");
+            FileResource entity = new FileResource();
+            entity.setInfoSystemUuid(infoSystemUuid);
+            entity.setName(name);
+            entity.setContentType(contentType);
+            entity.setLargeObject(largeObject);
+            logger.info("FILE RESOURCE LOGIC DEBUG: FileResource entity created, about to persist");
+
+            UUID uuid = fileResourceDAO.create(entity);
+            logger.info("Created file resource '{}'", uuid);
+            logger.info("FILE RESOURCE LOGIC DEBUG: Successfully created file resource with UUID: {}", uuid);
+
+            return uuid;
+        } catch (Exception e) {
+            logger.error("FILE RESOURCE LOGIC DEBUG: Exception occurred in createFileResource", e);
+            throw e;
         }
-
-        FileResource entity = new FileResource();
-        entity.setInfoSystemUuid(infoSystemUuid);
-        entity.setName(name);
-        entity.setContentType(contentType);
-        entity.setLargeObject(largeObject);
-
-        UUID uuid = fileResourceDAO.create(entity);
-        logger.info("Created file resource '{}'", uuid);
-
-        return uuid;
     }
 
     /**

@@ -4,9 +4,7 @@ import ee.eesti.riha.rest.model.readonly.RegisteredFileView;
 import ee.eesti.riha.rest.util.FilterParameter;
 import ee.eesti.riha.rest.util.FilterParameterExtractor;
 import ee.eesti.riha.rest.util.PagedRequest;
-import org.hibernate.criterion.*;
-import org.hibernate.type.StringType;
-import org.hibernate.type.Type;
+import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,42 +33,48 @@ public class RegisteredFileGrid extends AbstractQueryGrid {
     }
 
     @Override
-    protected void setRestrictions(DetachedCriteria criteria, PagedRequest request) {
+    protected void setRestrictions(CriteriaQuery<?> criteriaQuery, Root<?> root, CriteriaBuilder criteriaBuilder, PagedRequest request) {
         if (request.containsFilter(PROPERTY_DATA)) {
             List<FilterParameter> dataFilterParameters = new ArrayList<>();
             for (FilterParameter parameter : request.getFilter(PROPERTY_DATA)) {
                 dataFilterParameters.add(FilterParameterExtractor.extract(parameter.getValue(), ":"));
             }
 
-            Criterion dataCriterion = createFileDataSearchRestriction(dataFilterParameters);
-            if (dataCriterion != null) {
-                DetachedCriteria dataSubQueryCriteria = DetachedCriteria.forClass(
-                        RegisteredFileView.LargeObjectRecord.class, "csv")
-                        .setProjection(Projections.id())
-                        .add(dataCriterion);
-
-                criteria.add(Subqueries.exists(dataSubQueryCriteria));
+            if (!dataFilterParameters.isEmpty()) {
+                Subquery<Long> dataSubQuery = criteriaQuery.subquery(Long.class);
+                Root<RegisteredFileView.LargeObjectRecord> csvRoot = dataSubQuery.from(RegisteredFileView.LargeObjectRecord.class);
+                dataSubQuery.select(csvRoot.get("id"));
+                
+                Predicate dataPredicate = createFileDataSearchRestriction(csvRoot, criteriaBuilder, criteriaQuery, dataFilterParameters);
+                if (dataPredicate != null) {
+                    dataSubQuery.where(dataPredicate);
+                    criteriaQuery.where(criteriaBuilder.exists(dataSubQuery));
+                }
             }
         }
 
-        super.setRestrictions(criteria, request);
+        super.setRestrictions(criteriaQuery, root, criteriaBuilder, request);
     }
 
-    private Criterion createFileDataSearchRestriction(List<FilterParameter> filters) {
+    private Predicate createFileDataSearchRestriction(Root<?> root, CriteriaBuilder criteriaBuilder, CriteriaQuery<?> criteriaQuery, List<FilterParameter> filters) {
         if (filters == null || filters.isEmpty()) {
             return null;
         }
 
-        List<Criterion> restrictions = new ArrayList<>();
+        List<Predicate> restrictions = new ArrayList<>();
         for (FilterParameter filter : filters) {
             if (filter.getValue() == null) {
-                restrictions.add(Restrictions.sqlRestriction("{alias}.value ->> ? IS NULL",
-                        filter.getProperty(),
-                        StringType.INSTANCE));
+                // For null values, create a custom SQL restriction
+                restrictions.add(criteriaBuilder.isNull(
+                    criteriaBuilder.function("jsonb_extract_path_text", String.class,
+                        root.get("value"), criteriaBuilder.literal(filter.getProperty()))));
             } else {
-                restrictions.add(Restrictions.sqlRestriction("{alias}.value ->> ? ILIKE ?",
-                        new Object[]{filter.getProperty(), filter.getValue()},
-                        new Type[]{StringType.INSTANCE, StringType.INSTANCE}));
+                // For non-null values, use ILIKE for case-insensitive matching
+                Expression<String> jsonExtract = criteriaBuilder.function("jsonb_extract_path_text", String.class,
+                    root.get("value"), criteriaBuilder.literal(filter.getProperty()));
+                restrictions.add(criteriaBuilder.like(
+                    criteriaBuilder.upper(jsonExtract),
+                    criteriaBuilder.upper(criteriaBuilder.literal("%" + filter.getValue() + "%"))));
             }
         }
 
@@ -82,18 +86,18 @@ public class RegisteredFileGrid extends AbstractQueryGrid {
             return restrictions.get(0);
         }
 
-        return Restrictions.disjunction(restrictions.toArray(new Criterion[0]));
+        return criteriaBuilder.or(restrictions.toArray(new Predicate[0]));
     }
 
     @Override
-    protected Criterion createPropertyFilterRestriction(FilterParameter filter) {
+    protected Predicate createPropertyFilterRestriction(Root<?> root, CriteriaBuilder criteriaBuilder, FilterParameter filter) {
         if ("infoSystemUuid".equals(filter.getProperty())) {
-            return Restrictions.eq("r.registeredFilePK.infoSystemUuid", filter.asUuid());
+            return criteriaBuilder.equal(root.get("registeredFilePK").get("infoSystemUuid"), filter.asUuid());
         } else if ("filResourceUuid".equals(filter.getProperty())) {
-            return Restrictions.eq("r.registeredFilePK.fileResourceUuid", filter.asUuid());
+            return criteriaBuilder.equal(root.get("registeredFilePK").get("fileResourceUuid"), filter.asUuid());
         }
 
-        return super.createPropertyFilterRestriction(filter);
+        return super.createPropertyFilterRestriction(root, criteriaBuilder, filter);
     }
 
 }

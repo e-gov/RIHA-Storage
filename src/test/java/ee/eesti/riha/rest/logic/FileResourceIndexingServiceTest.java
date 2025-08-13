@@ -19,61 +19,64 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.WARN)
+@ExtendWith(MockitoExtension.class)
 public class FileResourceIndexingServiceTest {
-    @Mock
-    private FileResourceDAO fileResourceDAO;
+  @Mock
+  private FileResourceDAO fileResourceDAO;
 
-    @Mock
-    private Blob blob;
+  @Mock
+  private Blob blob;
 
-    @InjectMocks
-    private FileResourceIndexingService service;
+  @InjectMocks
+  private FileResourceIndexingService service;
 
-    private FileResource fileResource;
-    private UUID uuid;
+  private FileResource fileResource;
+  private UUID uuid;
 
-    @Before
-    public void setup() throws SQLException, IOException {
-        CsvToGsonConverter csvToGsonConverter = new CsvToGsonConverter();
-        ExcelToGsonConverter excelToGsonConverter = new ExcelToGsonConverter();
-        ReflectionTestUtils.setField(excelToGsonConverter, "csvToGsonConverter", csvToGsonConverter);
+  @BeforeEach
+  public void setup() throws SQLException, IOException {
+    CsvToGsonConverter csvToGsonConverter = new CsvToGsonConverter();
+    ExcelToGsonConverter excelToGsonConverter = new ExcelToGsonConverter();
+    ReflectionTestUtils.setField(excelToGsonConverter, "csvToGsonConverter", csvToGsonConverter);
 
-        List<ToGsonConverter> converters = Arrays.asList(csvToGsonConverter, excelToGsonConverter);
-        ReflectionTestUtils.setField(service, "toGsonConverters", converters);
+    List<ToGsonConverter> converters = Arrays.asList(csvToGsonConverter, excelToGsonConverter);
+    ReflectionTestUtils.setField(service, "toGsonConverters", converters);
 
-        File excelFile = new File("src/test/resources/xlsx/test1.xlsx");
+    File excelFile = new File("src/test/resources/xlsx/test1.xlsx");
 
-        when(blob.getBytes(anyLong(), anyInt())).thenReturn(IOUtils.toByteArray(new FileInputStream(excelFile)));
+    when(blob.getBytes(anyLong(), anyInt())).thenReturn(IOUtils.toByteArray(new FileInputStream(excelFile)));
 
-        LargeObject largeObject = new LargeObject();
-        largeObject.setData(blob);
+    LargeObject largeObject = new LargeObject();
+    largeObject.setData(blob);
 
-        uuid = UUID.randomUUID();
-        fileResource = new FileResource();
-        fileResource.setLargeObject(largeObject);
-        fileResource.setUuid(uuid);
-        fileResource.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        fileResource.setName("test1.xlsx");
-        fileResource.setInfoSystemUuid(UUID.randomUUID());
+    uuid = UUID.randomUUID();
+    fileResource = new FileResource();
+    fileResource.setLargeObject(largeObject);
+    fileResource.setUuid(uuid);
+    fileResource.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    fileResource.setName("test1.xlsx");
+    fileResource.setInfoSystemUuid(UUID.randomUUID());
 
-        when(fileResourceDAO.get(uuid)).thenReturn(fileResource);
-    }
+    when(fileResourceDAO.get(uuid)).thenReturn(fileResource);
+  }
 
-    @Test
-    public void indexAsynchronously() throws IOException, SQLException {
-        service.indexAsynchronously(uuid);
+  @Test
+  public void indexAsynchronously() throws IOException, SQLException {
+    service.indexAsynchronously(uuid);
 
-        Assert.assertEquals("[\"Vanemobjekt 3\",\"Vanemobjekt 2\",\"Vanemobjekt 1\",\"Andmeobjekti nimi\",\"IA\",\"DIA\",\"PA\",\"AV\",\"Infosüsteem\",\"Kommentaar\"]",
-                fileResource.getLargeObject().getSearchContent().getAsJsonArray("headers").toString());
-    }
+    Assertions.assertEquals("[\"Vanemobjekt 3\",\"Vanemobjekt 2\",\"Vanemobjekt 1\",\"Andmeobjekti nimi\",\"IA\",\"DIA\",\"PA\",\"AV\",\"Infosüsteem\",\"Kommentaar\"]",
+        fileResource.getLargeObject().getSearchContent().getAsJsonArray("headers").toString());
+  }
 }

@@ -7,14 +7,12 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.model.hibernate.JsonObjectUserType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.sql.Blob;
 import java.util.Date;
 
-import static javax.persistence.GenerationType.AUTO;
+import static jakarta.persistence.GenerationType.AUTO;
 
 /**
  * Entity for holding different large objects like document attachments or arbitrary files
@@ -22,7 +20,6 @@ import static javax.persistence.GenerationType.AUTO;
 @Entity
 @Table(name = "large_object")
 @DynamicUpdate
-@TypeDefs({@TypeDef(name = "JsonObject", typeClass = JsonObjectUserType.class)})
 public class LargeObject {
 
     @Id
@@ -48,7 +45,7 @@ public class LargeObject {
 
     @JsonIgnore
     @Column(name = "search_content")
-    @Type(type = "JsonObject")
+    @Type(value = JsonObjectUserType.class)
     private JsonObject searchContent;
 
     @JsonIgnore

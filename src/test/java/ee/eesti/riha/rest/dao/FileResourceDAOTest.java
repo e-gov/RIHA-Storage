@@ -1,24 +1,22 @@
 package ee.eesti.riha.rest.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ee.eesti.riha.rest.model.FileResource;
 import ee.eesti.riha.rest.model.LargeObject;
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.UUID;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration("/test-applicationContext.xml")
+@SpringJUnitConfig(locations = "/test-applicationContext.xml")
 public class FileResourceDAOTest extends AbstractGenericDaoTest {
     @Autowired
     private LargeObjectDAO largeObjectDAO;

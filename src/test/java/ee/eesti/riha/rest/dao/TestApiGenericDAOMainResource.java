@@ -11,24 +11,17 @@ import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Main_resource;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration("/test-applicationContext.xml")
+@SpringJUnitConfig(locations = "/test-applicationContext.xml")
 
 public class TestApiGenericDAOMainResource extends AbstractGenericDaoTest {
 
@@ -359,24 +352,28 @@ public class TestApiGenericDAOMainResource extends AbstractGenericDaoTest {
 
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testCreateNull() {
+    assertThrows(IllegalArgumentException.class, () -> {
 
-    Main_resource main_resource = null;
-    mainResourceDao.create(main_resource);
+      Main_resource main_resource = null;
+      mainResourceDao.create(main_resource);
+    });
   }
 
   //  @Test(expected = ConstraintViolationException.class)
-  @Test(expected = DataIntegrityViolationException.class)
+  @Test
   public void testCreateSame() {
+    assertThrows(DataIntegrityViolationException.class, () -> {
 
-    Main_resource main_resource = mrAsPrimeTestEntry;
-    // try to use entry again that contains id already existing in db
-    try {
-      mainResourceDao.create(main_resource);
-    } catch (ConstraintViolationException e) {
-      throw e;
-    }
+      Main_resource main_resource = mrAsPrimeTestEntry;
+      // try to use entry again that contains id already existing in db
+      try {
+        mainResourceDao.create(main_resource);
+      } catch (ConstraintViolationException e) {
+        throw e;
+      }
+    });
   }
 
   @Test

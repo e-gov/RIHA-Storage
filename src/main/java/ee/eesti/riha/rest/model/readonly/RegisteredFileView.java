@@ -4,10 +4,8 @@ import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.model.hibernate.JsonObjectUserType;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -96,11 +94,11 @@ public class RegisteredFileView {
     public static class RegisteredFilePK implements Serializable {
 
         @Column(name = "file_resource_uuid")
-        @Type(type = "pg-uuid")
+        
         private UUID fileResourceUuid;
 
         @Column(name = "infosystem_uuid")
-        @Type(type = "pg-uuid")
+        
         private UUID infoSystemUuid;
 
         public RegisteredFilePK() {
@@ -137,7 +135,6 @@ public class RegisteredFileView {
             "  (SELECT search_content -> 'records'" +
             "   FROM large_object" +
             "   WHERE id = file_resource_large_object_id)) AS record")
-    @TypeDefs({@TypeDef(name = "JsonObject", typeClass = JsonObjectUserType.class)})
     public static class LargeObjectRecord {
 
         @Id
@@ -145,7 +142,7 @@ public class RegisteredFileView {
         Long largeObjectId;
 
         @Column(name = "value")
-        @Type(type = "JsonObject")
+        @Type(value = JsonObjectUserType.class)
         private JsonObject value;
 
         public Long getLargeObjectId() {

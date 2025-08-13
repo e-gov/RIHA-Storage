@@ -1,10 +1,9 @@
 package ee.eesti.riha.rest.logic.util;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.JsonArray;
+import org.junit.jupiter.api.Test;
 
 public class TestStringHelper {
 

@@ -1,15 +1,16 @@
 package ee.eesti.riha.rest.dao;
 
 import ee.eesti.riha.rest.model.readonly.Kind;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,7 @@ public class KindRepositoryImpl implements KindRepository {
 
   private static final Logger LOG = LoggerFactory.getLogger(KindRepositoryImpl.class);
 
-  public KindRepositoryImpl(SessionFactory sessionFactory) {
+  public KindRepositoryImpl(@Qualifier("sessionFactory") SessionFactory sessionFactory) {
     this.sessionFactory = sessionFactory;
   }
 

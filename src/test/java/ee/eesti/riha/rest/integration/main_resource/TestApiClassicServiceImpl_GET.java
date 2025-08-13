@@ -12,24 +12,20 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -47,7 +43,7 @@ public class TestApiClassicServiceImpl_GET<T> {
   private static String tableUnderTest = TestFinals.MAIN_RESOURCE;
   private static String jsonToUseForCreate = TestFinals.JSON_CONTENT_FOR_MAIN_RESOURCE_CORRECT_SAMPLE_AS_JSON_STRING;
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     if (idUnderTestList.size() == 0) {
       webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
@@ -56,7 +52,7 @@ public class TestApiClassicServiceImpl_GET<T> {
     }
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() {
     // clean up always
     for (Integer idForTestEntry : idUnderTestList) {
@@ -257,7 +253,7 @@ public class TestApiClassicServiceImpl_GET<T> {
     System.out.println(error);
 
     assertEquals(ErrorCodes.INPUT_JSON_NOT_VALID_JSON, error.getErrcode());
-    assertTrue("Wrong error message", error.getErrmsg().contains(ErrorCodes.INPUT_JSON_NOT_VALID_JSON_MSG));
+    assertTrue(error.getErrmsg().contains(ErrorCodes.INPUT_JSON_NOT_VALID_JSON_MSG), "Wrong error message");
 
   }
 

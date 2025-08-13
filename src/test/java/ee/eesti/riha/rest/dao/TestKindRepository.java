@@ -1,26 +1,19 @@
 package ee.eesti.riha.rest.dao;
 
 import ee.eesti.riha.rest.model.readonly.Kind;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration("/test-applicationContext.xml")
+@SpringJUnitConfig(locations = "/test-applicationContext.xml")
 public class TestKindRepository extends AbstractGenericDaoTest {
   @Autowired
   private CacheManager cacheManager;
@@ -30,13 +23,13 @@ public class TestKindRepository extends AbstractGenericDaoTest {
 
   private Cache kindsCache;
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     super.beforeTest();
     kindsCache = cacheManager.getCache("kinds");
   }
 
-  @After
+  @AfterEach
   public void afterTest() {
     super.afterTest();
     kindsCache.clear();

@@ -15,26 +15,22 @@ import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.AfterClass;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -63,7 +59,7 @@ public class TestApiCGIServiceImpl_POST_opGet_Document<T> {
   private static Integer main_resourceId = null;
   private static Integer data_objectId = null;
   
-  @Before
+  @BeforeEach
   public void beforeTest() throws IOException {
     if (idUnderTestList.size() == 0) {
       webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
@@ -96,7 +92,7 @@ public class TestApiCGIServiceImpl_POST_opGet_Document<T> {
      }
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() {
     // clean up always
     for (Integer idForTestEntry : idUnderTestList) {
@@ -111,7 +107,7 @@ public class TestApiCGIServiceImpl_POST_opGet_Document<T> {
 
   @Test
   public void testGetAll() throws Exception {
-    Assume.assumeTrue("Test works only in server", SystemUtils.IS_OS_LINUX);
+    Assumptions.assumeTrue(SystemUtils.IS_OS_LINUX, "Test works only in server");
     String path = pathToUse;
     String json = "{\"op\": \"get\", \"path\": \"" + path + "\"," + "\"token\" : \"abca\", \"limit\":100}";
     Response response = serviceUnderTest.postCGI(json);
