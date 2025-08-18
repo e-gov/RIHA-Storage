@@ -211,4 +211,13 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="PERFORMANCE-OPTIMIZATION-DATA-OBJECTS" author="kristjankr">
+        <comment>Performance optimization for data_object_search_view and InfoSystem operations in production</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./optimization/optimize_data_objects_and_infosystem_performance.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 </databaseChangeLog>
