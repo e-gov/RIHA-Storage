@@ -193,4 +193,22 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="PERFORMANCE-OPTIMIZATION-COMMENT-ISSUES" author="kristjankr">
+        <comment>Performance optimization for comment_type_issue_view queries</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./optimization/optimize_comment_type_issue_view_performance.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="PERFORMANCE-OPTIMIZATION-MAIN-RESOURCE" author="kristjankr">
+        <comment>Performance optimization for main_resource_view and full-text search</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./optimization/optimize_main_resource_view_performance.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 </databaseChangeLog>
