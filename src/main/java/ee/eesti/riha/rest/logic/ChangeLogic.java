@@ -578,8 +578,7 @@ public class ChangeLogic<T, K> {
           deletedResult = doDelete(pathHolder.tableName, entry.getKey(), entry.getValue());
         } catch (RihaRestException e) {
           Object err = e.getError();
-          if (err instanceof RihaRestError) {
-            RihaRestError rrErr = (RihaRestError) err;
+          if (err instanceof RihaRestError rrErr) {
             rrErr.setErrtrace(queryHolder.getAsJson().toString());
           }
           throw e;

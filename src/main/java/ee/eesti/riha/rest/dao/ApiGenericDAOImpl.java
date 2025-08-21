@@ -21,7 +21,6 @@ import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -33,12 +32,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.Table;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.transaction.Transactional;
+import jakarta.persistence.Table;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -46,6 +45,7 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -65,7 +65,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   private final SqlFilter sqlFilter;
 
-  public ApiGenericDAOImpl(SessionFactory sessionFactory, SqlFilter sqlFilter) {
+  public ApiGenericDAOImpl(@Qualifier("sessionFactory") SessionFactory sessionFactory, SqlFilter sqlFilter) {
     this.sessionFactory = sessionFactory;
     this.sqlFilter = sqlFilter;
   }
@@ -314,10 +314,10 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
                 .append(" OFFSET ")
                 .append(offset)
                 .append(") AS foo;");
-        query = session.createSQLQuery(queryString.toString());
+        query = session.createNativeQuery(queryString.toString(), BigInteger.class);
       } else {
         // get object of type clazz in results
-        query = session.createSQLQuery(queryString.toString()).addEntity(clazz);
+        query = session.createNativeQuery(queryString.toString(), clazz);
         query.setMaxResults(limit);
         query.setFirstResult(offset);
       }
@@ -359,7 +359,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       String orderByParameterName = "jOrderParameter";
       qry.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
 
-      NativeQuery<T> query = session.createSQLQuery(qry.toString()).addEntity(clazz);
+      NativeQuery<T> query = session.createNativeQuery(qry.toString(), clazz);
 
       String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
       query.setParameter(orderByParameterName, jsonOrderByFieldName);
@@ -399,8 +399,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
    */
   private Query countNoFilter(Session session, String tableName, Integer limit, Integer offset) {
     // no filter, only limit and offset
-    return session.createSQLQuery("SELECT count(*) FROM " + "(SELECT * from " + tableName + " LIMIT " + limit
-        + " OFFSET " + offset + ") AS foo;");
+    return session.createNativeQuery("SELECT count(*) FROM " + "(SELECT * from " + tableName + " LIMIT " + limit
+        + " OFFSET " + offset + ") AS foo;", BigInteger.class);
   }
 
   /*
@@ -475,7 +475,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     LOG.info(JsonHelper.GSON.toJson(object));
     session.save(object);
 
-    Serializable id = session.getIdentifier(object);
+    Object id = session.getIdentifier(object);
     return Arrays.asList((K) id);
 
   }
@@ -492,7 +492,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     Set<K> createdIds = new HashSet<>();
     for (T t : objects) {
-      Integer id = (Integer) session.save(t);
+      session.persist(t);
+      Integer id = (Integer) session.getIdentifier(t);
       createdIds.add((K) id);
     }
 
@@ -544,7 +545,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       updateInfo.setJson_content(null);
 
       copyNotNullValues(existing, newValue);
-      session.update(existing);
+      session.merge(existing);
 
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
         | IntrospectionException e) {
@@ -562,7 +563,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     try {
       copyNotNullValues(existing, updatedEntity);
-      session.update(existing);
+      session.merge(existing);
     } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
       LOG.error("Failed to update entity {}", existing);
       LOG.debug("Failed to update entity", e);
@@ -660,14 +661,14 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Query queryExisting;
     if (DaoHelper.isFieldPartOfHibernateModel(idFieldName, clazz)) {
       FieldTypeHolder idField = FieldTypeHolder.construct(updateInfo, idFieldName);
-      queryExisting = session.createQuery("FROM " + tableName + " item WHERE item." + idFieldName + "=:idFieldValue");
+      queryExisting = session.createQuery("FROM " + tableName + " item WHERE item." + idFieldName + "=:idFieldValue", clazz);
       queryExisting.setParameter("idFieldValue", idField.getValue());
     } else if (jsonFieldExists(session, tableName, idFieldName)) {
       // select * from main_resource
       // where json_content ->> 'test_abc' = '1234';
       String idFieldNameParameter = "idFieldNameParam";
       String sql = "SELECT * FROM " + tableName + " where json_content ->> :" + idFieldNameParameter + " =:idFieldValue";
-      queryExisting = session.createSQLQuery(sql).addEntity(clazz);
+      queryExisting = session.createNativeQuery(sql, clazz);
 
       BaseModel bm = (BaseModel) updateInfo;
       String fieldValueString = bm.getJson_content().get(idFieldName).getAsString();
@@ -739,7 +740,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           updateInfo.setJson_content(null);
 
           copyNotNullValues(item, updateData);
-          session.update(item);
+          session.merge(item);
 
           // set updateInfo json_content to its old value
           updateInfo.setJson_content(updateInfoJsonContent);
@@ -772,7 +773,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     T toBeDeleted = find(type, id);
     if (toBeDeleted != null) {
-      session.delete(toBeDeleted);
+      session.remove(toBeDeleted);
       numOfDeleted = 1;
     }
 
@@ -791,7 +792,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     Session session = sessionFactory.getCurrentSession();
 
-    session.delete(object);
+    session.remove(object);
 
   }
 
@@ -807,7 +808,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Session session = sessionFactory.getCurrentSession();
 
     for (T t : objects) {
-      session.delete(t);
+      session.remove(t);
     }
 
   }
@@ -830,7 +831,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class
             && DaoHelper.isFieldPartOfModel(key, Finals.getClassRepresentingTable(tableName))) {
       String documentHQL = "select document_id from " + className + " where " + key + " IN (:fieldValues)";
-      documentQuery = session.createQuery(documentHQL);
+      documentQuery = session.createQuery(documentHQL, Integer.class);
     }
     return documentQuery;
   }
@@ -852,7 +853,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       String keyParameter = "keyParameter";
       String documentSQL = "select document_id from " + className + " where json_content ->> :" + keyParameter
           + " IN (:fieldValues)";
-      documentQuery = session.createSQLQuery(documentSQL);
+      documentQuery = session.createNativeQuery(documentSQL, Integer.class);
       documentQuery.setParameter(keyParameter, key);
     }
     return documentQuery;
@@ -901,7 +902,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       // where json_content ->> 'test_abc' IN ('test_123', 'test_1234');
       String keyParameter = "keyParam";
       String sql = "delete from " + className + " where json_content ->> :" + keyParameter + " IN (:fieldValues)";
-      query = session.createSQLQuery(sql);
+      query = session.createNativeQuery(sql);
       query.setParameter(keyParameter, key);
       // psql cannot get number from json, only json or text
       // therefore possible numbers must be converted to strings
@@ -967,12 +968,12 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     }
 
     // Create native SQL query with key tokens
-    Query q = session.createSQLQuery("select count(*) from " + tableName +
+    Query q = session.createNativeQuery("select count(*) from " + tableName +
                                              " where (" + Finals.JSON_CONTENT + "->" +
                                              StringUtils.join(conditionTokens, "->") +
-                                             ") is not null;");
+                                             ") is not null;", BigInteger.class);
     q.setProperties(parameters);
-    int rowCount = ((BigInteger) q.uniqueResult()).intValue();
+    int rowCount = ((Number) q.uniqueResult()).intValue();
     return rowCount > 0;
   }
 

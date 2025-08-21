@@ -17,17 +17,17 @@ import java.sql.Types;
  * {@link StringJsonUserType}
  *
  */
-public class JsonObjectUserType implements UserType {
+public class JsonObjectUserType implements UserType<JsonObject> {
 
   /**
    * Return the SQL type codes for the columns mapped by this type. The codes are defined on <tt>java.sql.Types</tt>.
    *
-   * @return int[] the typecodes
+   * @return int the typecode
    * @see java.sql.Types
    */
   @Override
-  public int[] sqlTypes() {
-    return new int[] {Types.JAVA_OBJECT };
+  public int getSqlType() {
+    return Types.OTHER;
   }
 
   /**
@@ -36,7 +36,7 @@ public class JsonObjectUserType implements UserType {
    * @return Class
    */
   @Override
-  public Class returnedClass() {
+  public Class<JsonObject> returnedClass() {
     return JsonObject.class;
   }
 
@@ -49,13 +49,10 @@ public class JsonObjectUserType implements UserType {
    * @return boolean
    */
   @Override
-  public boolean equals(Object x, Object y) throws HibernateException {
-
+  public boolean equals(JsonObject x, JsonObject y) {
     if (x == null) {
-
       return y == null;
     }
-
     return x.equals(y);
   }
 
@@ -63,9 +60,8 @@ public class JsonObjectUserType implements UserType {
    * Get a hashcode for the instance, consistent with persistence "equality"
    */
   @Override
-  public int hashCode(Object x) throws HibernateException {
-
-    return x.hashCode();
+  public int hashCode(JsonObject x) {
+    return x == null ? 0 : x.hashCode();
   }
 
   /**
@@ -73,21 +69,21 @@ public class JsonObjectUserType implements UserType {
    * values.
    *
    * @param rs a JDBC result set
-   * @param names the column names
-   * @param session
-   * @param owner the containing entity @return Object
+   * @param position the column position
+   * @param session the session
+   * @param owner the containing entity
+   * @return Object
    * @throws org.hibernate.HibernateException
-   *
    * @throws java.sql.SQLException
    */
   @Override
-  public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+  public JsonObject nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner)
       throws HibernateException, SQLException {
-    if (rs.getString(names[0]) == null) {
+    String value = rs.getString(position);
+    if (value == null) {
       return null;
     }
-    return JsonHelper.GSON.fromJson(rs.getString(names[0]), JsonObject.class);
-    // return rs.getString(names[0]);
+    return JsonHelper.GSON.fromJson(value, JsonObject.class);
   }
 
   /**
@@ -97,20 +93,18 @@ public class JsonObjectUserType implements UserType {
    * @param st a JDBC prepared statement
    * @param value the object to write
    * @param index statement parameter index
-   * @param session
+   * @param session the session
    * @throws org.hibernate.HibernateException
-   *
    * @throws java.sql.SQLException
    */
   @Override
-  public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
+  public void nullSafeSet(PreparedStatement st, JsonObject value, int index, SharedSessionContractImplementor session)
       throws HibernateException, SQLException {
     if (value == null) {
       st.setNull(index, Types.OTHER);
       return;
     }
-
-    st.setObject(index, value, Types.OTHER);
+    st.setObject(index, value.toString(), Types.OTHER);
   }
 
   /**
@@ -121,9 +115,12 @@ public class JsonObjectUserType implements UserType {
    * @return Object a copy
    */
   @Override
-  public Object deepCopy(Object value) throws HibernateException {
-
-    return value;
+  public JsonObject deepCopy(JsonObject value) {
+    if (value == null) {
+      return null;
+    }
+    // JsonObject is mutable, so we need to create a copy
+    return JsonHelper.GSON.fromJson(value.toString(), JsonObject.class);
   }
 
   /**
@@ -144,11 +141,10 @@ public class JsonObjectUserType implements UserType {
    * @param value the object to be cached
    * @return a cachable representation of the object
    * @throws org.hibernate.HibernateException
-   *
    */
   @Override
-  public Serializable disassemble(Object value) throws HibernateException {
-    return (String) this.deepCopy(value);
+  public Serializable disassemble(JsonObject value) {
+    return value == null ? null : value.toString();
   }
 
   /**
@@ -159,11 +155,13 @@ public class JsonObjectUserType implements UserType {
    * @param owner the owner of the cached object
    * @return a reconstructed object from the cachable representation
    * @throws org.hibernate.HibernateException
-   *
    */
   @Override
-  public Object assemble(Serializable cached, Object owner) throws HibernateException {
-    return this.deepCopy(cached);
+  public JsonObject assemble(Serializable cached, Object owner) {
+    if (cached == null) {
+      return null;
+    }
+    return JsonHelper.GSON.fromJson((String) cached, JsonObject.class);
   }
 
   /**
@@ -174,10 +172,11 @@ public class JsonObjectUserType implements UserType {
    *
    * @param original the value from the detached entity being merged
    * @param target the value in the managed entity
+   * @param owner the owner
    * @return the value to be merged
    */
   @Override
-  public Object replace(Object original, Object target, Object owner) throws HibernateException {
-    return original;
+  public JsonObject replace(JsonObject original, JsonObject target, Object owner) {
+    return deepCopy(original);
   }
 }

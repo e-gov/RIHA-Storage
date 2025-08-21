@@ -6,11 +6,11 @@ import com.google.gson.JsonObject;
 import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.model.Main_resource;
 import ee.eesti.riha.rest.model.readonly.Kind;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +40,7 @@ public abstract class AbstractGenericDaoTest {
     protected List<Main_resource> additionalMrTestEntries = new ArrayList<>();
     private Kind kind;
 
-    @Before
+    @BeforeEach
     public void beforeTest() {
         kind = createKind(INFOSYSTEM_KIND_NAME, INFOSYSTEM_KIND_ID);
         kindDao.create(kind);
@@ -48,7 +48,7 @@ public abstract class AbstractGenericDaoTest {
         mainResourceDao.create(mrAsPrimeTestEntry);
     }
 
-    @After
+    @AfterEach
     public void afterTest() {
         kindDao.delete(kind);
         mainResourceDao.delete(mrAsPrimeTestEntry);

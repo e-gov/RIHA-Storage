@@ -1,15 +1,14 @@
 package ee.eesti.riha.rest.logic.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.junit.jupiter.api.Test;
 
 public class JsonFieldsFiltererTest {
 
@@ -62,29 +61,31 @@ public class JsonFieldsFiltererTest {
   List<String> testImportUnwantedFields = Arrays.asList("old_id", "kind_id", 
       "older_data", "main_resource_id", "data_object_id", "document_id");
   
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testNullFilter() {
-    JsonFieldsFilterer.filter(jsonData, null);
+    assertThrows(NullPointerException.class, () ->
+      JsonFieldsFilterer.filter(jsonData, null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testNullData() {
-    JsonFieldsFilterer.filter(null, jsonArray);
+    assertThrows(NullPointerException.class, () ->
+      JsonFieldsFilterer.filter(null, jsonArray));
   }
 
-  @Test()
+  @Test
   public void testEmptyData() {
     JsonObject result = (JsonObject) JsonFieldsFilterer.filter(emptyData, jsonArray);
     assertEquals(emptyData, result);
   }
 
-  @Test()
+  @Test
   public void testEmptyDataArray() {
     JsonArray result = (JsonArray) JsonFieldsFilterer.filter(emptyDataArray, jsonArray);
     assertEquals(emptyDataArray, result);
   }
 
-  @Test()
+  @Test
   public void testArrayOfEmptyData() {
     JsonArray result = (JsonArray) JsonFieldsFilterer.filter(arrayOfEmptyData, jsonArray);
     assertEquals(arrayOfEmptyData, result);

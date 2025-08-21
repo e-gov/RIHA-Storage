@@ -5,12 +5,13 @@ import ee.eesti.riha.rest.service.HealthService;
 import ee.eesti.riha.rest.util.HeartBeat;
 import ee.eesti.riha.rest.util.HeartBeatInfo;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import javax.sql.DataSource;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.sql.Connection;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Component
+@DependsOnDatabaseInitialization
 @PropertySource("classpath:heartbeat.properties")
 public class HealthServiceImpl implements HealthService {
 
