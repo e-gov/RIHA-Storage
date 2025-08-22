@@ -226,7 +226,7 @@ WHERE comment_parent_id IS NOT NULL;
 -- =======================================================================================
 
 -- Enable pg_stat_statements if not already enabled (requires restart)
-CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+--CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 
 -- Create a view to monitor RIHA-specific query performance
 CREATE OR REPLACE VIEW riha.pg17_query_performance AS
