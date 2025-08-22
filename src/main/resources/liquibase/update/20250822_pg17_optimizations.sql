@@ -11,20 +11,20 @@
 -- These tables are append-heavy with timestamp-based queries
 
 -- Comment table BRIN indexes
-CREATE INDEX  IF NOT EXISTS idx_comment_creation_date_brin 
+CREATE INDEX IF NOT EXISTS idx_comment_creation_date_brin 
 ON riha.comment USING brin (creation_date)
 WITH (pages_per_range = 128);
 
-CREATE INDEX  IF NOT EXISTS idx_comment_modified_date_brin 
+CREATE INDEX IF NOT EXISTS idx_comment_modified_date_brin 
 ON riha.comment USING brin (modified_date)
 WITH (pages_per_range = 128);
 
 -- Main resource table BRIN indexes  
-CREATE INDEX  IF NOT EXISTS idx_main_resource_creation_date_brin 
+CREATE INDEX IF NOT EXISTS idx_main_resource_creation_date_brin 
 ON riha.main_resource USING brin (creation_date)
 WITH (pages_per_range = 128);
 
-CREATE INDEX  IF NOT EXISTS idx_main_resource_modified_date_brin 
+CREATE INDEX IF NOT EXISTS idx_main_resource_modified_date_brin 
 ON riha.main_resource USING brin (modified_date)
 WITH (pages_per_range = 128);
 
@@ -32,18 +32,41 @@ WITH (pages_per_range = 128);
 -- PHASE 2: COMPOSITE INDEXES FOR IMPROVED SORTING (PG17 INCREMENTAL SORT)
 -- =======================================================================================
 
--- Optimize the main resource view sorting pattern
+-- First, create IMMUTABLE helper functions for JSON extraction
+-- This is required for functional indexes in PostgreSQL
+
+CREATE OR REPLACE FUNCTION riha.extract_uuid_immutable(json_data jsonb)
+RETURNS text
+LANGUAGE SQL
+IMMUTABLE
+STRICT
+PARALLEL SAFE
+AS $$
+  SELECT json_data #>> '{uuid}';
+$$;
+
+CREATE OR REPLACE FUNCTION riha.extract_update_timestamp_immutable(json_data jsonb)
+RETURNS timestamp with time zone
+LANGUAGE SQL
+IMMUTABLE
+STRICT
+PARALLEL SAFE
+AS $$
+  SELECT (json_data #>> '{meta,update_timestamp}')::timestamp with time zone;
+$$;
+
+-- Now create the composite index using the IMMUTABLE functions
 -- PG17 can use incremental sort with this composite index
-CREATE INDEX  IF NOT EXISTS idx_main_resource_uuid_timestamp_id 
+CREATE INDEX IF NOT EXISTS idx_main_resource_uuid_timestamp_id 
 ON riha.main_resource (
-  (json_content #>> '{uuid}'), 
-  ((json_content #>> '{meta,update_timestamp}')::timestamp with time zone) DESC NULLS LAST,
+  riha.extract_uuid_immutable(json_content), 
+  riha.extract_update_timestamp_immutable(json_content) DESC NULLS LAST,
   main_resource_id DESC
 );
 
 -- Optimize comment filtering and sorting for issues
 -- This supports the exact query pattern in comment_type_issue_view
-CREATE INDEX  IF NOT EXISTS idx_comment_issue_comprehensive_v17
+CREATE INDEX IF NOT EXISTS idx_comment_issue_comprehensive_v17
 ON riha.comment (type, status, sub_type, creation_date DESC, infosystem_uuid)
 WHERE type = 'ISSUE';
 
@@ -53,15 +76,21 @@ WHERE type = 'ISSUE';
 
 -- GIN indexes for commonly accessed JSON paths
 -- PG17 has significant improvements for GIN index performance
-CREATE INDEX  IF NOT EXISTS idx_main_resource_json_uuid_gin
-ON riha.main_resource USING gin ((json_content -> 'uuid'));
+-- Using path expressions that are compatible with PostgreSQL's GIN operator classes
 
-CREATE INDEX  IF NOT EXISTS idx_main_resource_json_meta_gin
-ON riha.main_resource USING gin ((json_content -> 'meta'));
+CREATE INDEX IF NOT EXISTS idx_main_resource_json_content_gin
+ON riha.main_resource USING gin (json_content);
+
+-- Specific path-based indexes using jsonb_path_ops for better performance
+CREATE INDEX IF NOT EXISTS idx_main_resource_json_uuid_gin
+ON riha.main_resource USING gin ((json_content -> 'uuid') jsonb_path_ops);
+
+CREATE INDEX IF NOT EXISTS idx_main_resource_json_meta_gin
+ON riha.main_resource USING gin ((json_content -> 'meta') jsonb_path_ops);
 
 -- Index for topics array queries (used in main_resource_view)
-CREATE INDEX  IF NOT EXISTS idx_main_resource_json_topics_gin
-ON riha.main_resource USING gin ((json_content -> 'topics'));
+CREATE INDEX IF NOT EXISTS idx_main_resource_json_topics_gin
+ON riha.main_resource USING gin ((json_content -> 'topics') jsonb_path_ops);
 
 -- =======================================================================================
 -- PHASE 4: OPTIMIZED VIEW WITH CTE MATERIALIZATION
@@ -104,7 +133,7 @@ used_system_relations AS MATERIALIZED (
   WHERE mrr.type = 'USED_SYSTEM'
   GROUP BY mrr.infosystem_uuid
 )
-SELECT DISTINCT ON ((main_resource.json_content #>> '{uuid}'))
+SELECT DISTINCT ON (riha.extract_uuid_immutable(main_resource.json_content))
   main_resource.main_resource_id,
   main_resource.uri,
   main_resource.name,
@@ -128,7 +157,7 @@ SELECT DISTINCT ON ((main_resource.json_content #>> '{uuid}'))
   main_resource.main_resource_template_id,
   main_resource.search_content,
   ((main_resource.json_content #>> '{meta,creation_timestamp}'::text[]))::timestamp with time zone AS j_creation_timestamp,
-  ((main_resource.json_content #>> '{meta,update_timestamp}'::text[]))::timestamp with time zone AS j_update_timestamp,
+  riha.extract_update_timestamp_immutable(main_resource.json_content) AS j_update_timestamp,
   
   -- Improved logic for approval request type determination
   CASE WHEN
@@ -147,12 +176,12 @@ SELECT DISTINCT ON ((main_resource.json_content #>> '{uuid}'))
   COALESCE(usr.has_used_system_type_relations, false) AS has_used_system_type_relations
 
 FROM riha.main_resource main_resource
-LEFT JOIN comment_aggregates ca ON ((main_resource.json_content #>> '{uuid}'))::uuid = ca.infosystem_uuid
-LEFT JOIN used_system_relations usr ON ((main_resource.json_content #>> '{uuid}'))::uuid = usr.infosystem_uuid
+LEFT JOIN comment_aggregates ca ON riha.extract_uuid_immutable(main_resource.json_content)::uuid = ca.infosystem_uuid
+LEFT JOIN used_system_relations usr ON riha.extract_uuid_immutable(main_resource.json_content)::uuid = usr.infosystem_uuid
 
 ORDER BY 
-  (main_resource.json_content #>> '{uuid}'), 
-  ((main_resource.json_content #>> '{meta,update_timestamp}'::text[]))::timestamp with time zone DESC NULLS LAST, 
+  riha.extract_uuid_immutable(main_resource.json_content), 
+  riha.extract_update_timestamp_immutable(main_resource.json_content) DESC NULLS LAST, 
   main_resource.main_resource_id DESC;
 
 -- =======================================================================================
@@ -170,16 +199,16 @@ ANALYZE riha.main_resource_relation;
 
 -- Optimize the NamesDAO queries that use IN clauses
 -- These will benefit significantly from PG17's improved IN clause handling
-CREATE INDEX  IF NOT EXISTS idx_main_resource_uri_name
+CREATE INDEX IF NOT EXISTS idx_main_resource_uri_name
 ON riha.main_resource (uri, name)
 WHERE uri IS NOT NULL;
 
-CREATE INDEX  IF NOT EXISTS idx_data_object_uri_name  
+CREATE INDEX IF NOT EXISTS idx_data_object_uri_name  
 ON riha.data_object (uri, name)
 WHERE uri IS NOT NULL;
 
 -- Index for comment parent-child relationships
-CREATE INDEX  IF NOT EXISTS idx_comment_parent_child_v17
+CREATE INDEX IF NOT EXISTS idx_comment_parent_child_v17
 ON riha.comment (comment_parent_id, creation_date DESC, type)
 WHERE comment_parent_id IS NOT NULL;
 
