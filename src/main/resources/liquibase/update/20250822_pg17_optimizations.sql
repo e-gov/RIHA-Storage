@@ -1,6 +1,5 @@
 -- PostgreSQL 17 Performance Optimizations for RIHA
 -- Migration: 20250822_pg17_optimizations.sql
--- Author: AI Assistant
 -- Date: 2025-08-22
 -- Description: Optimize queries for PostgreSQL 17 features and improved performance
 
@@ -12,20 +11,20 @@
 -- These tables are append-heavy with timestamp-based queries
 
 -- Comment table BRIN indexes
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_comment_creation_date_brin 
+CREATE INDEX  IF NOT EXISTS idx_comment_creation_date_brin 
 ON riha.comment USING brin (creation_date)
 WITH (pages_per_range = 128);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_comment_modified_date_brin 
+CREATE INDEX  IF NOT EXISTS idx_comment_modified_date_brin 
 ON riha.comment USING brin (modified_date)
 WITH (pages_per_range = 128);
 
 -- Main resource table BRIN indexes  
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_main_resource_creation_date_brin 
+CREATE INDEX  IF NOT EXISTS idx_main_resource_creation_date_brin 
 ON riha.main_resource USING brin (creation_date)
 WITH (pages_per_range = 128);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_main_resource_modified_date_brin 
+CREATE INDEX  IF NOT EXISTS idx_main_resource_modified_date_brin 
 ON riha.main_resource USING brin (modified_date)
 WITH (pages_per_range = 128);
 
@@ -35,7 +34,7 @@ WITH (pages_per_range = 128);
 
 -- Optimize the main resource view sorting pattern
 -- PG17 can use incremental sort with this composite index
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_main_resource_uuid_timestamp_id 
+CREATE INDEX  IF NOT EXISTS idx_main_resource_uuid_timestamp_id 
 ON riha.main_resource (
   (json_content #>> '{uuid}'), 
   ((json_content #>> '{meta,update_timestamp}')::timestamp with time zone) DESC NULLS LAST,
@@ -44,7 +43,7 @@ ON riha.main_resource (
 
 -- Optimize comment filtering and sorting for issues
 -- This supports the exact query pattern in comment_type_issue_view
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_comment_issue_comprehensive_v17
+CREATE INDEX  IF NOT EXISTS idx_comment_issue_comprehensive_v17
 ON riha.comment (type, status, sub_type, creation_date DESC, infosystem_uuid)
 WHERE type = 'ISSUE';
 
@@ -54,14 +53,14 @@ WHERE type = 'ISSUE';
 
 -- GIN indexes for commonly accessed JSON paths
 -- PG17 has significant improvements for GIN index performance
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_main_resource_json_uuid_gin
+CREATE INDEX  IF NOT EXISTS idx_main_resource_json_uuid_gin
 ON riha.main_resource USING gin ((json_content -> 'uuid'));
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_main_resource_json_meta_gin
+CREATE INDEX  IF NOT EXISTS idx_main_resource_json_meta_gin
 ON riha.main_resource USING gin ((json_content -> 'meta'));
 
 -- Index for topics array queries (used in main_resource_view)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_main_resource_json_topics_gin
+CREATE INDEX  IF NOT EXISTS idx_main_resource_json_topics_gin
 ON riha.main_resource USING gin ((json_content -> 'topics'));
 
 -- =======================================================================================
@@ -171,16 +170,16 @@ ANALYZE riha.main_resource_relation;
 
 -- Optimize the NamesDAO queries that use IN clauses
 -- These will benefit significantly from PG17's improved IN clause handling
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_main_resource_uri_name
+CREATE INDEX  IF NOT EXISTS idx_main_resource_uri_name
 ON riha.main_resource (uri, name)
 WHERE uri IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_data_object_uri_name  
+CREATE INDEX  IF NOT EXISTS idx_data_object_uri_name  
 ON riha.data_object (uri, name)
 WHERE uri IS NOT NULL;
 
 -- Index for comment parent-child relationships
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_comment_parent_child_v17
+CREATE INDEX  IF NOT EXISTS idx_comment_parent_child_v17
 ON riha.comment (comment_parent_id, creation_date DESC, type)
 WHERE comment_parent_id IS NOT NULL;
 
