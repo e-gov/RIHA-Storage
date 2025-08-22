@@ -1,1 +1,0 @@
-ALTER TABLE riha.comment ADD sub_type VARCHAR(150) NULL;
