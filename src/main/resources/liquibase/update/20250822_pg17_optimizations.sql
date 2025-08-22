@@ -97,6 +97,7 @@ ON riha.main_resource USING gin ((json_content -> 'topics') jsonb_path_ops);
 -- =======================================================================================
 
 -- Update main_resource_view to use PG17's improved CTE handling
+-- Note: Using conditional aggregation instead of FILTER clause for broader PostgreSQL compatibility
 CREATE OR REPLACE VIEW riha.main_resource_view AS
 WITH comment_aggregates AS MATERIALIZED (
   -- Pre-aggregate comment data to reduce complex JOINs
@@ -110,10 +111,12 @@ WITH comment_aggregates AS MATERIALIZED (
              THEN c.modified_date END) as last_positive_take_into_use_request_date,
     MAX(CASE WHEN c.sub_type = 'FINALIZATION_REQUEST' AND c.status = 'CLOSED' AND c.resolution_type = 'POSITIVE' 
              THEN c.modified_date END) as last_positive_finalization_request_date,
-    -- Get the most recent approval request info
-    (array_agg(c.sub_type ORDER BY c.modified_date DESC 
-               FILTER (WHERE c.sub_type IN ('ESTABLISHMENT_REQUEST', 'TAKE_INTO_USE_REQUEST', 'FINALIZATION_REQUEST') 
-                        AND c.status = 'CLOSED' AND c.resolution_type = 'POSITIVE')))[1] as last_positive_approval_request_type,
+    -- Get the most recent approval request info using conditional aggregation
+    (array_agg(CASE WHEN c.sub_type IN ('ESTABLISHMENT_REQUEST', 'TAKE_INTO_USE_REQUEST', 'FINALIZATION_REQUEST') 
+                    AND c.status = 'CLOSED' AND c.resolution_type = 'POSITIVE'
+                    THEN c.sub_type 
+                    ELSE NULL END 
+               ORDER BY c.modified_date DESC))[1] as last_positive_approval_request_type,
     MAX(CASE WHEN c.sub_type IN ('ESTABLISHMENT_REQUEST', 'TAKE_INTO_USE_REQUEST', 'FINALIZATION_REQUEST') 
              AND c.status = 'CLOSED' AND c.resolution_type = 'POSITIVE' 
              THEN c.modified_date END) as last_positive_approval_request_date
