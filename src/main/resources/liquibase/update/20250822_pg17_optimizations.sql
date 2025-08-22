@@ -229,6 +229,7 @@ WHERE comment_parent_id IS NOT NULL;
 --CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 
 -- Create a view to monitor RIHA-specific query performance
+-- Note: Only create if pg_stat_statements extension is available
 CREATE OR REPLACE VIEW riha.pg17_query_performance AS
 SELECT 
   substr(query, 1, 100) as query_snippet,
@@ -245,11 +246,12 @@ WHERE query ILIKE '%riha%'
 ORDER BY mean_exec_time DESC;
 
 -- Create a view to monitor index usage
+-- Using correct column names from pg_stat_user_indexes
 CREATE OR REPLACE VIEW riha.pg17_index_usage AS
 SELECT 
   schemaname,
-  tablename, 
-  indexname,
+  relname as tablename, 
+  indexrelname as indexname,
   idx_scan,
   idx_tup_read,
   idx_tup_fetch,
