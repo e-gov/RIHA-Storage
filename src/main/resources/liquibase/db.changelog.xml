@@ -238,7 +238,7 @@
                  splitStatements="false"
         />
     </changeSet>
-    <changeSet id="Data-object search optimization" author="kristjankr">
+    <changeSet id="Data-object search optimization 2" author="kristjankr">
         <comment>Search optimization</comment>
         <sqlFile dbms="postgresql"
                  encoding="utf8"
