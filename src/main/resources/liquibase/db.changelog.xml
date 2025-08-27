@@ -220,4 +220,22 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="PG17-PERFORMANCE-OPTIMIZATIONS" author="kristjankr">
+        <comment>PostgreSQL 17 performance optimizations: BRIN indexes, improved IN clauses, JSON GIN indexes, and materialized CTE view updates</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20250822_pg17_optimizations.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+    <changeSet id="Data-object search optimization" author="kristjankr">
+        <comment>Search optimization</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20250827_optimize_dataobject_search.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 </databaseChangeLog>
