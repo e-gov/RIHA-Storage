@@ -238,4 +238,13 @@
                  splitStatements="false"
         />
     </changeSet>
+    <changeSet id="Data-object search optimization" author="kristjankr">
+        <comment>Search optimization</comment>
+        <sqlFile dbms="postgresql"
+                 encoding="utf8"
+                 path="./update/20250827_optimize_dataobject_search_riha_user.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
 </databaseChangeLog>
