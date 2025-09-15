@@ -49,23 +49,17 @@ public class LargeObjectDAO {
     public int create(InputStream inputStream) {
         LOG.info("=== LARGE OBJECT DAO DEBUG: Starting create method ===");
 
-        // Get the next value from the sequence for debugging
+        // Log sequence and table information for debugging, but don't modify the sequence
         try {
             Session session = sessionFactory.getCurrentSession();
-            Object seqValue = session.createNativeQuery("SELECT nextval('riha.large_object_seq')", Object.class).getSingleResult();
-            LOG.info("LARGE OBJECT DAO DEBUG: Next sequence value from large_object_seq: {}", seqValue);
             
-            // Also check current max ID in the table
+            // Check current max ID in the table
             Object maxId = session.createNativeQuery("SELECT COALESCE(MAX(id), 0) FROM riha.large_object", Object.class).getSingleResult();
             LOG.info("LARGE OBJECT DAO DEBUG: Current MAX id in large_object table: {}", maxId);
             
-            // Reset sequence to the proper value if needed
-            session.createNativeQuery("SELECT setval('riha.large_object_seq', (SELECT MAX(id) FROM riha.large_object), true)", Object.class).getSingleResult();
-            LOG.info("LARGE OBJECT DAO DEBUG: Reset sequence to max id value");
-            
-            // Get new sequence value after reset
-            seqValue = session.createNativeQuery("SELECT nextval('riha.large_object_seq')", Object.class).getSingleResult();
-            LOG.info("LARGE OBJECT DAO DEBUG: After reset, next sequence value is: {}", seqValue);
+            // Get current sequence value for diagnostic purposes only
+            Object currSeqValue = session.createNativeQuery("SELECT last_value FROM riha.large_object_seq", Object.class).getSingleResult();
+            LOG.info("LARGE OBJECT DAO DEBUG: Current sequence value from large_object_seq: {}", currSeqValue);
         } catch (Exception e) {
             LOG.error("LARGE OBJECT DAO DEBUG: Error getting sequence information", e);
         }
