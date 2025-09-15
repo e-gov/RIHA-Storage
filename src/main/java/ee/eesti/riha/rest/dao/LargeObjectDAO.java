@@ -48,20 +48,27 @@ public class LargeObjectDAO {
      */
     public int create(InputStream inputStream) {
         LOG.info("=== LARGE OBJECT DAO DEBUG: Starting create method ===");
-
-        // Log sequence and table information for debugging, but don't modify the sequence
+        
+        // For debugging only - check sequence and max ID values without modifying them
         try {
             Session session = sessionFactory.getCurrentSession();
             
+            // Check current sequence value
+            Object currSeqValue = session.createNativeQuery("SELECT last_value FROM riha.large_object_seq", Object.class).getSingleResult();
+            
             // Check current max ID in the table
             Object maxId = session.createNativeQuery("SELECT COALESCE(MAX(id), 0) FROM riha.large_object", Object.class).getSingleResult();
-            LOG.info("LARGE OBJECT DAO DEBUG: Current MAX id in large_object table: {}", maxId);
             
-            // Get current sequence value for diagnostic purposes only
-            Object currSeqValue = session.createNativeQuery("SELECT last_value FROM riha.large_object_seq", Object.class).getSingleResult();
-            LOG.info("LARGE OBJECT DAO DEBUG: Current sequence value from large_object_seq: {}", currSeqValue);
+            LOG.info("LARGE OBJECT DAO DEBUG: Current sequence value: {}, MAX id in table: {}", currSeqValue, maxId);
+            
+            // If sequence is behind max ID, log a warning but don't modify
+            if (Long.parseLong(currSeqValue.toString()) <= Long.parseLong(maxId.toString())) {
+                LOG.warn("LARGE OBJECT DAO DEBUG: WARNING - Sequence value {} is not greater than max ID {}. " +
+                         "This may cause primary key conflicts.", currSeqValue, maxId);
+            }
         } catch (Exception e) {
-            LOG.error("LARGE OBJECT DAO DEBUG: Error getting sequence information", e);
+            LOG.error("LARGE OBJECT DAO DEBUG: Error getting diagnostic information", e);
+            // Continue anyway as this is just diagnostic
         }
         
         LengthCalculatingInputStream lengthCalculatingInputStream = new LengthCalculatingInputStream(inputStream);
@@ -142,18 +149,23 @@ public class LargeObjectDAO {
     private LargeObject createEntityFromInputStream(InputStream inputStream) {
         LOG.info("LARGE OBJECT DAO DEBUG: Creating LargeObject entity");
         
-        try {
-            Session session = sessionFactory.getCurrentSession();
-            
-            // Check database sequence before create
-            Object seqValue = session.createNativeQuery("SELECT currval('riha.large_object_seq')", Object.class).getSingleResult();
-            LOG.info("LARGE OBJECT DAO DEBUG: Current sequence value before entity creation: {}", seqValue);
-        } catch (Exception e) {
-            // This might fail if no sequence has been used yet in this session
-            LOG.info("LARGE OBJECT DAO DEBUG: Could not get current sequence value, might be first use in this session");
-        }
-
         Session session = sessionFactory.getCurrentSession();
+
+        // Try to manually advance the sequence to avoid ID conflicts
+        try {
+            // First get the current max ID to ensure we're not behind
+            Object maxId = session.createNativeQuery("SELECT COALESCE(MAX(id), 0) FROM riha.large_object", Object.class).getSingleResult();
+            Long maxIdValue = Long.parseLong(maxId.toString());
+            
+            // Ensure sequence is ahead of max ID to avoid conflicts
+            session.createNativeQuery("SELECT setval('riha.large_object_seq', :maxId, true)", Object.class)
+                  .setParameter("maxId", maxIdValue)
+                  .getSingleResult();
+            
+            LOG.info("LARGE OBJECT DAO DEBUG: Ensured sequence is at least: {}", maxIdValue);
+        } catch (Exception e) {
+            LOG.warn("LARGE OBJECT DAO DEBUG: Could not adjust sequence. Will continue with default sequence behavior", e);
+        }
 
         LargeObject entity = new LargeObject();
         entity.setCreationDate(new Date());
@@ -164,15 +176,25 @@ public class LargeObjectDAO {
         LOG.info("LARGE OBJECT DAO DEBUG: BLOB created");
 
         // Save and flush in order to persist blob and calculate hash
-        LOG.info("LARGE OBJECT DAO DEBUG: Saving entity");
-        session.persist(entity);
-        LOG.info("LARGE OBJECT DAO DEBUG: Entity saved with generated ID: {}", entity.getId());
-        
-        LOG.info("LARGE OBJECT DAO DEBUG: Flushing session");
-        session.flush();
-        LOG.info("LARGE OBJECT DAO DEBUG: Session flushed");
-
-        LOG.info("LARGE OBJECT DAO DEBUG: LargeObject with id {} is created", entity.getId());
+        try {
+            LOG.info("LARGE OBJECT DAO DEBUG: Saving entity");
+            session.persist(entity);
+            LOG.info("LARGE OBJECT DAO DEBUG: Entity saved with generated ID: {}", entity.getId());
+            
+            LOG.info("LARGE OBJECT DAO DEBUG: Flushing session");
+            session.flush();
+            LOG.info("LARGE OBJECT DAO DEBUG: Session flushed");
+            
+            LOG.info("LARGE OBJECT DAO DEBUG: LargeObject with id {} is created", entity.getId());
+        } catch (Exception e) {
+            LOG.error("LARGE OBJECT DAO DEBUG: Error saving entity: {}", e.getMessage(), e);
+            // If there was a duplicate key error, try to restart the sequence
+            if (e.getMessage() != null && e.getMessage().contains("duplicate key")) {
+                LOG.error("LARGE OBJECT DAO DEBUG: Detected duplicate key error. This indicates sequence misalignment.");
+                throw new RuntimeException("Duplicate key error when creating LargeObject. Sequence needs to be reset.", e);
+            }
+            throw e;
+        }
 
         return entity;
     }
