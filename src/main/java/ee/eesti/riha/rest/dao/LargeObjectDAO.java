@@ -1,9 +1,9 @@
 package ee.eesti.riha.rest.dao;
 
-import ee.eesti.riha.rest.logic.util.LengthCalculatingInputStream;
 import ee.eesti.riha.rest.model.LargeObject;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -71,24 +71,35 @@ public class LargeObjectDAO {
             // Continue anyway as this is just diagnostic
         }
         
-        LengthCalculatingInputStream lengthCalculatingInputStream = new LengthCalculatingInputStream(inputStream);
-        DigestInputStream digestInputStream;
+        // First, fully read the input stream to calculate hash and length
+        byte[] fileBytes;
+        MessageDigest digest;
+        long fileLength;
+        
         try {
-            digestInputStream = new DigestInputStream(lengthCalculatingInputStream, MessageDigest.getInstance(HASH_ALGORITHM));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Could not create DigestInputStream with algorithm " + HASH_ALGORITHM, e);
+            // Read the entire stream into memory to allow multiple passes
+            fileBytes = inputStream.readAllBytes();
+            fileLength = fileBytes.length;
+            LOG.info("LARGE OBJECT DAO DEBUG: Read {} bytes from input stream", fileLength);
+            
+            // Calculate hash
+            digest = MessageDigest.getInstance(HASH_ALGORITHM);
+            digest.update(fileBytes);
+            LOG.info("LARGE OBJECT DAO DEBUG: Hash calculated");
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Error processing input stream", e);
         }
-
-        LOG.info("LARGE OBJECT DAO DEBUG: About to create entity from input stream");
-        LargeObject entity = createEntityFromInputStream(digestInputStream);
+        
+        LOG.info("LARGE OBJECT DAO DEBUG: About to create entity from byte array");
+        LargeObject entity = createEntityFromByteArray(fileBytes);
         LOG.info("LARGE OBJECT DAO DEBUG: Created new entity with ID: {}", entity.getId());
         
         LOG.info("LARGE OBJECT DAO DEBUG: Setting hash for entity");
-        setHash(entity, digestInputStream.getMessageDigest());
+        setHash(entity, digest);
         LOG.info("LARGE OBJECT DAO DEBUG: Hash set to: {}", entity.getHash());
         
         LOG.info("LARGE OBJECT DAO DEBUG: Setting length for entity");
-        setLength(entity, lengthCalculatingInputStream.getLength());
+        setLength(entity, fileLength);
         LOG.info("LARGE OBJECT DAO DEBUG: Length set to: {}", entity.getLength());
 
         if (deleteWhenReuseFound) {
@@ -146,7 +157,7 @@ public class LargeObjectDAO {
         return session.createQuery(cq).getResultList();
     }
 
-    private LargeObject createEntityFromInputStream(InputStream inputStream) {
+    private LargeObject createEntityFromByteArray(byte[] data) {
         LOG.info("LARGE OBJECT DAO DEBUG: Creating LargeObject entity");
         
         Session session = sessionFactory.getCurrentSession();
@@ -171,8 +182,9 @@ public class LargeObjectDAO {
         entity.setCreationDate(new Date());
         LOG.info("LARGE OBJECT DAO DEBUG: Setting creation date: {}", entity.getCreationDate());
         
-        LOG.info("LARGE OBJECT DAO DEBUG: Creating BLOB from input stream");
-        entity.setData(session.getLobHelper().createBlob(inputStream, -1));
+        LOG.info("LARGE OBJECT DAO DEBUG: Creating BLOB from byte array");
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        entity.setData(session.getLobHelper().createBlob(bais, data.length));
         LOG.info("LARGE OBJECT DAO DEBUG: BLOB created");
 
         // Save and flush in order to persist blob and calculate hash
@@ -191,7 +203,7 @@ public class LargeObjectDAO {
             // If there was a duplicate key error, try to restart the sequence
             if (e.getMessage() != null && e.getMessage().contains("duplicate key")) {
                 LOG.error("LARGE OBJECT DAO DEBUG: Detected duplicate key error. This indicates sequence misalignment.");
-                throw new RuntimeException("Duplicate key error when creating LargeObject. Sequence needs to be reset.", e);
+                throw new IllegalStateException("Duplicate key error when creating LargeObject. Sequence needs to be reset.", e);
             }
             throw e;
         }
