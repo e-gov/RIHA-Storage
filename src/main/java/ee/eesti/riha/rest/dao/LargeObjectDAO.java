@@ -1,9 +1,9 @@
 package ee.eesti.riha.rest.dao;
 
-import ee.eesti.riha.rest.logic.util.LengthCalculatingInputStream;
 import ee.eesti.riha.rest.model.LargeObject;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -47,30 +47,81 @@ public class LargeObjectDAO {
      * @return id of created entity or id of existing entity with the same hash
      */
     public int create(InputStream inputStream) {
-        LengthCalculatingInputStream lengthCalculatingInputStream = new LengthCalculatingInputStream(inputStream);
-        DigestInputStream digestInputStream;
+        LOG.info("=== LARGE OBJECT DAO DEBUG: Starting create method ===");
+        
+        // For debugging only - check sequence and max ID values without modifying them
         try {
-            digestInputStream = new DigestInputStream(lengthCalculatingInputStream, MessageDigest.getInstance(HASH_ALGORITHM));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Could not create DigestInputStream with algorithm " + HASH_ALGORITHM, e);
+            Session session = sessionFactory.getCurrentSession();
+            
+            // Check current sequence value
+            Object currSeqValue = session.createNativeQuery("SELECT last_value FROM riha.large_object_seq", Object.class).getSingleResult();
+            
+            // Check current max ID in the table
+            Object maxId = session.createNativeQuery("SELECT COALESCE(MAX(id), 0) FROM riha.large_object", Object.class).getSingleResult();
+            
+            LOG.info("LARGE OBJECT DAO DEBUG: Current sequence value: {}, MAX id in table: {}", currSeqValue, maxId);
+            
+            // If sequence is behind max ID, log a warning but don't modify
+            if (Long.parseLong(currSeqValue.toString()) <= Long.parseLong(maxId.toString())) {
+                LOG.warn("LARGE OBJECT DAO DEBUG: WARNING - Sequence value {} is not greater than max ID {}. " +
+                         "This may cause primary key conflicts.", currSeqValue, maxId);
+            }
+        } catch (Exception e) {
+            LOG.error("LARGE OBJECT DAO DEBUG: Error getting diagnostic information", e);
+            // Continue anyway as this is just diagnostic
         }
-
-        LargeObject entity = createEntityFromInputStream(digestInputStream);
-        setHash(entity, digestInputStream.getMessageDigest());
-        setLength(entity, lengthCalculatingInputStream.getLength());
+        
+        // First, fully read the input stream to calculate hash and length
+        byte[] fileBytes;
+        MessageDigest digest;
+        long fileLength;
+        
+        try {
+            // Read the entire stream into memory to allow multiple passes
+            fileBytes = inputStream.readAllBytes();
+            fileLength = fileBytes.length;
+            LOG.info("LARGE OBJECT DAO DEBUG: Read {} bytes from input stream", fileLength);
+            
+            // Calculate hash
+            digest = MessageDigest.getInstance(HASH_ALGORITHM);
+            digest.update(fileBytes);
+            LOG.info("LARGE OBJECT DAO DEBUG: Hash calculated");
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Error processing input stream", e);
+        }
+        
+        LOG.info("LARGE OBJECT DAO DEBUG: About to create entity from byte array");
+        LargeObject entity = createEntityFromByteArray(fileBytes);
+        LOG.info("LARGE OBJECT DAO DEBUG: Created new entity with ID: {}", entity.getId());
+        
+        LOG.info("LARGE OBJECT DAO DEBUG: Setting hash for entity");
+        setHash(entity, digest);
+        LOG.info("LARGE OBJECT DAO DEBUG: Hash set to: {}", entity.getHash());
+        
+        LOG.info("LARGE OBJECT DAO DEBUG: Setting length for entity");
+        setLength(entity, fileLength);
+        LOG.info("LARGE OBJECT DAO DEBUG: Length set to: {}", entity.getLength());
 
         if (deleteWhenReuseFound) {
+            LOG.info("LARGE OBJECT DAO DEBUG: Checking for reusable entities with same hash");
             Integer reusableEntityId = getFirstReusableEntityId(entity);
             if (reusableEntityId != null) {
+                LOG.info("LARGE OBJECT DAO DEBUG: Found reusable entity with ID: {} for hash: {}", 
+                         reusableEntityId, entity.getHash());
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Deleting persisted LargeObject with id {} since reusable LargeObject with id {} is found for hash {}",
                             entity.getId(), reusableEntityId, entity.getHash());
                 }
+                LOG.info("LARGE OBJECT DAO DEBUG: About to delete newly created entity");
                 delete(entity);
+                LOG.info("LARGE OBJECT DAO DEBUG: Entity deleted, returning reusable ID: {}", reusableEntityId);
                 return reusableEntityId;
+            } else {
+                LOG.info("LARGE OBJECT DAO DEBUG: No reusable entity found with same hash");
             }
         }
 
+        LOG.info("LARGE OBJECT DAO DEBUG: Returning newly created entity ID: {}", entity.getId());
         return entity.getId();
     }
 
@@ -106,23 +157,55 @@ public class LargeObjectDAO {
         return session.createQuery(cq).getResultList();
     }
 
-    private LargeObject createEntityFromInputStream(InputStream inputStream) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Creating LargeObject entity");
-        }
-
+    private LargeObject createEntityFromByteArray(byte[] data) {
+        LOG.info("LARGE OBJECT DAO DEBUG: Creating LargeObject entity");
+        
         Session session = sessionFactory.getCurrentSession();
+
+        // Try to manually advance the sequence to avoid ID conflicts
+        try {
+            // First get the current max ID to ensure we're not behind
+            Object maxId = session.createNativeQuery("SELECT COALESCE(MAX(id), 0) FROM riha.large_object", Object.class).getSingleResult();
+            Long maxIdValue = Long.parseLong(maxId.toString());
+            
+            // Ensure sequence is ahead of max ID to avoid conflicts
+            session.createNativeQuery("SELECT setval('riha.large_object_seq', :maxId, true)", Object.class)
+                  .setParameter("maxId", maxIdValue)
+                  .getSingleResult();
+            
+            LOG.info("LARGE OBJECT DAO DEBUG: Ensured sequence is at least: {}", maxIdValue);
+        } catch (Exception e) {
+            LOG.warn("LARGE OBJECT DAO DEBUG: Could not adjust sequence. Will continue with default sequence behavior", e);
+        }
 
         LargeObject entity = new LargeObject();
         entity.setCreationDate(new Date());
-        entity.setData(session.getLobHelper().createBlob(inputStream, -1));
+        LOG.info("LARGE OBJECT DAO DEBUG: Setting creation date: {}", entity.getCreationDate());
+        
+        LOG.info("LARGE OBJECT DAO DEBUG: Creating BLOB from byte array");
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        entity.setData(session.getLobHelper().createBlob(bais, data.length));
+        LOG.info("LARGE OBJECT DAO DEBUG: BLOB created");
 
         // Save and flush in order to persist blob and calculate hash
-        session.save(entity);
-        session.flush();
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("LargeObject with id {} is created", entity.getId());
+        try {
+            LOG.info("LARGE OBJECT DAO DEBUG: Saving entity");
+            session.persist(entity);
+            LOG.info("LARGE OBJECT DAO DEBUG: Entity saved with generated ID: {}", entity.getId());
+            
+            LOG.info("LARGE OBJECT DAO DEBUG: Flushing session");
+            session.flush();
+            LOG.info("LARGE OBJECT DAO DEBUG: Session flushed");
+            
+            LOG.info("LARGE OBJECT DAO DEBUG: LargeObject with id {} is created", entity.getId());
+        } catch (Exception e) {
+            LOG.error("LARGE OBJECT DAO DEBUG: Error saving entity: {}", e.getMessage(), e);
+            // If there was a duplicate key error, try to restart the sequence
+            if (e.getMessage() != null && e.getMessage().contains("duplicate key")) {
+                LOG.error("LARGE OBJECT DAO DEBUG: Detected duplicate key error. This indicates sequence misalignment.");
+                throw new IllegalStateException("Duplicate key error when creating LargeObject. Sequence needs to be reset.", e);
+            }
+            throw e;
         }
 
         return entity;
@@ -138,13 +221,13 @@ public class LargeObjectDAO {
 
         entity.setHash(hash);
 
-        sessionFactory.getCurrentSession().saveOrUpdate(entity);
+        sessionFactory.getCurrentSession().merge(entity);
     }
 
     private void setLength(LargeObject entity, long length) {
         entity.setLength(length);
 
-        sessionFactory.getCurrentSession().saveOrUpdate(entity);
+        sessionFactory.getCurrentSession().merge(entity);
     }
 
     /**
@@ -154,7 +237,7 @@ public class LargeObjectDAO {
      * @return loaded entity or null if not found
      */
     public LargeObject get(int id) {
-        return (LargeObject) sessionFactory.getCurrentSession().get(LargeObject.class, id);
+        return sessionFactory.getCurrentSession().get(LargeObject.class, id);
     }
 
     /**
@@ -163,7 +246,7 @@ public class LargeObjectDAO {
      * @param entity entity for deletion
      */
     public void delete(LargeObject entity) {
-        sessionFactory.getCurrentSession().delete(entity);
+        sessionFactory.getCurrentSession().remove(entity);
     }
 
     /**

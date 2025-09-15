@@ -12,8 +12,6 @@ import jakarta.persistence.*;
 import java.sql.Blob;
 import java.util.Date;
 
-import static jakarta.persistence.GenerationType.AUTO;
-
 /**
  * Entity for holding different large objects like document attachments or arbitrary files
  */
@@ -23,8 +21,8 @@ import static jakarta.persistence.GenerationType.AUTO;
 public class LargeObject {
 
     @Id
-    @GeneratedValue(strategy = AUTO, generator = "large_object_seq")
-    @SequenceGenerator(name = "large_object_seq", sequenceName = "large_object_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "large_object_seq")
+    @SequenceGenerator(name = "large_object_seq", sequenceName = "riha.large_object_seq", allocationSize = 1)
     @Column(name = "id", updatable = false)
     private int id;
 
