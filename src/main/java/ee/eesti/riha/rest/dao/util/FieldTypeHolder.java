@@ -1,6 +1,6 @@
 package ee.eesti.riha.rest.dao.util;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 import java.lang.reflect.Field;
 
 // TODO: Auto-generated Javadoc

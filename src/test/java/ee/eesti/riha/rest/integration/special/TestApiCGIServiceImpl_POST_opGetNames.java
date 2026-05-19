@@ -6,21 +6,19 @@ import ee.eesti.riha.rest.TestHelper;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -34,7 +32,7 @@ public class TestApiCGIServiceImpl_POST_opGetNames {
   // service under test info here
   private static ApiCGIService serviceUnderTest;
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     serviceUnderTest = JAXRSClientFactory.fromClient(webClient, ApiCGIService.class);
   }

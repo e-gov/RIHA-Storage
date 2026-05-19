@@ -1,10 +1,10 @@
 package ee.eesti.riha.rest.logic;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestURI {
 

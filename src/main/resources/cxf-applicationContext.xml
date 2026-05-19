@@ -25,7 +25,7 @@
 
 	</jaxrs:server>
 
-	<bean id="jacksonJsonProviderId" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+	<bean id="jacksonJsonProviderId" class="com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider" />
 
 	<util:list id="serviceBeansId">
 		<bean class="ee.eesti.riha.rest.service.impl.ApiClassicServiceImpl" />

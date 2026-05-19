@@ -12,23 +12,21 @@ import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -46,14 +44,14 @@ public class TestApiClassicServiceImpl_GET_LIMIT<T> {
   private static String tableUnderTest = TestFinals.MAIN_RESOURCE;
   private static String jsonToUseForCreate = TestFinals.JSON_CONTENT_FOR_MAIN_RESOURCE_CORRECT_SAMPLE_AS_JSON_STRING;
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
     serviceUnderTest = JAXRSClientFactory.fromClient(webClient, ApiClassicService.class, true);
     idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceUnderTest, tableUnderTest, jsonToUseForCreate));
   }
 
-  @After
+  @AfterEach
   public void afterTest() {
     // clean up always
     for (Integer idForTestEntry : idUnderTestList) {
@@ -153,7 +151,7 @@ public class TestApiClassicServiceImpl_GET_LIMIT<T> {
 
   }
 
-  @Ignore("Token not required with GET")
+  @Disabled("Token not required with GET")
   @Test
   public void testGetList_whenNoAuthToken_thenError() throws Exception {
     // create client with empty header field

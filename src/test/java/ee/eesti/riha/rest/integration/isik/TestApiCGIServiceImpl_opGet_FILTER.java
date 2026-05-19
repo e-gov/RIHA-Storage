@@ -9,21 +9,19 @@ import ee.eesti.riha.rest.logic.Finals;
 import ee.eesti.riha.rest.service.ApiCGIService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -37,13 +35,13 @@ public class TestApiCGIServiceImpl_opGet_FILTER<T> {
   // service under test info here
   private static ApiCGIService serviceUnderTest;
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
     serviceUnderTest = JAXRSClientFactory.fromClient(webClient, ApiCGIService.class);
   }
 
-  @After
+  @AfterEach
   public void afterTest() {
 
   }

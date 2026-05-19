@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,7 +39,7 @@ public class TestFileServiceImpl {
   private static String jsonToUseForCreateMain_resource = TestFinals.JSON_CONTENT_FOR_MAIN_RESOURCE_CORRECT_SAMPLE_AS_JSON_STRING;
   private static Integer main_resourceId;
   
-  @Before
+  @BeforeEach
   public void beforeTest() {
     if (idUnderTestList.size() == 0) {
       webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
@@ -67,7 +67,7 @@ public class TestFileServiceImpl {
     }
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() {
     for (Integer idForTestEntry : idUnderTestList) {
       IntegrationTestHelper.removeTestDataFromDB(serviceHelpingCreateDeleteTestData, tableUnderTest, idForTestEntry);

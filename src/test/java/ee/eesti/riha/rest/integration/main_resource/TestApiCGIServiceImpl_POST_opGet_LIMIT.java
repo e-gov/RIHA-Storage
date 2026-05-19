@@ -13,23 +13,21 @@ import ee.eesti.riha.rest.service.ApiCGIService;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -51,7 +49,7 @@ public class TestApiCGIServiceImpl_POST_opGet_LIMIT<T> {
   // other specifics
   private static String pathToUse = TestFinals.CGI_PATH_PROPERTY_VALUE_FOR_MAIN_RESOURCE;
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
     serviceHelpingCreateDeleteTestData = JAXRSClientFactory.fromClient(webClient, ApiClassicService.class, true);
@@ -60,7 +58,7 @@ public class TestApiCGIServiceImpl_POST_opGet_LIMIT<T> {
         jsonToUseForCreate));
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() {
     // clean up always
     for (Integer idForTestEntry : idUnderTestList) {
@@ -178,7 +176,7 @@ public class TestApiCGIServiceImpl_POST_opGet_LIMIT<T> {
 
   }
 
-  @Ignore("Token not required with GET")
+  @Disabled("Token not required with GET")
   @Test
   public void testGetList_noAuthToken_thenError() throws Exception {
 

@@ -14,17 +14,17 @@ import java.sql.Types;
 /**
  * The Class StringJsonUserType.
  */
-public class StringJsonUserType implements UserType {
+public class StringJsonUserType implements UserType<String> {
 
   /**
-   * Return the SQL type codes for the columns mapped by this type. The codes are defined on <tt>java.sql.Types</tt>.
+   * Return the SQL type code for the column mapped by this type.
    *
-   * @return int[] the typecodes
+   * @return int the typecode
    * @see java.sql.Types
    */
   @Override
-  public int[] sqlTypes() {
-    return new int[] {Types.JAVA_OBJECT };
+  public int getSqlType() {
+    return Types.OTHER;
   }
 
   /**
@@ -33,7 +33,7 @@ public class StringJsonUserType implements UserType {
    * @return Class
    */
   @Override
-  public Class returnedClass() {
+  public Class<String> returnedClass() {
     return String.class;
   }
 
@@ -44,16 +44,12 @@ public class StringJsonUserType implements UserType {
    * @param x the x
    * @param y the y
    * @return boolean
-   * @throws HibernateException the hibernate exception
    */
   @Override
-  public boolean equals(Object x, Object y) throws HibernateException {
-
+  public boolean equals(String x, String y) {
     if (x == null) {
-
       return y == null;
     }
-
     return x.equals(y);
   }
 
@@ -62,12 +58,10 @@ public class StringJsonUserType implements UserType {
    *
    * @param x the x
    * @return the int
-   * @throws HibernateException the hibernate exception
    */
   @Override
-  public int hashCode(Object x) throws HibernateException {
-
-    return x.hashCode();
+  public int hashCode(String x) {
+    return x == null ? 0 : x.hashCode();
   }
 
   /**
@@ -75,21 +69,17 @@ public class StringJsonUserType implements UserType {
    * values.
    *
    * @param rs a JDBC result set
-   * @param names the column names
+   * @param position the column position
    * @param session the session
-   * @param owner the containing entity @return Object
-   * @return the object
-   * @throws HibernateException the hibernate exception
-   * @throws SQLException the SQL exception
-   * @throws org.hibernate.HibernateException the org.hibernate. hibernate exception
+   * @param owner the containing entity
+   * @return String
+   * @throws org.hibernate.HibernateException the hibernate exception
+   * @throws java.sql.SQLException the SQL exception
    */
   @Override
-  public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+  public String nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner)
       throws HibernateException, SQLException {
-    if (rs.getString(names[0]) == null) {
-      return null;
-    }
-    return rs.getString(names[0]);
+    return rs.getString(position);
   }
 
   /**
@@ -100,18 +90,16 @@ public class StringJsonUserType implements UserType {
    * @param value the object to write
    * @param index statement parameter index
    * @param session the session
-   * @throws HibernateException the hibernate exception
-   * @throws SQLException the SQL exception
-   * @throws org.hibernate.HibernateException the org.hibernate. hibernate exception
+   * @throws org.hibernate.HibernateException the hibernate exception
+   * @throws java.sql.SQLException the SQL exception
    */
   @Override
-  public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
+  public void nullSafeSet(PreparedStatement st, String value, int index, SharedSessionContractImplementor session)
       throws HibernateException, SQLException {
     if (value == null) {
       st.setNull(index, Types.OTHER);
       return;
     }
-
     st.setObject(index, value, Types.OTHER);
   }
 
@@ -120,13 +108,11 @@ public class StringJsonUserType implements UserType {
    * immutable objects, or null values, in which case it is safe to simply return the argument.
    *
    * @param value the object to be cloned, which may be null
-   * @return Object a copy
-   * @throws HibernateException the hibernate exception
+   * @return String a copy
    */
   @Override
-  public Object deepCopy(Object value) throws HibernateException {
-
-    return value;
+  public String deepCopy(String value) {
+    return value; // Strings are immutable
   }
 
   /**
@@ -136,7 +122,7 @@ public class StringJsonUserType implements UserType {
    */
   @Override
   public boolean isMutable() {
-    return true;
+    return false; // Strings are immutable
   }
 
   /**
@@ -146,12 +132,11 @@ public class StringJsonUserType implements UserType {
    *
    * @param value the object to be cached
    * @return a cachable representation of the object
-   * @throws HibernateException the hibernate exception
-   * @throws org.hibernate.HibernateException the org.hibernate. hibernate exception
+   * @throws org.hibernate.HibernateException the hibernate exception
    */
   @Override
-  public Serializable disassemble(Object value) throws HibernateException {
-    return (String) this.deepCopy(value);
+  public Serializable disassemble(String value) {
+    return value; // Strings are already serializable
   }
 
   /**
@@ -161,12 +146,11 @@ public class StringJsonUserType implements UserType {
    * @param cached the object to be cached
    * @param owner the owner of the cached object
    * @return a reconstructed object from the cachable representation
-   * @throws HibernateException the hibernate exception
-   * @throws org.hibernate.HibernateException the org.hibernate. hibernate exception
+   * @throws org.hibernate.HibernateException the hibernate exception
    */
   @Override
-  public Object assemble(Serializable cached, Object owner) throws HibernateException {
-    return this.deepCopy(cached);
+  public String assemble(Serializable cached, Object owner) {
+    return (String) cached;
   }
 
   /**
@@ -179,10 +163,9 @@ public class StringJsonUserType implements UserType {
    * @param target the value in the managed entity
    * @param owner the owner
    * @return the value to be merged
-   * @throws HibernateException the hibernate exception
    */
   @Override
-  public Object replace(Object original, Object target, Object owner) throws HibernateException {
-    return original;
+  public String replace(String original, String target, Object owner) {
+    return original; // Strings are immutable
   }
 }

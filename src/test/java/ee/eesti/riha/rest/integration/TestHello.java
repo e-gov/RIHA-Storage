@@ -1,7 +1,7 @@
 package ee.eesti.riha.rest.integration;
 
 import ee.eesti.riha.rest.MyTestRunner;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;

@@ -6,6 +6,7 @@ import ee.eesti.riha.rest.dao.util.DaoHelper;
 import ee.eesti.riha.rest.dao.util.FieldTypeHolder;
 import ee.eesti.riha.rest.dao.util.FilterComponent;
 import ee.eesti.riha.rest.dao.util.OrderByData;
+import ee.eesti.riha.rest.dao.util.PostgreSQL17QueryOptimizer;
 import ee.eesti.riha.rest.dao.util.SqlFilter;
 import ee.eesti.riha.rest.error.RihaRestException;
 import ee.eesti.riha.rest.logic.Finals;
@@ -21,7 +22,6 @@ import ee.eesti.riha.rest.model.util.DisallowUseMethodForUpdate;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -33,12 +33,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.Table;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.transaction.Transactional;
+import java.util.stream.Collectors;
+import jakarta.persistence.Table;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -46,10 +47,17 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
  * The Class ApiGenericDAOImpl.
+ * 
+ * This DAO implementation includes PostgreSQL 17 optimizations for improved performance:
+ * - Optimized IN clause queries using single index scans
+ * - Enhanced JSON path queries with proper GIN index utilization
+ * - Incremental sort optimization with NULLS handling
+ * - Query validation and optimization suggestions
  *
  * @param <T> the generic type
  * @param <K> the key type
@@ -60,12 +68,20 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ApiGenericDAOImpl.class);
   public static final int NOT_PART_OF_MODEL_OR_JSON = -1001;
+  
+  // PostgreSQL 17 optimization constants
+  private static final String ITEM_PREFIX = "item.";
+  private static final String JSON_PATH_OPERATOR = " #>> :";
+  private static final String TEXT_CAST_SUFFIX = "\\:\\:text[]";
+  private static final String FIELD_VALUES_PARAM = "fieldValues";
+  private static final String ID_FIELD_VALUE_PARAM = "idFieldValue";
+  private static final String WHERE_CLAUSE = " where ";
 
   private final SessionFactory sessionFactory;
 
   private final SqlFilter sqlFilter;
 
-  public ApiGenericDAOImpl(SessionFactory sessionFactory, SqlFilter sqlFilter) {
+  public ApiGenericDAOImpl(@Qualifier("sessionFactory") SessionFactory sessionFactory, SqlFilter sqlFilter) {
     this.sessionFactory = sessionFactory;
     this.sqlFilter = sqlFilter;
   }
@@ -198,6 +214,20 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
   }
 
   /**
+   * Validates and logs PostgreSQL 17 optimization opportunities for a query.
+   *
+   * @param queryString the SQL query string to validate
+   */
+  private void validatePostgreSQL17Optimizations(String queryString) {
+    if (LOG.isDebugEnabled()) {
+      List<String> suggestions = PostgreSQL17QueryOptimizer.validateQueryOptimization(queryString);
+      if (!suggestions.isEmpty()) {
+        LOG.debug("PostgreSQL 17 optimization suggestions for query: {}", String.join("; ", suggestions));
+      }
+    }
+  }
+
+  /**
    * Json filter fields exist.
    *
    * @param session the session
@@ -293,20 +323,33 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       }
 
       if (DaoHelper.isFieldPartOfModel(orderData.getOrderByField(), clazz)) {
-        queryString.append(" ORDER BY item.")
-                .append(orderData.getDatabaseColumnName())
-                .append((orderData.isAsc() ? " ASC " : " DESC "));
+        // Use PostgreSQL 17 optimized ORDER BY with NULLS handling
+        String orderClause = PostgreSQL17QueryOptimizer.optimizeOrderByForIncrementalSort(
+            ITEM_PREFIX + orderData.getDatabaseColumnName(),
+            null,
+            orderData.isAsc() ? "ASC" : "DESC"
+        );
+        queryString.append(" ").append(orderClause);
       } else {
         if (jsonFieldExists(session, tableName, orderData.getOrderByField())) {
           String orderByParameterName = "jOrderParameter";
-          queryString.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
+          // Use PostgreSQL 17 optimized JSON path ordering
+          String orderClause = PostgreSQL17QueryOptimizer.optimizeOrderByForIncrementalSort(
+              ITEM_PREFIX + Finals.JSON_CONTENT + JSON_PATH_OPERATOR + orderByParameterName + TEXT_CAST_SUFFIX,
+              null,
+              orderData.isAsc() ? "ASC" : "DESC"
+          );
+          queryString.append(" ").append(orderClause);
 
-          String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
+          String jsonOrderByFieldName = "{" + orderData.getOrderByField().replace(".", ",") + "}";
           params.put(orderByParameterName, jsonOrderByFieldName);
         } else {
           LOG.info("Sorting order field was not taken into account as it exists neither in model nor in JSON content.");
         }
       }
+
+      // Validate query for PostgreSQL 17 optimization opportunities
+      validatePostgreSQL17Optimizations(queryString.toString());
 
       if (isCount) {
         queryString.append(" LIMIT ")
@@ -314,10 +357,10 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
                 .append(" OFFSET ")
                 .append(offset)
                 .append(") AS foo;");
-        query = session.createSQLQuery(queryString.toString());
+        query = session.createNativeQuery(queryString.toString(), BigInteger.class);
       } else {
         // get object of type clazz in results
-        query = session.createSQLQuery(queryString.toString()).addEntity(clazz);
+        query = session.createNativeQuery(queryString.toString(), clazz);
         query.setMaxResults(limit);
         query.setFirstResult(offset);
       }
@@ -325,14 +368,6 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     }
 
     return query;
-  }
-
-  private String createJsonQueryClause(String orderByParameterName, OrderByData orderData) {
-    return "ORDER BY" +
-            " item." + Finals.JSON_CONTENT +
-            " #>>" +
-            " :" + orderByParameterName + "\\:\\:text[]" +
-            (orderData.isAsc() ? " ASC" : " DESC");
   }
 
   /**
@@ -357,11 +392,17 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           .append(" FROM ").append(getTableName(clazz)).append(" item ");
 
       String orderByParameterName = "jOrderParameter";
-      qry.append(" ").append(createJsonQueryClause(orderByParameterName, orderData));
+      // Use PostgreSQL 17 optimized JSON path ordering with NULLS handling
+      String orderClause = PostgreSQL17QueryOptimizer.optimizeOrderByForIncrementalSort(
+          ITEM_PREFIX + Finals.JSON_CONTENT + JSON_PATH_OPERATOR + orderByParameterName + TEXT_CAST_SUFFIX,
+          null,
+          orderData.isAsc() ? "ASC" : "DESC"
+      );
+      qry.append(" ").append(orderClause);
 
-      NativeQuery<T> query = session.createSQLQuery(qry.toString()).addEntity(clazz);
+      NativeQuery<T> query = session.createNativeQuery(qry.toString(), clazz);
 
-      String jsonOrderByFieldName = "{" + orderData.getOrderByField().replaceAll("\\.", ",") + "}";
+      String jsonOrderByFieldName = "{" + orderData.getOrderByField().replace(".", ",") + "}";
       query.setParameter(orderByParameterName, jsonOrderByFieldName);
 
       query.setFirstResult(offset);
@@ -372,6 +413,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
       Root<T> root = cq.from(clazz);
 
+      // PostgreSQL 17 handles NULLS more efficiently, but CriteriaQuery handles this automatically
       if (orderData.isAsc()) {
         cq.orderBy(cb.asc(root.get(orderData.getOrderByField())));
       } else {
@@ -399,8 +441,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
    */
   private Query countNoFilter(Session session, String tableName, Integer limit, Integer offset) {
     // no filter, only limit and offset
-    return session.createSQLQuery("SELECT count(*) FROM " + "(SELECT * from " + tableName + " LIMIT " + limit
-        + " OFFSET " + offset + ") AS foo;");
+    return session.createNativeQuery("SELECT count(*) FROM " + "(SELECT * from " + tableName + " LIMIT " + limit
+        + " OFFSET " + offset + ") AS foo;", BigInteger.class);
   }
 
   /*
@@ -475,7 +517,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     LOG.info(JsonHelper.GSON.toJson(object));
     session.save(object);
 
-    Serializable id = session.getIdentifier(object);
+    Object id = session.getIdentifier(object);
     return Arrays.asList((K) id);
 
   }
@@ -492,7 +534,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     Set<K> createdIds = new HashSet<>();
     for (T t : objects) {
-      Integer id = (Integer) session.save(t);
+      session.persist(t);
+      Integer id = (Integer) session.getIdentifier(t);
       createdIds.add((K) id);
     }
 
@@ -544,7 +587,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
       updateInfo.setJson_content(null);
 
       copyNotNullValues(existing, newValue);
-      session.update(existing);
+      session.merge(existing);
 
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
         | IntrospectionException e) {
@@ -562,7 +605,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     try {
       copyNotNullValues(existing, updatedEntity);
-      session.update(existing);
+      session.merge(existing);
     } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
       LOG.error("Failed to update entity {}", existing);
       LOG.debug("Failed to update entity", e);
@@ -660,19 +703,19 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Query queryExisting;
     if (DaoHelper.isFieldPartOfHibernateModel(idFieldName, clazz)) {
       FieldTypeHolder idField = FieldTypeHolder.construct(updateInfo, idFieldName);
-      queryExisting = session.createQuery("FROM " + tableName + " item WHERE item." + idFieldName + "=:idFieldValue");
-      queryExisting.setParameter("idFieldValue", idField.getValue());
+      queryExisting = session.createQuery("FROM " + tableName + " item WHERE item." + idFieldName + "=:" + ID_FIELD_VALUE_PARAM, clazz);
+      queryExisting.setParameter(ID_FIELD_VALUE_PARAM, idField.getValue());
     } else if (jsonFieldExists(session, tableName, idFieldName)) {
-      // select * from main_resource
-      // where json_content ->> 'test_abc' = '1234';
-      String idFieldNameParameter = "idFieldNameParam";
-      String sql = "SELECT * FROM " + tableName + " where json_content ->> :" + idFieldNameParameter + " =:idFieldValue";
-      queryExisting = session.createSQLQuery(sql).addEntity(clazz);
+      // Use PostgreSQL 17 optimized JSON path query
+      String sql = PostgreSQL17QueryOptimizer.optimizeJsonPathQuery(
+          "json_content", idFieldName, "=", ID_FIELD_VALUE_PARAM);
+      sql = "SELECT * FROM " + tableName + WHERE_CLAUSE + sql;
+      queryExisting = session.createNativeQuery(sql, clazz);
 
       BaseModel bm = (BaseModel) updateInfo;
       String fieldValueString = bm.getJson_content().get(idFieldName).getAsString();
-      queryExisting.setParameter("idFieldValue", fieldValueString);
-      queryExisting.setParameter(idFieldNameParameter, idFieldName);
+      queryExisting.setParameter(ID_FIELD_VALUE_PARAM, fieldValueString);
+      // Note: PostgreSQL17QueryOptimizer.optimizeJsonPathQuery handles the path formatting
     } else {
       // return NOT_PART_OF_MODEL_OR_JSON;
       queryExisting = null;
@@ -739,7 +782,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
           updateInfo.setJson_content(null);
 
           copyNotNullValues(item, updateData);
-          session.update(item);
+          session.merge(item);
 
           // set updateInfo json_content to its old value
           updateInfo.setJson_content(updateInfoJsonContent);
@@ -772,7 +815,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     T toBeDeleted = find(type, id);
     if (toBeDeleted != null) {
-      session.delete(toBeDeleted);
+      session.remove(toBeDeleted);
       numOfDeleted = 1;
     }
 
@@ -791,7 +834,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     Session session = sessionFactory.getCurrentSession();
 
-    session.delete(object);
+    session.remove(object);
 
   }
 
@@ -807,7 +850,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Session session = sessionFactory.getCurrentSession();
 
     for (T t : objects) {
-      session.delete(t);
+      session.remove(t);
     }
 
   }
@@ -829,8 +872,8 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Query documentQuery = null;
     if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class
             && DaoHelper.isFieldPartOfModel(key, Finals.getClassRepresentingTable(tableName))) {
-      String documentHQL = "select document_id from " + className + " where " + key + " IN (:fieldValues)";
-      documentQuery = session.createQuery(documentHQL);
+      String documentHQL = "select document_id from " + className + WHERE_CLAUSE + key + " IN (:" + FIELD_VALUES_PARAM + ")";
+      documentQuery = session.createQuery(documentHQL, Integer.class);
     }
     return documentQuery;
   }
@@ -849,11 +892,12 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Query documentQuery = null;
     if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class
             && jsonFieldExists(session, className, key)) {
-      String keyParameter = "keyParameter";
-      String documentSQL = "select document_id from " + className + " where json_content ->> :" + keyParameter
-          + " IN (:fieldValues)";
-      documentQuery = session.createSQLQuery(documentSQL);
-      documentQuery.setParameter(keyParameter, key);
+      // Use PostgreSQL 17 optimized JSON path query for document ID selection
+      String jsonCondition = PostgreSQL17QueryOptimizer.optimizeJsonPathQuery(
+          "json_content", key, "IN", FIELD_VALUES_PARAM);
+      String documentSQL = "select document_id from " + className + WHERE_CLAUSE + jsonCondition;
+      documentQuery = session.createNativeQuery(documentSQL, Integer.class);
+      // Note: Parameter setting will be handled by the calling method
     }
     return documentQuery;
   }
@@ -870,9 +914,9 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
   private List<Integer> queryDocumentDeleteIds(Query documentQuery, String tableName, Object[] values) {
     List<Integer> documentIds = null;
     if ((Class) Finals.getClassRepresentingTable(tableName) == Document.class && documentQuery != null) {
-      documentQuery.setParameterList("fieldValues", values);
+      documentQuery.setParameterList(FIELD_VALUES_PARAM, values);
       documentIds = documentQuery.list();
-      LOG.info("DOCUMENT DELETE IDS: " + documentIds);
+      LOG.info("DOCUMENT DELETE IDS: {}", documentIds);
     }
     return documentIds;
   }
@@ -893,16 +937,28 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     Query documentQuery = null;
     if (DaoHelper.isFieldPartOfHibernateModel(key, Finals.getClassRepresentingTable(tableName))) {
       documentQuery = documentDeleteIds(session, tableName, className, key);
-      String hql = "delete from " + className + " where " + key + " IN (:fieldValues)";
+      String hql = "delete from " + className + WHERE_CLAUSE + key + " IN (:" + FIELD_VALUES_PARAM + ")";
       query = session.createQuery(hql);
     } else if (jsonFieldExists(session, tableName, key)) {
       documentQuery = documentDeleteIdsJson(session, tableName, className, key);
-      // delete from main_resource
-      // where json_content ->> 'test_abc' IN ('test_123', 'test_1234');
+      // Use PostgreSQL 17 optimized JSON path query with IN clause
+      List<String> stringValues = Arrays.stream(StringHelper.convertToString(values))
+          .map(String::valueOf)
+          .toList();
+      
+      // Optimize IN clause for PostgreSQL 17
       String keyParameter = "keyParam";
-      String sql = "delete from " + className + " where json_content ->> :" + keyParameter + " IN (:fieldValues)";
-      query = session.createSQLQuery(sql);
+      String inCondition = PostgreSQL17QueryOptimizer.optimizeOrConditionsToIn(
+          "json_content ->> :" + keyParameter, stringValues, FIELD_VALUES_PARAM);
+      String sql = "delete from " + className + WHERE_CLAUSE + inCondition;
+      
+      query = session.createNativeQuery(sql);
       query.setParameter(keyParameter, key);
+      
+      // Set parameters optimized for IN clause
+      Map<String, Object> params = PostgreSQL17QueryOptimizer.createInClauseParams(stringValues, FIELD_VALUES_PARAM);
+      query.setProperties(params);
+      
       // psql cannot get number from json, only json or text
       // therefore possible numbers must be converted to strings
       // to enable comparison in DELETE WHERE clause
@@ -913,7 +969,7 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
 
     List<Integer> documentIds = queryDocumentDeleteIds(documentQuery, tableName, values);
 
-    query.setParameterList("fieldValues", values);
+    query.setParameterList(FIELD_VALUES_PARAM, values);
     numOfDeleted = query.executeUpdate();
 
     return numOfDeleted;
@@ -967,12 +1023,12 @@ public class ApiGenericDAOImpl<T, K> implements ApiGenericDAO<T, K> {
     }
 
     // Create native SQL query with key tokens
-    Query q = session.createSQLQuery("select count(*) from " + tableName +
+    Query q = session.createNativeQuery("select count(*) from " + tableName +
                                              " where (" + Finals.JSON_CONTENT + "->" +
                                              StringUtils.join(conditionTokens, "->") +
-                                             ") is not null;");
+                                             ") is not null;", BigInteger.class);
     q.setProperties(parameters);
-    int rowCount = ((BigInteger) q.uniqueResult()).intValue();
+    int rowCount = ((Number) q.uniqueResult()).intValue();
     return rowCount > 0;
   }
 

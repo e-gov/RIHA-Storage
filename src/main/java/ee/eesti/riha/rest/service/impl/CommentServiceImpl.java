@@ -7,8 +7,8 @@ import ee.eesti.riha.rest.util.PagedRequestArgumentResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * Implementation of {@link CommentService} interface.

@@ -9,23 +9,20 @@ import ee.eesti.riha.rest.logic.util.JsonHelper;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -58,7 +55,7 @@ public class TestApiClassicServiceImpl_RESOURCE {
   private static final String TEST_KINDS = "infosystemTests";
   private static final String TEST_KINDS_DOC = "documentTests";
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     if (idUnderTestList.size() == 0) {
 
@@ -99,7 +96,7 @@ public class TestApiClassicServiceImpl_RESOURCE {
     }
   }
 
-  @AfterClass
+  @AfterAll
   public static void afterClass() {
     // clean up always
     for (Integer idForTestEntry : idUnderTestList) {

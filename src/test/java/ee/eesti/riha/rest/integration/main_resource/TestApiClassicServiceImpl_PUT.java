@@ -14,16 +14,16 @@ import ee.eesti.riha.rest.model.Main_resource;
 import ee.eesti.riha.rest.service.ApiClassicService;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.annotation.Resource;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.Resource;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,11 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ee.eesti.riha.rest.logic.util.DateHelper.DATE_FORMAT_IN_JSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(MyTestRunner.class)
 @WebAppConfiguration
@@ -58,14 +54,14 @@ public class TestApiClassicServiceImpl_PUT<T> {
   @Resource(name = "apiGenericDAOImpl")
   ApiGenericDAO<Main_resource, Integer> genericDAO;
 
-  @Before
+  @BeforeEach
   public void beforeTest() {
     webClient.header(Finals.X_AUTH_TOKEN, "TEST_TOKEN");
     serviceUnderTest = JAXRSClientFactory.fromClient(webClient, ApiClassicService.class, true);
     idUnderTestList.add(IntegrationTestHelper.addTestDataToDB(serviceUnderTest, tableUnderTest, jsonToUseForCreate));
   }
 
-  @After
+  @AfterEach
   public void afterTest() {
     // clean up always
     for (Integer idForTestEntry : idUnderTestList) {

@@ -1,6 +1,7 @@
 package ee.eesti.riha.rest.logic;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +31,7 @@ import ee.eesti.riha.rest.model.readonly.Kind;
  */
 public class Validator extends Exception {
 
+  @Serial
   private static final long serialVersionUID = -4780671967978509000L;
 
   private static final Logger LOG = LoggerFactory.getLogger(Validator.class);

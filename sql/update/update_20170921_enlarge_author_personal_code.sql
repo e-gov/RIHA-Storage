@@ -1,1 +1,0 @@
-ALTER TABLE riha.comment ALTER COLUMN author_personal_code TYPE VARCHAR(13);

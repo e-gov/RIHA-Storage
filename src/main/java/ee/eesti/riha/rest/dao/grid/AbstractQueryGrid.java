@@ -9,19 +9,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.PostConstruct;
-import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.ProjectionList;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.SimpleExpression;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.metamodel.spi.MetamodelImplementor;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.Metamodel;
+import jakarta.persistence.metamodel.SingularAttribute;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -32,68 +32,76 @@ import org.springframework.util.Assert;
 @Transactional
 public abstract class AbstractQueryGrid {
 
-    private final Class entityType;
-    private final String entityAlias;
+    private final Class<?> entityType;
 
-    private Map<String, String> projectionAliases = new HashMap<>();
+    protected Map<String, String> projectionAliases = new HashMap<>();
 
     private boolean initialized = false;
 
-    @Autowired
-    private SessionFactory sessionFactory;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
-     * Creates new instance of {@link AbstractQueryGrid} restricted to entity class with alias.
+     * Creates new instance of {@link AbstractQueryGrid} restricted to entity class.
      *
      * @param entityType  class of entity
-     * @param entityAlias entity alias used in queries
      */
-    public AbstractQueryGrid(Class entityType, String entityAlias) {
+    public AbstractQueryGrid(Class<?> entityType) {
         Assert.notNull(entityType, "entity type must be provided");
-        Assert.hasText(entityAlias, "entity alias must not be empty");
-
         this.entityType = entityType;
-        this.entityAlias = entityAlias;
     }
 
     /**
-     * Creates conjunction from collection of criterion. Returns <ul><li>null in case of parameter list is null or
-     * empty</li> <li>first element in collection in case collection size is 1</li> <li>conjunction of criterion
-     * otherwise</li> </ul>
-     *
-     * @param criterion collection of criterion
-     * @return null, first collection element or conjunction criterion of all collection elements
+     * Legacy constructor for backward compatibility
+     * @param entityType class of entity
+     * @param entityAlias entity alias (ignored in JPA Criteria API)
+     * @deprecated Use {@link #AbstractQueryGrid(Class)} instead
      */
-    public static Criterion conjunction(Collection<? extends Criterion> criterion) {
-        if (criterion == null || criterion.isEmpty()) {
-            return null;
-        }
-
-        if (criterion.size() == 1) {
-            return criterion.iterator().next();
-        }
-
-        return Restrictions.conjunction(criterion.toArray(new Criterion[0]));
+    @Deprecated
+    public AbstractQueryGrid(Class<?> entityType, String entityAlias) {
+        this(entityType);
     }
 
     /**
-     * Creates disjunction from collection of criterion. Returns <ul><li>null in case of parameter list is null or
-     * empty</li> <li>first element in collection in case collection size is 1</li> <li>disjunction of criterion
+     * Creates conjunction from collection of predicates. Returns <ul><li>null in case of parameter list is null or
+     * empty</li> <li>first element in collection in case collection size is 1</li> <li>conjunction of predicates
      * otherwise</li> </ul>
      *
-     * @param criterion collection of criterion
-     * @return null, first collection element or disjunction criterion of all collection elements
+     * @param predicates collection of predicates
+     * @return null, first collection element or conjunction predicate of all collection elements
      */
-    public static Criterion disjunction(Collection<? extends Criterion> criterion) {
-        if (criterion == null || criterion.isEmpty()) {
+    protected Predicate conjunction(Collection<? extends Predicate> predicates) {
+        if (predicates == null || predicates.isEmpty()) {
             return null;
         }
 
-        if (criterion.size() == 1) {
-            return criterion.iterator().next();
+        if (predicates.size() == 1) {
+            return predicates.iterator().next();
         }
 
-        return Restrictions.disjunction(criterion.toArray(new Criterion[0]));
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        return cb.and(predicates.toArray(new Predicate[0]));
+    }
+
+    /**
+     * Creates disjunction from collection of predicates. Returns <ul><li>null in case of parameter list is null or
+     * empty</li> <li>first element in collection in case collection size is 1</li> <li>disjunction of predicates
+     * otherwise</li> </ul>
+     *
+     * @param predicates collection of predicates
+     * @return null, first collection element or disjunction predicate of all collection elements
+     */
+    protected Predicate disjunction(Collection<? extends Predicate> predicates) {
+        if (predicates == null || predicates.isEmpty()) {
+            return null;
+        }
+
+        if (predicates.size() == 1) {
+            return predicates.iterator().next();
+        }
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        return cb.or(predicates.toArray(new Predicate[0]));
     }
 
     /**
@@ -110,17 +118,22 @@ public abstract class AbstractQueryGrid {
      * dependency injection is complete.
      */
     protected void setProjections() {
-        MetamodelImplementor metamodel = (MetamodelImplementor) sessionFactory.getMetamodel();
-        ClassMetadata metadata = (ClassMetadata) metamodel.entityPersister(entityType.getName());
+        Metamodel metamodel = entityManager.getMetamodel();
+        EntityType<?> entityMetadata = metamodel.entity(entityType);
 
-        String idPropertyName = metadata.getIdentifierPropertyName();
-        if (idPropertyName != null) {
+        // Add ID attribute
+        if (entityMetadata.hasSingleIdAttribute()) {
+            String idPropertyName = entityMetadata.getId(entityMetadata.getIdType().getJavaType()).getName();
             addProjection(idPropertyName, idPropertyName);
         }
 
-        for (String propertyName : metadata.getPropertyNames()) {
-            addProjection(propertyName, propertyName);
-        }
+        // Add all other attributes
+        entityMetadata.getAttributes().forEach(attribute -> {
+            if (attribute instanceof SingularAttribute) {
+                String propertyName = attribute.getName();
+                addProjection(propertyName, propertyName);
+            }
+        });
     }
 
     public void addProjection(String propertyName, String alias) {
@@ -138,7 +151,7 @@ public abstract class AbstractQueryGrid {
      */
     public PagedResponse query(PagedRequest request) {
         Long totalElements = getTotalElementCount(request);
-        List content = getContent(request);
+        List<?> content = getContent(request);
 
         return new PagedResponse(content, totalElements, request.getPageSize(), request.getPageNumber());
     }
@@ -150,27 +163,51 @@ public abstract class AbstractQueryGrid {
      * @param request paged request
      * @return list of elements
      */
-    public List getContent(PagedRequest request) {
-        DetachedCriteria criteria = createCriteria();
-        setProjections(criteria);
-        setRestrictions(criteria, request);
-        setOrder(criteria, request);
-        setTransformation(criteria, request);
-
-        Criteria executableCriteria = criteria.getExecutableCriteria(sessionFactory.getCurrentSession());
-        setLimits(executableCriteria, request);
-
-        return executableCriteria.list();
+    public List<?> getContent(PagedRequest request) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<?> root = cq.from(entityType);
+        
+        // Set projections
+        setProjections(cq, root, cb);
+        
+        // Set restrictions
+        setRestrictions(cq, root, cb, request);
+        
+        // Set order
+        setOrder(cq, root, cb, request);
+        
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        
+        // Set limits
+        setLimits(query, request);
+        
+        List<Object[]> results = query.getResultList();
+        
+        // Transform to maps (similar to ALIAS_TO_ENTITY_MAP)
+        return transformResults(results, request);
     }
 
     /**
-     * Sets result transformers. By default {@link DetachedCriteria#ALIAS_TO_ENTITY_MAP} transformer is used.
+     * Transform results from Object[] to Maps with aliases as keys.
      *
-     * @param criteria criteria for setting result transformer
-     * @param request  paged request
+     * @param results raw query results
+     * @param request paged request
+     * @return transformed results
      */
-    protected void setTransformation(DetachedCriteria criteria, PagedRequest request) {
-        criteria.setResultTransformer(DetachedCriteria.ALIAS_TO_ENTITY_MAP);
+    protected List<Map<String, Object>> transformResults(List<Object[]> results, PagedRequest request) {
+        List<Map<String, Object>> transformedResults = new ArrayList<>();
+        List<String> aliasOrder = new ArrayList<>(projectionAliases.keySet());
+        
+        for (Object[] row : results) {
+            Map<String, Object> resultMap = new HashMap<>();
+            for (int i = 0; i < row.length && i < aliasOrder.size(); i++) {
+                resultMap.put(aliasOrder.get(i), row[i]);
+            }
+            transformedResults.add(resultMap);
+        }
+        
+        return transformedResults;
     }
 
     /**
@@ -180,98 +217,110 @@ public abstract class AbstractQueryGrid {
      * @return total number of elements
      */
     public Long getTotalElementCount(PagedRequest request) {
-        DetachedCriteria criteria = createCriteria();
-        criteria.setProjection(Projections.rowCount());
-        setRestrictions(criteria, request);
-
-        return (Long) criteria.getExecutableCriteria(sessionFactory.getCurrentSession()).uniqueResult();
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<?> root = cq.from(entityType);
+        
+        cq.select(cb.count(root));
+        setRestrictions(cq, root, cb, request);
+        
+        TypedQuery<Long> query = entityManager.createQuery(cq);
+        return query.getSingleResult();
     }
 
-    private void setLimits(Criteria contentExecutableCriteria, PagedRequest request) {
+    private void setLimits(TypedQuery<?> query, PagedRequest request) {
         if (request.getPageSize() >= 0) {
-            contentExecutableCriteria.setMaxResults(request.getPageSize());
+            query.setMaxResults(request.getPageSize());
 
-            if (request.getPageSize() >= 0) {
-                contentExecutableCriteria.setFirstResult(request.getPageNumber() * request.getPageSize());
+            if (request.getPageNumber() >= 0) {
+                query.setFirstResult(request.getPageNumber() * request.getPageSize());
             }
         }
-    }
-
-    private DetachedCriteria createCriteria() {
-        return DetachedCriteria.forClass(entityType, entityAlias);
     }
 
     /**
      * Default order setting method. Iterates through request sort definitions creates and adds {@link Order} to
      * criteria. By default only projected property can be sorted.
      *
-     * @param criteria criteria for adding of ordering
+     * @param cq criteria query for adding of ordering
+     * @param root query root
+     * @param cb criteria builder
      * @param request  paged request
      */
-    protected void setOrder(DetachedCriteria criteria, PagedRequest request) {
+    protected void setOrder(CriteriaQuery<?> cq, Root<?> root, CriteriaBuilder cb, PagedRequest request) {
+        List<Order> orders = new ArrayList<>();
         for (SortParameter sortParameter : request.getSort()) {
-            Order order = createSortParameterOrder(sortParameter);
+            Order order = createSortParameterOrder(root, cb, sortParameter);
             if (order != null) {
-                criteria.addOrder(order);
+                orders.add(order);
             }
+        }
+        if (!orders.isEmpty()) {
+            cq.orderBy(orders);
         }
     }
 
     /**
      * Creates single {@link Order} for specified {@link SortParameter}.
      *
+     * @param root query root
+     * @param cb criteria builder
      * @param sortParameter sort parameter
      * @return order or null if property is not within alias list
      */
-    protected Order createSortParameterOrder(SortParameter sortParameter) {
+    protected Order createSortParameterOrder(Root<?> root, CriteriaBuilder cb, SortParameter sortParameter) {
         if (!projectionAliases.containsKey(sortParameter.getProperty())) {
             return null;
         }
 
-		String propertyName = projectionAliases.get(sortParameter.getProperty());
+        String propertyName = projectionAliases.get(sortParameter.getProperty());
         return sortParameter.isAscending()
-                ? Order.asc(propertyName)
-                : Order.desc(propertyName);
+                ? cb.asc(root.get(propertyName))
+                : cb.desc(root.get(propertyName));
     }
 
-    private void setProjections(DetachedCriteria criteria) {
+    private void setProjections(CriteriaQuery<Object[]> cq, Root<?> root, CriteriaBuilder cb) {
         if (projectionAliases.isEmpty()) {
             return;
         }
 
-        ProjectionList projectionList = Projections.projectionList();
+        List<Selection<?>> selections = new ArrayList<>();
         for (Map.Entry<String, String> projectionAliasEntry : projectionAliases.entrySet()) {
-            projectionList.add(Projections.property(projectionAliasEntry.getValue()), projectionAliasEntry.getKey());
+            selections.add(root.get(projectionAliasEntry.getValue()).alias(projectionAliasEntry.getKey()));
         }
-        criteria.setProjection(projectionList);
+        cq.multiselect(selections);
     }
 
     /**
      * Default restrictions setting method. Sets restrictions from request to criteria. Relies on {@link
-     * #createRequestRestrictions(PagedRequest)} for instantiation of restriction criterion of each property. Override
+     * #createRequestRestrictions(Root, CriteriaBuilder, PagedRequest)} for instantiation of restriction predicates of each property. Override
      * this method in order to fully customize restriction handling.
      *
-     * @param criteria criteria for setting of restrictions
+     * @param cq criteria query for setting of restrictions
+     * @param root query root
+     * @param cb criteria builder
      * @param request  paged request
      */
-    protected void setRestrictions(DetachedCriteria criteria, PagedRequest request) {
-        Criterion requestRestrictions = createRequestRestrictions(request);
+    protected void setRestrictions(CriteriaQuery<?> cq, Root<?> root, CriteriaBuilder cb, PagedRequest request) {
+        Predicate requestRestrictions = createRequestRestrictions(root, cb, request);
         if (requestRestrictions != null) {
-            criteria.add(requestRestrictions);
+            cq.where(requestRestrictions);
         }
     }
 
     /**
-     * Iterates all request filters and creates conjunction of produced restriction criterion. Criterion is created
-     * using {@link #createPropertyRestrictions(List)} method.
+     * Iterates all request filters and creates conjunction of produced restriction predicates. Predicates are created
+     * using {@link #createPropertyRestrictions(Root, CriteriaBuilder, List)} method.
      *
+     * @param root query root
+     * @param cb criteria builder
      * @param request paged request
-     * @return criterion conjunction, single criterion or null
+     * @return predicate conjunction, single predicate or null
      */
-    protected Criterion createRequestRestrictions(PagedRequest request) {
-        List<Criterion> requestRestrictions = new ArrayList<>();
+    protected Predicate createRequestRestrictions(Root<?> root, CriteriaBuilder cb, PagedRequest request) {
+        List<Predicate> requestRestrictions = new ArrayList<>();
         for (String property : request.getFilterProperties()) {
-            Criterion propertyRestrictions = createPropertyRestrictions(request.getFilter(property));
+            Predicate propertyRestrictions = createPropertyRestrictions(root, cb, request.getFilter(property));
             if (propertyRestrictions != null) {
                 requestRestrictions.add(propertyRestrictions);
             }
@@ -281,20 +330,22 @@ public abstract class AbstractQueryGrid {
     }
 
     /**
-     * Iterates request filters of single property and creates disjunction of restriction criterion. Criterion is
-     * created using {@link #createPropertyFilterRestriction(FilterParameter)}.
+     * Iterates request filters of single property and creates disjunction of restriction predicates. Predicates are
+     * created using {@link #createPropertyFilterRestriction(Root, CriteriaBuilder, FilterParameter)}.
      *
+     * @param root query root
+     * @param cb criteria builder
      * @param filterParameters list of filter parameters for single property
-     * @return criterion disjunction, single criterion or null
+     * @return predicate disjunction, single predicate or null
      */
-    protected Criterion createPropertyRestrictions(List<FilterParameter> filterParameters) {
+    protected Predicate createPropertyRestrictions(Root<?> root, CriteriaBuilder cb, List<FilterParameter> filterParameters) {
         if (filterParameters == null) {
             return null;
         }
 
-        List<Criterion> propertyRestrictions = new ArrayList<>();
+        List<Predicate> propertyRestrictions = new ArrayList<>();
         for (FilterParameter filter : filterParameters) {
-            Criterion restriction = createPropertyFilterRestriction(filter);
+            Predicate restriction = createPropertyFilterRestriction(root, cb, filter);
             if (restriction != null) {
                 propertyRestrictions.add(restriction);
             }
@@ -304,23 +355,25 @@ public abstract class AbstractQueryGrid {
     }
 
     /**
-     * Creates restriction criterion for single {@link FilterParameter}. By default produces equals {@link
-     * SimpleExpression} with property and value from filter parameter or null if property alias not defined. Override
-     * this method in order order to provide custom property handling and/or criterion creation.
+     * Creates restriction predicate for single {@link FilterParameter}. By default produces equals predicate
+     * with property and value from filter parameter or null if property alias not defined. Override
+     * this method in order to provide custom property handling and/or predicate creation.
      *
+     * @param root query root
+     * @param cb criteria builder
      * @param filter single filter
-     * @return created criterion
+     * @return created predicate
      */
-    protected Criterion createPropertyFilterRestriction(FilterParameter filter) {
+    protected Predicate createPropertyFilterRestriction(Root<?> root, CriteriaBuilder cb, FilterParameter filter) {
         if (!projectionAliases.containsKey(filter.getProperty())) {
             return null;
         }
 
         String propertyName = projectionAliases.get(filter.getProperty());
         if (filter.getValue() != null) {
-            return Restrictions.eq(propertyName, filter.getValue());
+            return cb.equal(root.get(propertyName), filter.getValue());
         } else {
-            return Restrictions.isNull(propertyName);
+            return cb.isNull(root.get(propertyName));
         }
     }
 
